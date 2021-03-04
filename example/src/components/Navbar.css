@@ -74,6 +74,15 @@
   .menu-icon {
     display: none;
   }
+
+  .nav-dark {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 60px;
+    background-color: wheat;
+  }
   
   @media screen and (max-width: 960px) {
     .NavbarItems {
@@ -108,7 +117,7 @@
     }
   
     .nav-links:hover {
-      color: #f00946;
+      color: wheat;
       transform: scale(1.2);
       transition: all 0.3s ease;
     }

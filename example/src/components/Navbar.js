@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FaBars, FaTimes } from 'react-icons/fa'
+import { FaBars, FaTimes, FaLightbulb, FaRegLightbulb } from 'react-icons/fa'
 import { Button } from './Button'
 import './Navbar.css'
 import { useEffect } from 'react'
@@ -61,6 +61,11 @@ function Navbar() {
                                     </Button>
                                 </Link>
                             )}
+                        </li>
+                        <li className='nav-btn' onClick={handleClick}>
+                            <Button buttonStyle='btn--lightbulb'>
+                                {click ? <FaRegLightbulb /> : <FaLightbulb />}
+                            </Button>
                         </li>
                     </ul>
                 </div>
