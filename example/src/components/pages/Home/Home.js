@@ -1,4 +1,5 @@
 import React from 'react'
+import { Button } from '../../Button'
 import Map from '../../Map'
 
 const location = {
@@ -10,6 +11,14 @@ const location = {
 export const Home = () => {
     return (
         <div>
+            <div className='input-area'>
+                <form>
+                    <input className='map-input' name='distance' type='distance' placeholder='Distance' />
+                    <input className='map-input' name='pace' type='pace' placeholder='Pace' />
+                    <input className='map-input' name='time' type='time' placeholder='Time' />
+                </form>
+            </div>
+            <Button buttonStyle='btn--input'>Enter</Button>
             <Map location={location} zoomLevel={16} />
         </div>
     )

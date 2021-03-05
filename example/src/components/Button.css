@@ -25,6 +25,13 @@
     transition: all 0.3s ease-out;
 }
 
+.btn--input {
+    background-color: transparent;
+    color: #1c2237;
+    border: 1px solid #1c2237;
+    transition: all 0.3s ease-out;
+}
+
 .btn--lightbulb {
     background-color: #fff;
     color: #242424;
@@ -66,12 +73,18 @@
 .btn--large:hover, .btn--medium:hover, .btn--mobile:hover {
     transition: all 0.3s ease-out;
     background-color: #fff;
-    color: #242424;
+    color: #1c2237;
+}
+
+.btn--input:hover {
+    color: #fff;
+    background-color: #1c2237;
+    transition: all 0.3s ease-out;
 }
 
 .btn--wide:hover {
     color: #fff;
-    background-color: aquamarine;
+    background-color: #1c2237;
     transition: all 0.2s ease-out;
 }
 
