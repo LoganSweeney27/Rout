@@ -1,9 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FaBars, FaTimes, FaLightbulb, FaRegLightbulb } from 'react-icons/fa'
 import { Button } from './Button'
 import './Navbar.css'
-import { useEffect } from 'react'
 
 var mainLogo = require('./assests/rout_logo_dark_small.png');
 
@@ -32,7 +31,7 @@ function Navbar() {
         <>
             <div className='navbar'>
                 <div className='navbar-container container'>
-                    <Link to='/' className='navbar-logo'>
+                    <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
                         {/* no text */}
                         <img src={mainLogo.default}  alt='fireSpot'/>
                     </Link>
@@ -42,21 +41,21 @@ function Navbar() {
                     </div>
                     <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                         <li className='nav-item'>
-                            <Link to='/User Statistics' className='nav-links'>
+                            <Link to='/Statistics' className='nav-links' onClick={closeMobileMenu}>
                                 User Statistics
                             </Link>
                         </li>
                         <li className='nav-btn'>
                             {button ? (
-                                <Link to='/login' className='btn-link'>
+                                <Link to='/Login' className='btn-link'>
                                     <Button buttonStyle='btn--outline'>
                                         Login
                                     </Button>
                                 </Link>
                             ): (
                                 //Button for mobile
-                                <Link to='/login' className='btn-link'>
-                                    <Button buttonStyle='btn--outline' buttonSize='btn--moble'>
+                                <Link to='/Login' className='btn-link' onClick={closeMobileMenu}>
+                                    <Button buttonStyle='btn--outline' buttonSize='btn--mobile'>
                                         Login
                                     </Button>
                                 </Link>

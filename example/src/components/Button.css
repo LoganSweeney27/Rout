@@ -29,6 +29,7 @@
     background-color: #fff;
     color: #242424;
     padding: 8px 20px;
+    margin-left: 25px;
     border: 1px solid var(--primary);
     transition: all 0.3s ease-out;
 }
