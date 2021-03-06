@@ -1,5 +1,4 @@
 import React from 'react';
-import Map from './components/Map' // import the map here
 import './App.css';
 import Navbar from './components/Navbar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';

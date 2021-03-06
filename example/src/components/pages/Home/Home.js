@@ -1,6 +1,7 @@
 import React from 'react'
-import { Button } from '../../Button'
+// import { Button } from '../../Button'
 import Map from '../../Map'
+import Input from './Input'
 
 const location = {
     address: '610 Purdue Mall, West Lafayette, IN 47907',
@@ -9,16 +10,15 @@ const location = {
   } // static location for google map api
 
 export const Home = () => {
+
+    const addData = (data) => {
+        console.log(data)
+    }
+
     return (
         <div>
-            <div className='input-area'>
-                <form>
-                    <input className='map-input' name='distance' type='distance' placeholder='Distance' />
-                    <input className='map-input' name='pace' type='pace' placeholder='Pace' />
-                    <input className='map-input' name='time' type='time' placeholder='Time' />
-                </form>
-            </div>
-            <Button buttonStyle='btn--input'>Enter</Button>
+            <Input onPress={addData} />
+            {/* <Button buttonStyle='btn--input'>Enter</Button> */}
             <Map location={location} zoomLevel={16} />
         </div>
     )
