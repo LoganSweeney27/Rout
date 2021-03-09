@@ -1,9 +1,9 @@
-.container {
+.login-container {
     height: 75vh;
     width: 100%;
 }
 
-.text {
+.login-text {
     text-align: center;
     padding-top: 35vh;
     color: #1c2237;

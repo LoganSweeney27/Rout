@@ -1,10 +1,10 @@
 .navbar {
     background: #1c2237;
-    height: 80px;
+    height: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     position: sticky;
     top: 0;
     z-index: 999;
@@ -57,11 +57,12 @@
   }
   
   .nav-item {
-    height: 80px;
+    height: 15px;
     border-bottom: 2px solid transparent;
   }
   
   .nav-item:hover {
+    height: 7.6vh;
     border-bottom: 2px solid wheat;
   }
   
@@ -70,7 +71,7 @@
     display: flex;
     align-items: center;
     text-decoration: none;
-    padding: 0.5rem 1rem;
+    padding: 0.1rem 1rem;
     height: 100%;
   }
   
@@ -89,6 +90,14 @@
     width: 80px;
     height: 60px;
     background-color: wheat;
+  }
+
+  .nav-weather-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 5px;
+    padding-top: 0px;
   }
   
   @media screen and (max-width: 960px) {
@@ -161,6 +170,14 @@
     }
   
     .nav-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 120px;
+    }
+
+    .nav-weather-btn {
       display: flex;
       justify-content: center;
       align-items: center;

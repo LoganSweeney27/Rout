@@ -1,11 +1,14 @@
 import React from 'react';
-import './App.css';
 import Navbar from './components/Navbar';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import Footer from './components/pages/Footer/Footer';
 import { Home } from './components/pages/Home/Home';
 import Statistics from './components/pages/Statistics/Statistics';
 import Login from './components/pages/Login/Login';
+
+import './App.css';
+
+
 
 function App() {
   return (

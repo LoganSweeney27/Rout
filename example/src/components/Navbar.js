@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { FaBars, FaTimes, FaLightbulb, FaRegLightbulb } from 'react-icons/fa'
+import { FaBars, FaTimes } from 'react-icons/fa'
 import { Button } from './Button'
+
 import './Navbar.css'
+import Weather from './Weather'
+import DarkMode from './DarkMode'
 
 var mainLogo = require('./assests/rout_logo_dark_small.png');
 
 function Navbar() {
     const [click, setClick] = useState(false)
     const [button, setButton] = useState(true)
+    const [showDetails, setShowDetails] = useState(false)
 
     const handleClick = () => setClick(!click)
     const closeMobileMenu = () => setClick(false)
@@ -33,19 +37,31 @@ function Navbar() {
                 <div className='navbar-container'>
                     <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
                         {/* no text */}
-                        <img src={mainLogo.default}  alt='fireSpot'/>
+                        <img src={mainLogo.default}  alt='Rout Logo'/>
                     </Link>
                     {/* Handles the menu links with resizing */}
                     <div className='menu-icon' onClick={handleClick}>
                         {click ? <FaTimes /> : <FaBars />}
                     </div>
                     <ul className={click ? 'nav-menu active' : 'nav-menu'}>
+                        {showDetails && <Weather />}
+                        <li className='nav-weather-btn'>
+                            <Button buttonStyle='btn--weather' onClick={() => setShowDetails(!showDetails)}>
+                                Weather
+                            </Button>
+                        </li>
                         <li className='nav-item'>
                             <Link to='/Statistics' className='nav-links' onClick={closeMobileMenu}>
-                                User Statistics
+                                Statistics
                             </Link>
                         </li>
-                        <li className='nav-btn'>
+                        <li className='nav-item'>
+                            <Link to='/Login' className='nav-links' onClick={closeMobileMenu}>
+                                Login
+                            </Link>
+                        </li>
+                        {/* example of using mobile buttons */}
+                        {/* <li className='nav-btn'>
                             {button ? (
                                 <Link to='/Login' className='btn-link'>
                                     <Button buttonStyle='btn--outline'>
@@ -60,12 +76,9 @@ function Navbar() {
                                     </Button>
                                 </Link>
                             )}
-                        </li>
-                        <li className='nav-btn' onClick={handleClick}>
-                            <Button buttonStyle='btn--lightbulb'>
-                                {click ? <FaRegLightbulb /> : <FaLightbulb />}
-                            </Button>
-                        </li>
+                        </li> */}
+
+                        <DarkMode />
                     </ul>
                 </div>
             </div>

@@ -4,8 +4,8 @@ import './Statistics.css'
 
 const UserStatistics = () => {
     return (
-        <div className='container'>
-            <h1 className='text'>
+        <div className='stats-container'>
+            <h1 className='stats-text'>
                 Haven't designed the user statistics page yet
             </h1>
         </div>

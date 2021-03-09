@@ -4,8 +4,8 @@ import './Login.css'
 
 const Login = () => {
     return (
-        <div className='container'>
-            <h1 className='text'>
+        <div className='login-container'>
+            <h1 className='login-text'>
                 Logan's Login Page
             </h1>
         </div>

@@ -26,7 +26,7 @@
 }
 
 .btn--input {
-    background-color: transparent;
+    background-color: #fff;
     color: #1c2237;
     border: 1px solid #1c2237;
     transition: all 0.3s ease-out;
@@ -36,9 +36,24 @@
     background-color: #fff;
     color: #242424;
     padding: 8px 20px;
-    margin-left: 25px;
-    border: 1px solid var(--primary);
+    margin-left: 20px;
+    /* border: 1px solid var(--primary); */
     transition: all 0.3s ease-out;
+}
+
+.btn--details {
+    background-color: #fff;
+    color: #1c2237;
+    border: 2px solid #1c2237;
+    transition: all 0.3s ease-out;
+    width: 60%;
+    height: 3.5vh;
+}
+
+.btn--weather {
+    background-color: transparent;
+    color: #fff;
+    font-size: 1.45rem!important;
 }
 
 .btn--medium {
@@ -76,7 +91,7 @@
     color: #1c2237;
 }
 
-.btn--input:hover {
+.btn--input:hover, .btn--details:hover {
     color: #fff;
     background-color: #1c2237;
     transition: all 0.3s ease-out;

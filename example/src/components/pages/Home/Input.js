@@ -8,7 +8,6 @@ const Input = ({ onPress }) => {
     const [time, setTime] = useState('')
 
     const onSubmit = (e) => {
-        
         if (!distance && (!pace && !time)) {
             alert('Please add either a distance or pace and time!')
             return
