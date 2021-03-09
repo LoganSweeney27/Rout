@@ -35,10 +35,10 @@ const Weather = () => {
 
     return (
         <div className='weather-container'>
-            <h1 className='weather-text'>
+            {/* Could use input fields like <input type="text" value={city} onChange={(e) => setCity(e.target.value)} /> */}
+            <h1 style={{ background: "" }} className='weather-text'>
                 {city} Weather
             </h1>
-            {/* Could use input fields like <input type="text" value={city} onChange={(e) => setCity(e.target.value)} /> */}
             <div style={{ whiteSpace: "pre-wrap" }}>
                 {/* {getWeatherData(city, state, country)} */}
                 {new Date().toLocaleString()}

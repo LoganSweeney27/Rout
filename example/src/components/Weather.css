@@ -1,5 +1,5 @@
 .weather-container {
-    background-color: #fff;
+    background-color: var(--background-color);
     border: 3px solid #1c2237;
     height: 18vh;
     width: 25vh;
@@ -9,6 +9,6 @@
 .weather-text {
     text-align: center;
     padding-top: 0vh;
-    color: #1c2237;
+    /* color: #1c2237; */
     font-size: 2vh;
 }
