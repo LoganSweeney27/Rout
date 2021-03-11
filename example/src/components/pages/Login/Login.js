@@ -67,8 +67,8 @@ class Login extends React.Component {
   render() {
     if (UserStore.loading) {
       return (
-        <div className="app">
-          <div className="container">
+        <div className="login-page">
+          <div className="login-container">
             Rout is currently loading, please wait.
           </div>
         </div>
@@ -76,8 +76,8 @@ class Login extends React.Component {
     } else {
       if (UserStore.isLoggedIn) {
         return (
-          <div className="app">
-            <div className="container">
+          <div className="login-page">
+            <div className="login-container">
               Welcome {UserStore.username}
 
               <SubmitButton
@@ -91,8 +91,8 @@ class Login extends React.Component {
       }
       if (!UserStore.register) {
         return (
-          <div className="app">
-            <div className="container">
+          <div className="login-page">
+            <div className="login-container">
               <LoginForm />
             </div>
           </div>

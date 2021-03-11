@@ -3,6 +3,8 @@ import InputField from './InputField';
 import SubmitButton from './SubmitButton';
 import UserStore from './Stores/UserStore';
 
+import './Login.css'
+
 class LoginForm extends React.Component {
   constructor(props) {
     super(props);
@@ -187,7 +189,7 @@ class LoginForm extends React.Component {
         </div>
         )}
         { this.state.formDisabled && (
-
+          // No registerFrom CSS styling
           <div className="registerForm">
             Register Below! 
 

@@ -1,11 +1,13 @@
 import React from 'react';
 
+import './Login.css';
+
 class InputField extends React.Component {
   render() {
     return (
-      <div className="inputField">
+      <div className="login-inputField">
           <input
-            className='input'
+            className='login-input'
             type={this.props.type}
             placeholder={this.props.placeholder}
             value={this.props.value}
