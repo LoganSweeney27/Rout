@@ -82,6 +82,35 @@ class LoginForm extends React.Component {
       console.log(e);
       this.resetForm();
     }
+
+    this.setState({
+      buttonDisabled: true,
+      formDisabled: false
+    })
+    try {
+      let res = await fetch('/login', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: this.state.username,
+          password: this.state.password
+        })
+      });
+      let result = await res.json();
+      if (result && result.success) {
+        UserStore.isLoggedIn = true;
+        UserStore.username = result.username;
+      } else if (result && result.success === false) {
+        this.resetForm();
+        alert(result.msg);
+      }
+    } catch (e) {
+      console.log(e);
+      this.resetForm();
+    }
   }
   async doLogin() {
     if (!this.state.username) {
