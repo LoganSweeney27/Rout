@@ -2,7 +2,7 @@
   "name": "example",
   "version": "0.1.0",
   "private": true,
-  "homepage": "./",
+  "homepage": ".",
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
@@ -48,6 +48,7 @@
   },
   "devDependencies": {
     "@iconify/icons-mdi": "^1.1.11",
-    "@iconify/react": "^1.1.4"
+    "@iconify/react": "^1.1.4",
+    "@types/react": "^17.0.3"
   }
 }

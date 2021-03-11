@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState } from 'react/cjs/react.development'
+import { useState } from 'react'
 import { Button } from '../../Button'
 import Details from './Details'
 // import { Button } from '../../Button'
@@ -9,13 +9,13 @@ import Input from './Input'
 import './Home.css'
 
 const location = {
-    address: '610 Purdue Mall, West Lafayette, IN 47907',
+    address: '620 Purdue Mall, West Lafayette, IN 47907',
     lat: 40.4237,
     lng: -86.9212,
   } // static location for google map api
 
 export const Home = () => {
-    const [showDetails, setShowDetails] = useState(false)
+    const [showDetails, setShowDetails] = useState(false);
 
     // takes in the data from the input fields, can be used to give to the alogrithm when implemented together
     const addData = (data) => {
