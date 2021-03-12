@@ -25,12 +25,12 @@ const Input = ({ onPress }) => {
         <div>
             <form className='map-inputs' onSubmit={onSubmit}>
                 <div>
-                    <input className='input-field' name='distance' value={distance} onChange={(e) => setDistance(e.target.value)} type='text' placeholder='Distance' />
+                    <input className='input-field' name='distance' value={distance} onChange={(e) => setDistance(e.target.value)} type='text' placeholder='Distance (meters)' />
                     <h1 className='input-text'>OR</h1>
                 </div>
                 <div>
-                    <input className='input-field' name='pace' value={pace} onChange={(e) => setPace(e.target.value)} type='text' placeholder='Pace' />
-                    <input className='input-field' name='time' value={time} onChange={(e) => setTime(e.target.value)} type='text' placeholder='Time' />
+                    <input className='input-field' name='pace' value={pace} onChange={(e) => setPace(e.target.value)} type='text' placeholder='Pace (minutes/km)' />
+                    <input className='input-field' name='time' value={time} onChange={(e) => setTime(e.target.value)} type='text' placeholder='Time (mm:ss)' />
                 </div>
                 <input className='input-submit' type='submit' value='Enter' />
             </form>
