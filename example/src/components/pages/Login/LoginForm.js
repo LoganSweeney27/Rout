@@ -69,7 +69,6 @@ class LoginForm extends React.Component {
       forgot: true
     })
   }
-
   async doRegister() {
     try {
       let res = await fetch('/Register', {
@@ -169,8 +168,26 @@ class LoginForm extends React.Component {
   }
 
   /* if user forgot password, run this */
-  async doForgot() {
-    
+  async sendCode() {
+    var newCode = Math.random().toString(20).substr(2, 6)
+    try {
+      let res = await fetch ('/sendCode', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: this.state.username,
+          password: this.state.password,
+          forgotCode: newCode
+        })
+      });
+      let result = await res.json();
+    } catch (e) {
+      console.log(e);
+      this.resetForm();
+    }
   }
 
   render() {
@@ -286,7 +303,7 @@ class LoginForm extends React.Component {
             <SubmitButton
                 text='Send Code'
                 disabled={this.state.forgotDisable}
-                onClick= { () => this.doForgot()}
+                onClick= { () => this.sendCode()}
               />
             <SubmitButton
                 text='Submit Code'
