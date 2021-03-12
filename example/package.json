@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^12.7.3",
     "axios": "^0.21.1",
     "bcrypt": "^5.0.1",
+    "emailjs-com": "^2.6.4",
     "google-map-react": "^2.1.9",
     "google-maps-react": "^2.0.6",
     "mobx": "^6.1.7",

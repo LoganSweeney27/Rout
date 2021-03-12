@@ -13,8 +13,11 @@ class LoginForm extends React.Component {
       password: '',
       nickname: '',
       profilePicture: '',
+      forgotCode: '',
       buttonDisabled: false,
       formDisabled: false,
+      forgotDisable: false,
+      forgot: false,
       email: ''
     }
   }
@@ -41,7 +44,11 @@ class LoginForm extends React.Component {
       buttonDisabled: false,
       nickname: '',
       profilePicture: '',
-      email: ''
+      email: '',
+      forgot: false,
+      formDisabled: false,
+      forgotCode: ''
+
     })
   }
 
@@ -51,6 +58,15 @@ class LoginForm extends React.Component {
       password: '',
       buttonDisabled: false,
       formDisabled: true
+    })
+  }
+
+  async switchForgot() {
+    this.setState ({
+      username: '',
+      password: '',
+      formDisabled: true,
+      forgot: true
     })
   }
 
@@ -114,6 +130,8 @@ class LoginForm extends React.Component {
       this.resetForm();
     }
   }
+
+
   async doLogin() {
     if (!this.state.username) {
       return;
@@ -149,10 +167,16 @@ class LoginForm extends React.Component {
       this.resetForm();
     }
   }
+
+  /* if user forgot password, run this */
+  async doForgot() {
+    
+  }
+
   render() {
     return (
       <div>
-      { !this.state.formDisabled && (
+      { (!this.state.formDisabled && !this.state.forgot) && (
         <div className="loginForm">
             Login
             <InputField
@@ -178,7 +202,7 @@ class LoginForm extends React.Component {
               <SubmitButton
                 text='Forgot Password?'
                 disabled={this.state.buttonDisabled}
-                onClick={ () => this.switchRegister()}
+                onClick={ () => this.switchForgot()}
               />
 
               <SubmitButton
@@ -188,8 +212,8 @@ class LoginForm extends React.Component {
               />
         </div>
         )}
-        { this.state.formDisabled && (
-          // No registerFrom CSS styling
+        { (this.state.formDisabled && !this.state.forgot) && (
+          // No register From CSS styling
           <div className="registerForm">
             Register Below! 
 
@@ -233,6 +257,46 @@ class LoginForm extends React.Component {
                 disabled={this.state.buttonDisabled}
                 onClick= { () => this.doRegister()}
               />
+              
+          </div>
+
+
+        )}
+
+        { this.state.forgot && (
+          // No register From CSS styling
+          <div className="registerForm">
+            Forgot Password? We'll send a code to your email.
+
+            <InputField
+              type='text'
+              placeholder='Email'
+              value={this.state.email ? this.state.email : ''}
+              onChange={ (val) => this.setInputValue('email', val)}
+            />
+
+            <InputField
+              type='text'
+              placeholder='Enter Code Here'
+              disabled={!this.state.forgotDisable}
+              value={this.state.forgotCode ? this.state.forgotCode : ''}
+              onChange={ (val) => this.setInputValue('forgotCode', val)}
+            />
+
+            <SubmitButton
+                text='Send Code'
+                disabled={this.state.forgotDisable}
+                onClick= { () => this.doForgot()}
+              />
+            <SubmitButton
+                text='Submit Code'
+                disabled={!this.state.forgotDisable}
+                onClick= { () => this.doForgot()}
+            />
+
+            
+
+
               
           </div>
 
