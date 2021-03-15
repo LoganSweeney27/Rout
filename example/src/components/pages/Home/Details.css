@@ -1,0 +1,12 @@
+.details-container {
+    height: 30vh;
+    width: 100%;
+    /* background-color: #fff; */
+    border: 6px solid #1c2237;
+}
+
+.details-text {
+    text-align: center;
+    padding-top: 5vh;
+    color: #1c2237;
+}

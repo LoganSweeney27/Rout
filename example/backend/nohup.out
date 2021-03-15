@@ -1,0 +1,29 @@
+
+> backend@1.0.0 start /home/ubuntu/Rout.git/example/backend
+> node Main
+
+internal/modules/cjs/loader.js:1057
+  return process.dlopen(module, path.toNamespacedPath(filename));
+                 ^
+
+Error: /home/ubuntu/Rout.git/example/backend/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: invalid ELF header
+    at Object.Module._extensions..node (internal/modules/cjs/loader.js:1057:18)
+    at Module.load (internal/modules/cjs/loader.js:863:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:708:14)
+    at Module.require (internal/modules/cjs/loader.js:887:19)
+    at require (internal/modules/cjs/helpers.js:74:18)
+    at Object.<anonymous> (/home/ubuntu/Rout.git/example/backend/node_modules/bcrypt/bcrypt.js:6:16)
+    at Module._compile (internal/modules/cjs/loader.js:999:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:1027:10)
+    at Module.load (internal/modules/cjs/loader.js:863:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:708:14)
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! backend@1.0.0 start: `node Main`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the backend@1.0.0 start script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /root/.npm/_logs/2021-03-11T03_49_26_842Z-debug.log
