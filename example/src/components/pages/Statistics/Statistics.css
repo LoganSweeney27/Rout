@@ -5,6 +5,5 @@
 
 .stats-text {
     text-align: center;
-    padding-top: 35vh;
-    color: #1c2237;
+    color: var(--text-color);
 }
