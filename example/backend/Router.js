@@ -16,6 +16,7 @@ class Router {
                 let profilePicture = req.body.profilePicture;
                 let nickname = req.body.nickname;
                 let email = req.body.email;
+                let dev = 0;
                 console.log(nickname);
 
                 username = username.toLowerCase();
@@ -42,7 +43,7 @@ class Router {
                 } else {
                     password = bcrypt.hashSync(password, 9);
                     var send={email:email, password:password, profilePicture:profilePicture
-                    , nickname:nickname, username:username}
+                    , nickname:nickname, username:username, dev:dev}
                     var query = db.query("INSERT INTO user set ? ",send,
                     function(err, rows) {
                         if (err){
