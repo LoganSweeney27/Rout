@@ -8,6 +8,36 @@ class Router {
         this.logout(app, db);
         this.isLoggedIn(app, db);
         this.register(app, db);
+        this.sendCode(app, db);
+    }
+    sendCode(app, db) {
+        app.post('/sendCode', (req, res) => {
+            let email = req.body.email;
+            let code = req.body.forgotCode;
+            let username = req.body.username;
+        
+            var transporter = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: 'noreply.rout.link@gmail.com',
+                    pass: 'BKRpJG2D6w57KBMb6hkP4iM3'
+                }
+            });
+            let mailOptions = {
+                from: '"Rout Helper" <noreply.rout.link@gmail.com',
+                to: email,
+                subject: "Password Reset",
+                text: 
+                    'Hello ' + username + ', we have noticed your attempt to reset your password. Please enter this code when prompted : ' + code 
+            }
+            transporter.sendMail(mailOptions, function (err, res) {
+                if(err){
+                    console.log('Error');
+                } else {
+                    console.log('Email Sent');
+                }
+            })
+        });
     }
     register(app, db) {
             app.post('/Register', (req, res) => {

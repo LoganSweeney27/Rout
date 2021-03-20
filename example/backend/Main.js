@@ -7,7 +7,6 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const Router = require('./Router');
 var nodemailer = require("nodemailer");
-var smtpTransport = require('nodemailer-smtp-transport');
 
 
 app.use(express.static(path.join(__dirname, 'build')));
@@ -46,35 +45,6 @@ app.use(session({
         httpOnly: false
     }
 }));
-
-app.post('/sendCode', (req, res) => {
-    let email = req.body.email;
-    let code = req.body.forgotCode;
-    let username = req.body.username;
-
-    let transporter = nodemailer.createTransport(smtpTransport({
-        host: 'smtp.gmail.com',
-        service: 587,
-        auth: {
-        user: 'noreply.rout.link@gmail.com',
-        pass: 'BKRpJG2D6w57KBMb6hkP4iM3'
-    }
-    }));
-    let mailOptions = {
-        from: '"Rout Helper" <noreply.rout.link@gmail.com',
-        to: email,
-        subject: "Password Reset",
-        text: 
-            'Hello ' + username + ', we have noticed your attempt to reset your password. Please enter this code when prompted : ' + code 
-    }
-    transporter.sendMail(mailOptions, function (err, res) {
-        if(err){
-            console.log('Error');
-        } else {
-            console.log('Email Sent');
-        }
-    })
-});
 
 new Router(app, db);
 
