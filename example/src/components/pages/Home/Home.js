@@ -23,6 +23,7 @@ export const Home = () => {
     }
 
     return (
+        
         <div>
             <Input onPress={addData} />
             {/* <Button buttonStyle='btn--input'>Enter</Button> */}
