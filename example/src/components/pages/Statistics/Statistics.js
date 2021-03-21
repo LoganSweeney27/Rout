@@ -1,4 +1,5 @@
 import React from 'react'
+import Comparison from './Comparison'
 import LineChart from './LineChart'
 
 import './Statistics.css'
@@ -19,6 +20,7 @@ const UserStatistics = () => {
                 <h1>
                     Comparison
                 </h1>
+                <Comparison />
             </div>
         </div>
     )
