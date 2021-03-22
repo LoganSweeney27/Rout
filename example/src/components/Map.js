@@ -1,5 +1,5 @@
 import React from 'react'
-import GoogleMapReact from 'google-map-react'
+//import GoogleMapReact from 'google-map-react'
 import { Icon } from '@iconify/react'
 import locationIcon from '@iconify/icons-mdi/map-marker'
 import './map.css'
@@ -64,8 +64,12 @@ const Map = compose(
   lifecycle({
     componentDidMount() {
 
+    //   var startPointListener = Map.addListener("click", (event) => {
+    //     addMarker(event.latLng, this);
+    //     startPoint = event.latLng
+    //     google.maps.event.removeListener(startPointListener);
 
-
+    // });
 
 
       const DirectionsService = new google.maps.DirectionsService();
@@ -89,6 +93,15 @@ const Map = compose(
   })
 )(props =>
   <GoogleMap
+    //onClick={_onClick}
+    onLoad={map => {
+      const bounds = new window.google.maps.LatLngBounds();
+      map.fitBounds(bounds);
+    }}
+    onUnmount={map => {
+      map.addListener()
+      // do your stuff before map is unmounted
+    }}
     defaultZoom={7}
     defaultCenter={new google.maps.LatLng(41.8507300, -87.6512600)}
   >
@@ -97,6 +110,13 @@ const Map = compose(
 );
 
 export default Map
+// function _onClick(obj) {
+//   console.log("adding marker");
+//   addMarker(obj.latLng, this);
+//   startPoint = obj.latLng;
+//   //google.maps.event.removeListener(startPointListener);
+
+// }
 
 function newCoordinatesLocation(lat, lng, distance, direction) {
   direction = (direction * 180) / Math.PI;
