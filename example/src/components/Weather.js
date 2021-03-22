@@ -45,7 +45,7 @@ const Weather = () => {
                 {'\n'}
                 {temperature} °F - {description}
                 {'\n'}
-                <img src={`http://openweathermap.org/img/w/${image}.png`} alt='Icon for weather'/>
+                <img src={`https://openweathermap.org/img/w/${image}.png`} alt='Icon for weather'/>
             </div>
             <button onClick={() => { getWeatherData(city, state, country) }}>
                 GET

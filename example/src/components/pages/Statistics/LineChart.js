@@ -1,35 +1,63 @@
 import React from 'react'
-import { Chart } from 'react-charts'
+import { Line } from 'react-chartjs-2';
+
+import './LineChart.css'
 
 const LineChart = () => {
-    const data = React.useMemo(
-        () => [
-          {
-            label: 'Series 1',
-            data: [[0, 300], [1, 200], [2, 400], [3, 200], [4, 700]]
+  const data = {
+    labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    datasets: [
+      {
+        label: "Calories",
+        data: [1000, 1200, 800, 1800, 1400, 1300, 900],
+        pointBackgroundColor: 'rgba(100, 150, 250, 1)',
+        backgroundColor: 'rgba(100, 150, 250, 0.5)',
+        borderColor: 'rgba(100, 150, 250, 1)',
+      },
+    ]
+  };
+
+  const options = {
+    responsive: true,
+    legend: {
+      display: false,
+    },
+    title: {
+      display: true,
+      text: "Calores Burned By Day",
+      fontSize: 20,
+      fontColor: 'rgba(100, 150, 250, 1)',
+    },
+    scales: {
+      xAxes: [{
+        ticks: {
+          fontColor: 'rgba(80, 130, 250, 1)',
+        },
+        gridLines: {
+          display: false,
+          drawBorder: false
         }
-        //,
-        //   {
-        //     label: 'Series 2',
-        //     data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
-        //   }
-        ],
-        []
-      )
-     
-    const axes = React.useMemo(
-        () => [
-          { primary: true, type: 'linear', position: 'bottom' },
-          { type: 'linear', position: 'left' }
-        ],
-        []
-      )
-      
-    return (
-        <div style={{ width: '500px', height: '400px' }}>
-            <Chart data={data} axes={axes} />
-        </div>
-    )
+      }],
+      yAxes: [{
+          ticks: {
+            fontColor: 'rgba(80, 130, 250, 1)',
+            suggestedMin: 0,
+            suggestedMax: 2000
+          },
+          gridLines: {
+            display: false,
+            drawBorder: false
+          }
+        }]
+    }
+  };
+
+  return (
+    // style={{ width: '500px', height: '400px' }}
+    <div className='lineChart'>
+        <Line data={data} options={options}/>
+    </div>
+  );
 }
 
 export default LineChart

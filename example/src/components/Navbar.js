@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import { Button } from './Button'
-
-import './Navbar.css'
 import Weather from './Weather'
 import DarkMode from './DarkMode'
+
+import './Navbar.css'
 
 var mainLogo = require('./assests/rout_logo_dark_small.png');
 
