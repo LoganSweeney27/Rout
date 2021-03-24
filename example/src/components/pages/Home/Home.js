@@ -8,11 +8,6 @@ import Input from './Input'
 
 import './Home.css'
 
-const location = {
-    address: '620 Purdue Mall, West Lafayette, IN 47907',
-    lat: 40.4237,
-    lng: -86.9212,
-  } // static location for google map api
 
 export const Home = () => {
     const [showDetails, setShowDetails] = useState(false);
