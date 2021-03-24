@@ -169,7 +169,6 @@ class LoginForm extends React.Component {
 
   /* if user forgot password, run this */
   async sendCode() {
-    var newCode = Math.random().toString(20).substr(2, 6)
     try {
       let res = await fetch ('/sendCode', {
         method: 'post',
@@ -180,8 +179,29 @@ class LoginForm extends React.Component {
         body: JSON.stringify({
           username: this.state.username,
           password: this.state.password,
+          email: this.state.email
+        })
+      });
+      let result = await res.json();
+    } catch (e) {
+      console.log(e);
+      this.resetForm();
+    }
+  }
+
+  async submitCode() {
+    console.log("submit");
+    try {
+      let res = await fetch ('/submitCode', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          password: this.state.password,
           email: this.state.email,
-          forgotCode: newCode
+          forgotCode: this.state.forgotCode
         })
       });
       let result = await res.json();
@@ -301,15 +321,22 @@ class LoginForm extends React.Component {
               onChange={ (val) => this.setInputValue('forgotCode', val)}
             />
 
+              <InputField
+              type='password'
+              placeholder='New Password'
+              value={this.state.password ? this.state.password : ''}
+              onChange={ (val) => this.setInputValue('password', val)}
+              />
+
             <SubmitButton
                 text='Send Code'
                 disabled={this.state.forgotDisable}
                 onClick= { () => this.sendCode()}
               />
             <SubmitButton
-                text='Submit Code'
+                text='Submit Code and Change Password'
                 disabled={!this.state.forgotDisable}
-                onClick= { () => this.doForgot()}
+                onClick= { () => this.submitCode()}
             />
 
             

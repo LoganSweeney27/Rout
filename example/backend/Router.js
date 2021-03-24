@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 
 
@@ -9,11 +9,67 @@ class Router {
         this.isLoggedIn(app, db);
         this.register(app, db);
         this.sendCode(app, db);
+        this.submitCode(app, db);
+    }
+
+    submitCode(app, db) {
+        app.post('/submitCode', (req, res) => {
+            let email = req.body.email;
+            let FACODE = req.body.forgotCode;
+            let password = req.body.password;
+            console.log(FACODE);
+            
+            let cols = [email];
+            db.query('SELECT * FROM user WHERE email = ? LIMIT 1', 
+            cols, (err, data, fields) => {
+                if (err) {
+                    res.json({
+                        success: false,
+                        msg: 'User does not exist.'
+                    })
+                    return;
+                }
+                // if user is found
+                if (data && data.length == 1) {
+                    if (FACODE = data[0].FACODE) {
+                        password = bcrypt.hashSync(password, 9);
+                        var sql = "UPDATE user set password = \"" + password + "\" WHERE email = \"" + email + "\"";
+                        var query = db.query(sql,
+                            function(err, rows) {
+                                if (err){
+                                    console.log(err);
+                                    console.log("Error in DB for updating password");
+                                } else {
+                                    console.log("Successfully changed password");
+                                }
+                            });
+                        res.json({
+                            success: true,
+                            msg: 'Password Updated Successfully'
+                        })
+
+                    } else {
+                        res.json({
+                            success: false,
+                            msg: 'Incorrect 2FA Code'
+                        })
+                    }
+                } else {
+                    //User does not exist
+                    res.json({
+                        success: false,
+                        msg: 'User does not exist.'
+                    })
+                }
+            });
+            
+            
+        });
     }
     sendCode(app, db) {
         app.post('/sendCode', (req, res) => {
             let email = req.body.email;
-            let code = req.body.forgotCode;
+            let FACODE = Math.random().toString(20).substr(2, 6);
             let username = req.body.username;
         
             var transporter = nodemailer.createTransport({
@@ -28,13 +84,24 @@ class Router {
                 to: email,
                 subject: "Password Reset",
                 text: 
-                    'Hello ' + username + ', we have noticed your attempt to reset your password. Please enter this code when prompted : ' + code 
+                    'Hello ' + username + ', we have noticed your attempt to reset your password. Please enter this code when prompted : ' + FACODE 
             }
             transporter.sendMail(mailOptions, function (err, res) {
                 if(err){
                     console.log('Error');
                 } else {
                     console.log('Email Sent');
+                    var sql = "UPDATE user set FACODE = \"" + FACODE + "\" WHERE email = \"" + email + "\"";
+                    var query = db.query(sql,
+                    function(err, rows) {
+                        if (err){
+                            console.log(err);
+                            console.log("Error in DB for updating 2FA Code");
+                        } else {
+                            console.log("Hello");
+                        }
+                    });
+
                 }
             })
         });
@@ -47,6 +114,7 @@ class Router {
                 let nickname = req.body.nickname;
                 let email = req.body.email;
                 let dev = 0;
+                let FACODE = "Won't find me!";
                 console.log(nickname);
 
                 username = username.toLowerCase();
@@ -73,7 +141,7 @@ class Router {
                 } else {
                     password = bcrypt.hashSync(password, 9);
                     var send={email:email, password:password, profilePicture:profilePicture
-                    , nickname:nickname, username:username, dev:dev}
+                    , nickname:nickname, username:username, dev:dev, FACODE:FACODE}
                     var query = db.query("INSERT INTO user set ? ",send,
                     function(err, rows) {
                         if (err){
