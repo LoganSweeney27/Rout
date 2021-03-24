@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Button } from '../../Button'
 import Details from './Details'
 // import { Button } from '../../Button'
-import Map from '../../Map'
+import NewMap from '../../NewMap'
 import Input from './Input'
 
 import './Home.css'
@@ -27,7 +27,7 @@ export const Home = () => {
         <div>
             <Input onPress={addData} />
             {/* <Button buttonStyle='btn--input'>Enter</Button> */}
-            <Map location={location} zoomLevel={16} />
+            <NewMap />
             {showDetails && <Details />}
             <div className='details-btn'>
                 <Button buttonStyle='btn--details' onClick={() => setShowDetails(!showDetails)}>

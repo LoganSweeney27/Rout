@@ -4,8 +4,12 @@ import { Icon } from '@iconify/react'
 import locationIcon from '@iconify/icons-mdi/map-marker'
 import './map.css'
 import { Loader } from "@googlemaps/js-api-loader"
+import {MAP} from 'react-google-maps/lib/constants';
+import { useGoogleMap } from '@react-google-maps/api'
+
 const { compose, withProps, lifecycle } = require("recompose");
 const google = window.google = window.google ? window.google : {}
+
 const {
   withScriptjs,
   withGoogleMap,
@@ -13,7 +17,7 @@ const {
   DirectionsRenderer,
 } = require("react-google-maps");
 const loader = new Loader({
-  apiKey: "AIzaSyDaeI3wL3hzchjY5e6b9KjG_MgK4cQVuYU",
+  apiKey: "AIzaSyDekWG_GZBqJ3j0Kt9t-B0ayBcU9wLHlsk",
   version: "weekly",
 });
 // var script = document.createElement('script');
@@ -54,22 +58,22 @@ let wayptOn = false;
 
 const Map = compose(
   withProps({
-    googleMapURL: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDaeI3wL3hzchjY5e6b9KjG_MgK4cQVuYU&v=3.exp&libraries=geometry,drawing,places",
+    googleMapURL: "https://maps.googleapis.com/maps/api/js?key=AIzaSyDekWG_GZBqJ3j0Kt9t-B0ayBcU9wLHlsk&v=3.exp&libraries=geometry,drawing,places",
     loadingElement: <div style={{ height: `100%` }} />,
     containerElement: <div style={{ height: `400px` }} />,
     mapElement: <div style={{ height: `100%` }} />,
   }),
   withScriptjs,
   withGoogleMap,
+
+
   lifecycle({
     componentDidMount() {
 
-    //   var startPointListener = Map.addListener("click", (event) => {
-    //     addMarker(event.latLng, this);
-    //     startPoint = event.latLng
-    //     google.maps.event.removeListener(startPointListener);
-
-    // });
+      const marker = new google.maps.Marker({
+        position: new google.maps.LatLng(41.8507300, -87.6512600),
+        map: this,
+      });
 
 
       const DirectionsService = new google.maps.DirectionsService();
@@ -83,7 +87,7 @@ const Map = compose(
       }, (result, status) => {
         if (status === google.maps.DirectionsStatus.OK) {
           this.setState({
-            directions: result,
+            //directions: result,
           });
         } else {
           console.error(`error fetching directions ${result}`);
@@ -93,18 +97,10 @@ const Map = compose(
   })
 )(props =>
   <GoogleMap
-    //onClick={_onClick}
-    onLoad={map => {
-      const bounds = new window.google.maps.LatLngBounds();
-      map.fitBounds(bounds);
-    }}
-    onUnmount={map => {
-      map.addListener()
-      // do your stuff before map is unmounted
-    }}
-    defaultZoom={7}
+    defaultZoom={4}
     defaultCenter={new google.maps.LatLng(41.8507300, -87.6512600)}
   >
+
     {props.directions && <DirectionsRenderer directions={props.directions} draggable={true} />}
   </GoogleMap>
 );
@@ -128,6 +124,7 @@ function newCoordinatesLocation(lat, lng, distance, direction) {
 
 
 function addMarker(location, map) {
+  console.log("adding marker");
   const marker = new google.maps.Marker({
       position: location,
       map: map,
