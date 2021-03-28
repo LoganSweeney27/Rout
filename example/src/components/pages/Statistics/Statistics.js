@@ -7,20 +7,30 @@ import './Statistics.css'
 const UserStatistics = () => {
     return (
         <div className='stats-container'>
-            <h1 className='stats-text'>
+            <h1 className='stats-header'>
                 User Statistics
             </h1>
             <div>
-                <h1>
-                    Calories
+                <div className='stats-line'></div>
+                <h1 className='stats-subheader'>
+                    Past Routes
                 </h1>
-                <LineChart />
+                {/* <Comparison className='stats-graph'/> */}
             </div>
             <div>
-                <h1>
+                <div className='stats-line'></div>
+                <h1 className='stats-subheader'>
+                    Calories
+                </h1>
+                <LineChart className='stats-graph'/>
+            </div>
+            <div>
+            <div className='stats-line'></div>
+                <h1 className='stats-subheader'>
                     Comparison
                 </h1>
-                <Comparison />
+                <Comparison className='stats-graph'/>
+                <div className='stats-line' style={{ marginTop: '40px' }}></div>
             </div>
         </div>
     )

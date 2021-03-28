@@ -1,4 +1,7 @@
 .lineChart {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
     position: relative;
     height: 350px;
     width: 600px;

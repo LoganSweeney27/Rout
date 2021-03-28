@@ -4,6 +4,13 @@
     font-size: 20px;
 }
 
+.input-form {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
 .data {
     display: table;
     margin-left: auto;
@@ -12,7 +19,7 @@
     font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     border: 3px solid #ddd;
-    width: 70%;
+    width: 40%;
 }
   
 .data td, .data th {
