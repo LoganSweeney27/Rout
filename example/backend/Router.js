@@ -10,6 +10,7 @@ class Router {
         this.register(app, db);
         this.sendCode(app, db);
         this.submitCode(app, db);
+        this.getCompare(app, db);
     }
 
     submitCode(app, db) {
@@ -249,6 +250,44 @@ class Router {
                     success: false
                 })
             }
+        });
+    }
+
+
+
+
+
+    // STATISTICS PAGE QUERIES
+    getCompare(app, db) {
+        app.post('/getCompare', (req, res) => {
+            let dist = req.body.dist;
+            let userID = req.body.userID;
+        
+            var sql = "SELECT distance, time FROM prevroutes WHERE userID = \"" + userID + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time";
+            var query = db.query(sql,
+            function(err, data) {
+                if (err){
+                    console.log(err);
+                    console.log("Error in DB for retrieving route.");
+                    res.json({
+                        success: false,
+                    })
+                } else {
+                    console.log("Success");
+                    if (data && data.length >= 1) {
+                        res.json({
+                            success: true,
+                            dist: data[0].distance,
+                            time: data[0].time
+                        })
+                        return true;
+                    } else {
+                        res.json({
+                            success: false,
+                        })
+                    }
+                }
+            });
         });
     }
 }

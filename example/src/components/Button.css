@@ -11,6 +11,14 @@
     white-space: nowrap;
 }
 
+.btn--regular {
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    transition: all 0.3s ease-out;
+    margin-left: 15px;
+}
+
 .btn--primary {
     background-color: var(--primary);
     color: #242424;
@@ -100,6 +108,12 @@
 .btn--wide:hover {
     color: #fff;
     background-color: #1c2237;
+    transition: all 0.2s ease-out;
+}
+
+.btn--regular:hover {
+    color: var(--background-color);
+    background-color: var(--text-color);
     transition: all 0.2s ease-out;
 }
 
