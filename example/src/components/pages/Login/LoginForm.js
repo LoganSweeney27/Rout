@@ -70,6 +70,7 @@ class LoginForm extends React.Component {
     })
   }
   async doRegister() {
+    console.log("hello");
     try {
       let res = await fetch('/Register', {
         method: 'post',
@@ -205,6 +206,8 @@ class LoginForm extends React.Component {
         })
       });
       let result = await res.json();
+      this.resetForm();
+      alert(result.msg);
     } catch (e) {
       console.log(e);
       this.resetForm();
@@ -335,7 +338,7 @@ class LoginForm extends React.Component {
               />
             <SubmitButton
                 text='Submit Code and Change Password'
-                disabled={!this.state.forgotDisable}
+                disabled={this.state.forgotDisable}
                 onClick= { () => this.submitCode()}
             />
 
