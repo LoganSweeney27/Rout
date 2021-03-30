@@ -3,61 +3,102 @@ import { Line } from 'react-chartjs-2';
 
 import './LineChart.css'
 
-const LineChart = () => {
-  const data = {
-    labels: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-    datasets: [
-      {
-        label: "Calories",
-        data: [1000, 1200, 800, 1800, 1400, 1300, 900],
-        pointBackgroundColor: 'rgba(100, 150, 250, 1)',
-        backgroundColor: 'rgba(100, 150, 250, 0.5)',
-        borderColor: 'rgba(100, 150, 250, 1)',
-      },
-    ]
-  };
+class LineChart extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+        data: [],
+        labels: [],
+        loading: true,
+        userID: '1',
+    };
+    this.fetchLinePastRoutes();
+  }
 
-  const options = {
-    responsive: true,
-    legend: {
-      display: false,
-    },
-    title: {
-      display: true,
-      text: "Calores Burned By Day",
-      fontSize: 20,
-      fontColor: 'rgba(100, 150, 250, 1)',
-    },
-    scales: {
-      xAxes: [{
-        ticks: {
-          fontColor: 'rgba(80, 130, 250, 1)',
+  async fetchLinePastRoutes() {
+    try {
+      let res = await fetch('/getLine', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-type': 'application/json'
         },
-        gridLines: {
-          display: false,
-          drawBorder: false
+        body: JSON.stringify({
+            userID: this.state.userID
+          })
+      });
+      let result = await res.json();
+        if (result && result.success) {
+            // If successful we should set user calories and dates to all rows found
+            this.setState({ data: result.data, labels: result.labels })
+        } else {
+            alert("Could not find previous routes with calories burnded.");
+            this.setState({ data: [], labels: [] })
         }
-      }],
-      yAxes: [{
+    } catch(e) {
+        console.log(e)
+    }
+    this.setState({ loading: false })
+  }
+
+  render() {
+    const data = {
+      labels: this.state.labels,
+      datasets: [
+        {
+          label: "Calories",
+          data: this.state.data,
+          pointBackgroundColor: 'rgba(100, 150, 250, 1)',
+          backgroundColor: 'rgba(100, 150, 250, 0.5)',
+          borderColor: 'rgba(100, 150, 250, 1)',
+        },
+      ]
+    };
+  
+    const options = {
+      responsive: true,
+      legend: {
+        display: false,
+      },
+      title: {
+        display: true,
+        text: "Calores Burned",
+        fontSize: 20,
+        fontColor: 'rgba(100, 150, 250, 1)',
+      },
+      scales: {
+        xAxes: [{
           ticks: {
             fontColor: 'rgba(80, 130, 250, 1)',
-            suggestedMin: 0,
-            suggestedMax: 2000
           },
           gridLines: {
             display: false,
             drawBorder: false
           }
-        }]
+        }],
+        yAxes: [{
+            ticks: {
+              fontColor: 'rgba(80, 130, 250, 1)',
+              suggestedMin: 0,
+              suggestedMax: 2000
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false
+            }
+          }]
+      }
+    };
+    if (this.state.loading) {
+        return <div className='loading'>Data is loading... </div>;
+    } else {
+      return (
+        <div className='lineChart'>
+          <Line data={data} options={options}/>
+        </div>
+      )
     }
-  };
-
-  return (
-    // style={{ width: '500px', height: '400px' }}
-    <div className='lineChart'>
-        <Line data={data} options={options}/>
-    </div>
-  );
+  }
 }
 
 export default LineChart

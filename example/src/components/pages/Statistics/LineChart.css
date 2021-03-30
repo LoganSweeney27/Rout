@@ -6,3 +6,10 @@
     height: 350px;
     width: 600px;
 }
+
+.loading {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}

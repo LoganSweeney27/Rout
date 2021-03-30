@@ -1,17 +1,10 @@
 .stats-container {
-    height: 75vh;
+    height: 100%;
     width: 100%;
 }
 
-/* .stats-line {
-    height: 90%;
-    width: 5vh;
-    margin-left: 5vh;
-    background: var(--text-color);
-} */
-
 .stats-line {
-    height: 1vh;
+    height: 12px;
     width: 95%;
     display: block;
     margin-left: auto;

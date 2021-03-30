@@ -11,6 +11,8 @@ class Router {
         this.sendCode(app, db);
         this.submitCode(app, db);
         this.getCompare(app, db);
+        this.getLine(app, db);
+        this.getPrevRoutes(app, db);
     }
 
     submitCode(app, db) {
@@ -279,6 +281,88 @@ class Router {
                             success: true,
                             dist: data[0].distance,
                             time: data[0].time
+                        })
+                        return true;
+                    } else {
+                        res.json({
+                            success: false,
+                        })
+                    }
+                }
+            });
+        });
+    }
+
+    getLine(app, db) {
+        app.post('/getLine', (req, res) => {
+            let userID = req.body.userID;
+        
+            var sql = "SELECT calories, date FROM prevroutes WHERE userID = \"" + userID + "\" ORDER BY date";
+            var query = db.query(sql,
+            function(err, data) {
+                if (err){
+                    console.log(err);
+                    console.log("Error in DB for retrieving route.");
+                    res.json({
+                        success: false,
+                    })
+                } else {
+                    console.log("Success");
+                    if (data && data.length >= 1) {
+                        let dataArray = [];
+                        let labelsArray = [];
+                        for (let i = 0; i < data.length; i++) {
+                            dataArray[i] = data[i].calories;
+                            labelsArray[i] = data[i].date;
+                        }
+                        res.json({
+                            success: true,
+                            data: dataArray,
+                            labels: labelsArray
+                        })
+                        return true;
+                    } else {
+                        res.json({
+                            success: false,
+                        })
+                    }
+                }
+            });
+        });
+    }
+
+    getPrevRoutes(app, db) {
+        app.post('/getPrevRoutes', (req, res) => {
+            let userID = req.body.userID;
+        
+            var sql = "SELECT distance, time, calories, date FROM prevroutes WHERE userID = \"" + userID + "\" ORDER BY date";
+            var query = db.query(sql,
+            function(err, data) {
+                if (err){
+                    console.log(err);
+                    console.log("Error in DB for retrieving routes.");
+                    res.json({
+                        success: false,
+                    })
+                } else {
+                    console.log("Success");
+                    if (data && data.length >= 1) {
+                        let distanceArray = [];
+                        let timeArray = [];
+                        let caloriesArray = [];
+                        let dateArray = [];
+                        for (let i = 0; i < data.length; i++) {
+                            distanceArray[i] = data[i].distance;
+                            timeArray[i] = data[i].time;
+                            caloriesArray[i] = data[i].calories;
+                            dateArray[i] = data[i].date;
+                        }
+                        res.json({
+                            success: true,
+                            distances: distanceArray,
+                            times: timeArray,
+                            calories: caloriesArray,
+                            dates: dateArray
                         })
                         return true;
                     } else {

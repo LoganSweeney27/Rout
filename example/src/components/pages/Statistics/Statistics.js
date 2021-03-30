@@ -1,6 +1,7 @@
 import React from 'react'
 import Comparison from './Comparison'
 import LineChart from './LineChart'
+import PreviousRoutes from './PreviousRoutes'
 
 import './Statistics.css'
 
@@ -15,7 +16,7 @@ const UserStatistics = () => {
                 <h1 className='stats-subheader'>
                     Past Routes
                 </h1>
-                {/* <Comparison className='stats-graph'/> */}
+                <PreviousRoutes />
             </div>
             <div>
                 <div className='stats-line'></div>
@@ -30,7 +31,6 @@ const UserStatistics = () => {
                     Comparison
                 </h1>
                 <Comparison className='stats-graph'/>
-                <div className='stats-line' style={{ marginTop: '40px' }}></div>
             </div>
         </div>
     )

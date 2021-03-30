@@ -1,9 +1,3 @@
-.title {
-    text-align: center;
-    font-family: arial, sans-serif;
-    font-size: 26px;
-}
-
 .loading {
     display: block;
     margin-left: auto;
@@ -11,15 +5,8 @@
     text-align: center;
 }
 
-.table-input-container {
+.table {
     padding-bottom: 15px;
-}
-
-.input-form {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
 }
 
 .data {
