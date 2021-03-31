@@ -8,7 +8,7 @@ const Input = ({ onPress, onClear }) => {
     const [time, setTime] = useState('')
 
     const handleEnter = (e) => {
-        //e.preventDefault();
+        e.preventDefault();
         if (!distance && (!pace && !time)) {
             alert('Please add either a distance or pace and time!')
             return
