@@ -21,10 +21,17 @@ class Router {
             let email = req.body.email;
             let FACODE = req.body.forgotCode;
             let password = req.body.password;
-            console.log(FACODE);
+            let phone = req.body.phone;
+            var cols;
             
-            let cols = [email];
-            db.query('SELECT * FROM user WHERE email = ? LIMIT 1', 
+            if (email == '') {
+                var cols = [phone];
+                var sql = 'SELECT * FROM user WHERE phone = ? LIMIT 1';
+            } else {
+                var cols = [email];
+                var sql = 'SELECT * FROM user WHERE email = ? LIMIT 1'
+            }
+            db.query(sql, 
             cols, (err, data, fields) => {
                 if (err) {
                     res.json({
@@ -37,7 +44,11 @@ class Router {
                 if (data && data.length == 1) {
                     if (FACODE = data[0].FACODE) {
                         password = bcrypt.hashSync(password, 9);
-                        var sql = "UPDATE user set password = \"" + password + "\" WHERE email = \"" + email + "\"";
+                        if (email == '') {
+                            var sql = "UPDATE user set password = \"" + password + "\" WHERE phone = \"" + phone + "\"";
+                        } else {
+                            var sql = "UPDATE user set password = \"" + password + "\" WHERE email = \"" + email + "\"";
+                        }
                         var query = db.query(sql,
                             function(err, rows) {
                                 if (err){
@@ -133,6 +144,29 @@ class Router {
             let email = req.body.email;
             let FACODE = Math.random().toString(20).substr(2, 6);
             let username = req.body.username;
+            let phone = req.body.phone;
+            const accountSid = "AC7a6d07b8f2f5d7667b5bdb54180b8f3b";
+            const authToken = "652c8fd265ce89575e34c40446dd4ada";
+            const client = require('twilio')(accountSid, authToken);
+            if (phone != '') {
+                client.messages
+                    .create({
+                        body: 'Hello ' + username + ', we have noticed your attempt to reset your password. Please enter this code when prompted : ' + FACODE,
+                        from: '+17088016706',
+                        to: '+1' + phone
+                    })
+                    .then(message => console.log(message.sid));
+                    var sql = "UPDATE user set FACODE = \"" + FACODE + "\" WHERE phone = \"" + phone + "\"";
+                    var query = db.query(sql,
+                    function(err, rows) {
+                        if (err){
+                            console.log(err);
+                            console.log("Error in DB for updating 2FA Code for SMS");
+                        } else {
+                            console.log("Hello");
+                        }
+                    });
+            }
         
             var transporter = nodemailer.createTransport({
                 service: 'Gmail',
@@ -175,9 +209,10 @@ class Router {
                 let profilePicture = req.body.profilePicture;
                 let nickname = req.body.nickname;
                 let email = req.body.email;
+                let phone = req.body.phone;
                 let dev = 0;
                 let enableFA = req.body.enableFA;
-                let FACODE = "Won't find me!";
+                let FACODE = "Unset";
                 console.log(nickname);
 
                 username = username.toLowerCase();
@@ -204,7 +239,7 @@ class Router {
                 } else {
                     password = bcrypt.hashSync(password, 9);
                     var send={email:email, password:password, profilePicture:profilePicture
-                    , nickname:nickname, username:username, dev:dev, FACODE:FACODE, enableFA:enableFA}
+                    , nickname:nickname, username:username, phone:phone, dev:dev, FACODE:FACODE, enableFA:enableFA}
                     var query = db.query("INSERT INTO user set ? ",send,
                     function(err, rows) {
                         if (err){
@@ -248,6 +283,8 @@ class Router {
                     bcrypt.compare(password, data[0].password, (bcryptErr, verified) => {
                         if (verified) {
                             if (data[0].enableFA == 1) {
+                                console.log("HERE IS THE CLIENT FA - " + FACODE);
+                                console.log("HERE IS THE DB FA - " + data[0].FACODE);
                                 if (FACODE == data[0].FACODE) {
                                     req.session.userID = data[0].id;
                                     res.json({

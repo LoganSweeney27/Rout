@@ -20,7 +20,8 @@ class LoginForm extends React.Component {
       forgot: false,
       email: '',
       enableFA: false,
-      changeFA: "Enable Two Factor Authentication"
+      changeFA: "Enable Two Factor Authentication",
+      phone: ''
     }
   }
 
@@ -98,14 +99,12 @@ class LoginForm extends React.Component {
           profilePicture: this.state.profilePicture,
           email: this.state.email,
           nickname: this.state.nickname,
-          enableFA: this.state.enableFA
+          enableFA: this.state.enableFA,
+          phone: this.state.phone
         })
       });
       let result = await res.json();
       if (result && result.success) {
-        UserStore.isLoggedIn = true;
-        UserStore.username = result.username;
-        UserStore.nickname = result.nickname;
       } else if (result && result.success === false) {
         console.log("error")
         this.resetForm();
@@ -129,7 +128,8 @@ class LoginForm extends React.Component {
         },
         body: JSON.stringify({
           username: this.state.username,
-          password: this.state.password
+          password: this.state.password,
+          forgotCode: 'Unset'
         })
       });
       let result = await res.json();
@@ -216,7 +216,8 @@ class LoginForm extends React.Component {
         body: JSON.stringify({
           username: this.state.username,
           password: this.state.password,
-          email: this.state.email
+          email: this.state.email,
+          phone: this.state.phone
         })
       });
       let result = await res.json();
@@ -238,7 +239,8 @@ class LoginForm extends React.Component {
         body: JSON.stringify({
           password: this.state.password,
           email: this.state.email,
-          forgotCode: this.state.forgotCode
+          forgotCode: this.state.forgotCode,
+          phone: this.state.phone
         })
       });
       let result = await res.json();
@@ -339,6 +341,13 @@ class LoginForm extends React.Component {
               value={this.state.profilePicture ? this.state.profilePicture : ''}
               onChange={ (val) => this.setInputValue('profilePicture', val)}
               />
+
+              <InputField
+              type='text'
+              placeholder='Phone Number (no spaces)'
+              value={this.state.phone ? this.state.phone : ''}
+              onChange={ (val) => this.setInputValue('phone', val)}
+              />
               <SubmitButton
               text = {this.state.changeFA}
               onClick= { () => this.enableFA()}
@@ -358,13 +367,20 @@ class LoginForm extends React.Component {
         { this.state.forgot && (
           // No register From CSS styling
           <div className="registerForm">
-            Forgot Password? We'll send a code to your email.
+            Forgot Password? We'll send a code to your email and/or phone.
 
             <InputField
               type='text'
               placeholder='Email'
               value={this.state.email ? this.state.email : ''}
               onChange={ (val) => this.setInputValue('email', val)}
+            />
+
+            <InputField
+              type='text'
+              placeholder='Phone Number (no space)'
+              value={this.state.phone ? this.state.phone : ''}
+              onChange={ (val) => this.setInputValue('phone', val)}
             />
 
             <InputField
