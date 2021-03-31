@@ -220,7 +220,7 @@ function myCalculateAndDisplayRoute(
   //addMarker( {lat: 40.4259, lng: -86.9081}, map);
   new window.google.maps.Marker({
       position: newCoordinatesLocation(start.lat(), start.lng(),
-          distance/2, 90),
+          distance/2),
       map,
   });
   console.log("added marker");
@@ -229,7 +229,7 @@ function myCalculateAndDisplayRoute(
       distance = distance / 2;
       waypts.push({
           location: newCoordinatesLocation(start.lat(), start.lng(),
-              distance, 90),
+              distance),
           stopover: false,
       });
   }
@@ -290,8 +290,8 @@ function myCalculateAndDisplayRoute(
   );
 }
 
-function newCoordinatesLocation(lat, lng, distance, direction) {
-  direction = (direction * 180) / Math.PI;
+function newCoordinatesLocation(lat, lng, distance) {
+  let direction = Math.random * Math.PI * 2;
   lat = lat + (distance * Math.cos(direction) / 111111);
   lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
   let latlng = new window.google.maps.LatLng(lat, lng);
