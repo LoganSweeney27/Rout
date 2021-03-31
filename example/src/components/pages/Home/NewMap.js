@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
-
+import Input from './Input';
 
 
 const styles = {
@@ -16,6 +16,8 @@ let markers = [];
 let waypts = [];
 
 class NewMap extends Component {
+
+
   constructor(props){
     super(props);
     this.state ={
@@ -23,7 +25,11 @@ class NewMap extends Component {
       query:"",
       places:[],
       filtered:[],
-      m:[]
+      m:[],
+      routeDistance:"",
+      d_service:"",
+      d_renderer:"",
+      my_map:"",
     }
 
     this.updateQuery = this.updateQuery.bind(this);
@@ -77,11 +83,12 @@ class NewMap extends Component {
       center: {lat: 40.4259, lng: -86.9081},
       zoom: 13
     });
+    this.setState({my_map: map});
     const directionsService = new window.google.maps.DirectionsService();
     const directionsRenderer = new window.google.maps.DirectionsRenderer({
       draggable: true,
       map,
-    })    
+    });    
           
     
   //create markers
@@ -93,7 +100,9 @@ class NewMap extends Component {
     addMarker(event.latLng, map);
     startPoint = event.latLng
     window.google.maps.event.removeListener(startPointListener);
-    myCalculateAndDisplayRoute(startPoint, directionsService, directionsRenderer, map);
+    // while (this.state.routeDistance == "") {
+    //   //console.log("waiting");
+    // }
   });
   
           }//end of if statement
@@ -120,13 +129,25 @@ gm_authFailure(){
   }
   return response;
 }
+clearMap = () => {
+  window.alert("clearing map");
+}
+addData = (e, data) => {
+  //alert(e);
+  console.log(data)
+  console.log(data.distance)
+  this.setState({routeDistance: data.distance});
+  //myCalculateAndDisplayRoute(startPoint, directionsService, directionsRenderer, map);
 
-
+}
 
   render() {
     //console.log(this.state.m)
     return (
+      
       <div>
+          <Input onPress={ (e) => this.addData(e) } onClear={this.clearMap}/>
+          <h1>{this.state.routeDistance}</h1>
           <main id="map" role="application"></main>
       </div>
     )
