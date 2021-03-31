@@ -1,0 +1,10 @@
+.profile-container {
+    height: 60vh;
+    width: 100%;
+}
+
+.profile-text {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

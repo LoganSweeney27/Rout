@@ -4,61 +4,74 @@ import { FaBars, FaTimes } from 'react-icons/fa'
 import { Button } from './Button'
 import Weather from './Weather'
 import DarkMode from './DarkMode'
+import UserStore from './pages/Login/Stores/UserStore'
 
 import './Navbar.css'
 
 var mainLogo = require('./assests/rout_logo_dark_small.png');
 
-function Navbar() {
-    const [click, setClick] = useState(false)
-    const [button, setButton] = useState(true)
-    const [showDetails, setShowDetails] = useState(false)
+class Navbar extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            click: false,
+            button: true,
+            showWeather: false,
+            loggedIn: false,
+        };
+        this.isLoggedIn();
+        window.addEventListener('resize', this.showButton)
+        window.addEventListener('click', this.isLoggedIn)
+    }
 
-    const handleClick = () => setClick(!click)
-    const closeMobileMenu = () => setClick(false)
+    isLoggedIn= (e) => {
+        this.setState({ loggedIn: UserStore.isLoggedIn })
+    }
 
-    const showButton = () => {
+    setShowWeather = (e) => {
+        this.setState({ showWeather: !(this.state.showWeather) })
+    }
+
+    handleClick = (e) => {
+        this.setState({ click: !(this.state.click) })
+    }
+
+    closeMobileMenu = (e) => {
+        this.setState({ click: false })
+    }
+
+    showButton = (e) => {
         if(window.innerWidth <= 960) {
-            setButton(false)
+            this.setState({ button: false })
         } else {
-            setButton(true)
+            this.setState({ button: true })
         }
     }
 
-    useEffect(() => {
-        showButton()
-    }, [])
-
-    window.addEventListener('resize', showButton)
-
-    return (
-        <>
+    render() {
+        return (
             <div className='navbar'>
                 <div className='navbar-container'>
-                    <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
+                    <Link to='/' className='navbar-logo' onClick={ (e) => this.closeMobileMenu(e) }>
                         {/* no text */}
                         <img src={mainLogo.default}  alt='Rout Logo'/>
                     </Link>
                     {/* Handles the menu links with resizing */}
-                    <div className='menu-icon' onClick={handleClick}>
-                        {click ? <FaTimes /> : <FaBars />}
+                    <div className='menu-icon' onClick={ (e) => this.handleClick(e) }>
+                        {this.state.click ? <FaTimes /> : <FaBars />}
                     </div>
-                    <ul className={click ? 'nav-menu active' : 'nav-menu'}>
-                        {showDetails && <Weather />}
+                    <ul className={this.state.click ? 'nav-menu active' : 'nav-menu'}>
+                        {this.state.showWeather && <Weather />}
                         <li className='nav-weather-btn'>
-                            <Button buttonStyle='btn--weather' onClick={() => setShowDetails(!showDetails)}>
+                            <Button buttonStyle='btn--weather' onClick={ (e) => this.setShowWeather(e) }>
                                 Weather
                             </Button>
                         </li>
                         <li className='nav-item'>
-                            <Link to='/Statistics' className='nav-links' onClick={closeMobileMenu}>
-                                Statistics
-                            </Link>
+                            {this.state.loggedIn && <Link to='/Statistics' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Statistics</Link>}
                         </li>
                         <li className='nav-item'>
-                            <Link to='/Login' className='nav-links' onClick={closeMobileMenu}>
-                                Login
-                            </Link>
+                            {this.state.loggedIn ? <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link> : <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
                         </li>
                         {/* example of using mobile buttons */}
                         {/* <li className='nav-btn'>
@@ -82,8 +95,8 @@ function Navbar() {
                     </ul>
                 </div>
             </div>
-        </>
-    )
+        )
+    }
 }
 
 export default Navbar
