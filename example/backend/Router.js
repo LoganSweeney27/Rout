@@ -13,6 +13,7 @@ class Router {
         this.getCompare(app, db);
         this.getLine(app, db);
         this.getPrevRoutes(app, db);
+        this.sendCodeFA(app, db);
     }
 
     submitCode(app, db) {
@@ -69,6 +70,64 @@ class Router {
             
         });
     }
+    // Sends 2FA code
+    sendCodeFA(app, db) {
+        app.post('/sendCodeFA', (req, res) => {
+            let FACODE = Math.random().toString(20).substr(2, 6);
+            let username = req.body.username;
+            let cols = [username];
+            db.query('SELECT * FROM user WHERE username = ? LIMIT 1', 
+            cols, (err, data, fields) => {
+                if (err) {
+                    res.json({
+                        success: false,
+                        msg: 'User does not exist.'
+                    })
+                    return;
+                }
+                // if user is found
+                if (data && data.length == 1) {
+                    var transporter = nodemailer.createTransport({
+                        service: 'Gmail',
+                        auth: {
+                            user: 'noreply.rout.link@gmail.com',
+                            pass: 'BKRpJG2D6w57KBMb6hkP4iM3'
+                        }
+                    });
+                    let mailOptions = {
+                        from: '"Rout Helper" <noreply.rout.link@gmail.com',
+                        to: data[0].email,
+                        subject: "Two Factor Login",
+                        text: 
+                            'Hello ' + username + ', we have noticed your attempt to login. Please enter this code when prompted : ' + FACODE 
+                    }
+                    transporter.sendMail(mailOptions, function (err, res) {
+                        if(err){
+                            console.log('Error in Mail');
+                            console.log(err);
+                        } else {
+                            var sql2 = "UPDATE user set FACODE = \"" + FACODE + "\" WHERE email = \"" + data[0].email + "\"";
+                            var query = db.query(sql2,
+                            function(err, rows) {
+                                if (err){
+                                    console.log(err);
+                                    console.log("Error in DB for updating 2FA Code");
+                                } else {
+                                    console.log("Hello");
+                                }
+                            });
+                        }
+                    })
+                } else {
+                    //User does not exist
+                    res.json({
+                        success: false,
+                        msg: 'User does not exist.'
+                    })
+                }
+            });
+        });
+    }
     sendCode(app, db) {
         app.post('/sendCode', (req, res) => {
             let email = req.body.email;
@@ -117,6 +176,7 @@ class Router {
                 let nickname = req.body.nickname;
                 let email = req.body.email;
                 let dev = 0;
+                let enableFA = req.body.enableFA;
                 let FACODE = "Won't find me!";
                 console.log(nickname);
 
@@ -144,7 +204,7 @@ class Router {
                 } else {
                     password = bcrypt.hashSync(password, 9);
                     var send={email:email, password:password, profilePicture:profilePicture
-                    , nickname:nickname, username:username, dev:dev, FACODE:FACODE}
+                    , nickname:nickname, username:username, dev:dev, FACODE:FACODE, enableFA:enableFA}
                     var query = db.query("INSERT INTO user set ? ",send,
                     function(err, rows) {
                         if (err){
@@ -161,6 +221,7 @@ class Router {
         app.post('/login', (req, res) => {
             let username = req.body.username;
             let password = req.body.password;
+            let FACODE = req.body.forgotCode;
             console.log(username);
 
             username = username.toLowerCase();
@@ -186,11 +247,28 @@ class Router {
                 if (data && data.length == 1) {
                     bcrypt.compare(password, data[0].password, (bcryptErr, verified) => {
                         if (verified) {
-                            req.session.userID = data[0].id;
-                            res.json({
-                                success: true,
-                                username: data[0].username
-                            })
+                            if (data[0].enableFA == 1) {
+                                if (FACODE == data[0].FACODE) {
+                                    req.session.userID = data[0].id;
+                                    res.json({
+                                        success: true,
+                                        username: data[0].username,
+                                        email : data[0].email
+                                    })
+                                } else {
+                                    res.json({
+                                        success: false,
+                                        msg: '2FA Code Incorrect'
+                                    })
+                                }
+                            } else {
+                                req.session.userID = data[0].id;
+                                res.json({
+                                    success: true,
+                                    username: data[0].username,
+                                    email : data[0].email
+                                })
+                            }
                         } else {
                             res.json({
                                 success: false,

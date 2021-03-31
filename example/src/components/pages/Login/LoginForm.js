@@ -18,7 +18,9 @@ class LoginForm extends React.Component {
       formDisabled: false,
       forgotDisable: false,
       forgot: false,
-      email: ''
+      email: '',
+      enableFA: false,
+      changeFA: "Enable Two Factor Authentication"
     }
   }
 
@@ -47,11 +49,23 @@ class LoginForm extends React.Component {
       email: '',
       forgot: false,
       formDisabled: false,
-      forgotCode: ''
+      forgotCode: '',
+      enableFA: false
 
     })
   }
 
+  async enableFA() {
+    this.setState({
+      username: this.state.username,
+          password: this.state.password,
+          profilePicture: this.state.profilePicture,
+          email: this.state.email,
+          nickname: this.state.nickname,
+          enableFA: !this.state.enableFA,
+          changeFA: "Disable Two Factor Authentication"
+    })
+  }
   async switchRegister() {
     this.setState ({
       username: '',
@@ -83,7 +97,8 @@ class LoginForm extends React.Component {
           password: this.state.password,
           profilePicture: this.state.profilePicture,
           email: this.state.email,
-          nickname: this.state.nickname
+          nickname: this.state.nickname,
+          enableFA: this.state.enableFA
         })
       });
       let result = await res.json();
@@ -151,7 +166,8 @@ class LoginForm extends React.Component {
         },
         body: JSON.stringify({
           username: this.state.username,
-          password: this.state.password
+          password: this.state.password,
+          forgotCode: this.state.forgotCode
         })
       });
       let result = await res.json();
@@ -168,6 +184,26 @@ class LoginForm extends React.Component {
     }
   }
 
+
+  async sendCodeFA() {
+    console.log("hi");
+    try {
+      let res = await fetch ('/sendCodeFA', {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: this.state.username
+        })
+      });
+      let result = await res.json();
+    } catch (e) {
+      console.log(e);
+      this.resetForm();
+    }
+  }
   /* if user forgot password, run this */
   async sendCode() {
     try {
@@ -233,6 +269,17 @@ class LoginForm extends React.Component {
               value={this.state.password ? this.state.password : ''}
               onChange={ (val) => this.setInputValue('password', val)}
               />
+            <SubmitButton
+                text='Send Two Factor Code (if enabled)'
+                disabled={this.state.buttonDisabled}
+                onClick={ () => this.sendCodeFA()}
+              />
+            <InputField
+              type='text'
+              placeholder='Two Factor Code (leave blank if none)'
+              value={this.state.forgotCode ? this.state.forgotCode : ''}
+              onChange={ (val) => this.setInputValue('forgotCode', val)}
+              />
 
               <SubmitButton
                 text='Login'
@@ -291,6 +338,10 @@ class LoginForm extends React.Component {
               placeholder='Profile Picture URL'
               value={this.state.profilePicture ? this.state.profilePicture : ''}
               onChange={ (val) => this.setInputValue('profilePicture', val)}
+              />
+              <SubmitButton
+              text = {this.state.changeFA}
+              onClick= { () => this.enableFA()}
               />
 
               <SubmitButton
