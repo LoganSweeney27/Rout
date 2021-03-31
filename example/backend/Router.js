@@ -42,7 +42,7 @@ class Router {
                 }
                 // if user is found
                 if (data && data.length == 1) {
-                    if (FACODE = data[0].FACODE) {
+                    if (FACODE == data[0].FACODE) {
                         password = bcrypt.hashSync(password, 9);
                         if (email == '') {
                             var sql = "UPDATE user set password = \"" + password + "\" WHERE phone = \"" + phone + "\"";
