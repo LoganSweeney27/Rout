@@ -313,7 +313,9 @@ class Router {
                                     res.json({
                                         success: true,
                                         username: data[0].username,
-                                        email : data[0].email
+                                        email : data[0].email,
+                                        dev: data[0].dev,
+                                        profilePicture: data[0].profilePicture
                                     })
                                 } else {
                                     res.json({
@@ -326,7 +328,9 @@ class Router {
                                 res.json({
                                     success: true,
                                     username: data[0].username,
-                                    email : data[0].email
+                                    email : data[0].email,
+                                    dev: data[0].dev,
+                                    profilePicture: data[0].profilePicture
                                 })
                             }
                         } else {
