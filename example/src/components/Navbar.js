@@ -47,18 +47,20 @@ class Navbar extends React.Component {
               UserStore.username = result.username;
               UserStore.profilePicture = result.profilePicture;
               UserStore.nickname = result.nickname;
-      
+			  UserStore.isDev = result.dev;
             } else {
               UserStore.loading = false;
               UserStore.isLoggedIn = false;
+			  UserStore.isDev = false;
             }
           }
       
           catch(e) {
             UserStore.loading = false;
             UserStore.isLoggedIn = false;
+			UserStore.isDev = false;
           }
-        // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
+        // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn + " and .isDev=" + UserStore.isDev);
         this.setState({})
     }
 
@@ -115,6 +117,9 @@ class Navbar extends React.Component {
                         <li className='nav-item'>
                             {UserStore.isLoggedIn && <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link>}
                         </li>
+						<li className='nav-item'>
+							{UserStore.isDev && <Link to='/phpmyadmin' className='nav-links'>Database</Link>}
+						</li>
                         <li className='nav-item'>
                             <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>
                         </li>
