@@ -26,6 +26,7 @@ class NewMap extends Component {
       routeDistance:"",
       d_service:null,
       d_renderer:null,
+      d_geocoder:null,
       my_map:null,
       wayptListener:null,
 
@@ -120,8 +121,11 @@ class NewMap extends Component {
     }
     if (this.state.d_service == null) {
       const directionsService = new window.google.maps.DirectionsService();
-
       this.setState({d_service : directionsService});
+    }
+    if (this.state.d_geocoder == null) {
+      const geocoder = new window.google.maps.Geocoder();
+      this.setState({d_geocoder : geocoder});
     }
 
     listenforStart(map);
@@ -139,7 +143,7 @@ class NewMap extends Component {
     map,
   ) {
   
-    addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
+    addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2), map);
   
     console.log("added marker");
     //add that location as a waypoint
@@ -239,6 +243,8 @@ addData = (data, e) => {
   //e.preventDefault();
   console.log(data)
   console.log(data.distance)
+  console.log(data.addr)
+  geocodeAddr(this.state.d_geocoder, data.addr);
   if (startPoint) {
     if (data.distance) {
     //this.setState({routeDistance: data.distance});
@@ -295,7 +301,18 @@ function deleteMarkers() {
 }
 
 
-
+function geocodeAddr(geocoder, addr) {
+  //const addr = document.getElementById("addr");
+  geocoder.geocode({address: addr}, (results, status) => {
+    if (status == "OK") {
+      startPoint = results[0].geometry.location;
+    } else {
+      alert(
+        "Geocoder was not successful for the following reason: " + status
+      );
+    }
+  });
+}
 
 function newCoordinatesLocation(lat, lng, distance) {
   let direction = Math.random() * Math.PI * 2;
