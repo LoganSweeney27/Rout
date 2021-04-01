@@ -6,6 +6,8 @@ const Input = ({ onPress, onClear }) => {
     const [distance, setDistance] = useState('')
     const [pace, setPace] = useState('')
     const [time, setTime] = useState('')
+    const [units, setUnits] = useState('Distance (Meters)')
+    const [unitType, setUnitType] = useState('meters')
 
     const handleEnter = (e) => {
         e.preventDefault();
@@ -14,13 +16,24 @@ const Input = ({ onPress, onClear }) => {
             return
         }
 
-        onPress({ distance, pace, time }, e)
+        onPress({ distance, pace, time, unitType }, e)
 
         // Submit button is already resetting, but can use these function to make sure or keep values
         // setDistance('')
         // setPace('')
         // setTime('')
     }
+
+    const handleChangeUnit = (e) => {
+        // e.preventDefault();
+        if (units === 'Distance (Meters)') {
+            setUnits('Distance (Miles)')
+            setUnitType('miles')
+        } else {
+            setUnits('Distance (Meters)')
+            setUnitType('meters')
+        }
+    } 
 
     const handleClear = () => {
         onClear()
@@ -29,7 +42,7 @@ const Input = ({ onPress, onClear }) => {
     return (
         <div className='map-inputs'>
             <div>
-                <input className='input-field' name='distance' value={distance} onChange={(e) => setDistance(e.target.value)} type='text' placeholder='Distance (meters)' />
+                <input className='input-field' name='distance' value={distance} onChange={(e) => setDistance(e.target.value)} type='text' placeholder={units} />
                 <h1 className='input-text'>OR</h1>
             </div>
             <div>
@@ -38,6 +51,9 @@ const Input = ({ onPress, onClear }) => {
             </div>
             <Button buttonStyle='btn--input' onClick={(e) => handleEnter(e)}>
                 Enter
+            </Button>
+            <Button buttonStyle='btn--input' onClick={(e) => handleChangeUnit(e)}>
+                Change Units
             </Button>
             <Button buttonStyle='btn--input' onClick={handleClear}>
                 Clear
