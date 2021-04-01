@@ -353,7 +353,9 @@ class Router {
                     if (data && data.length === 1) {
                         res.json({
                             success: true,
-                            username: data[0].username
+                            username: data[0].username,
+                            profilePicture: data[0].profilePicture,
+                            nickname: data[0].nickname
                         })
                         return true;
                     } else {

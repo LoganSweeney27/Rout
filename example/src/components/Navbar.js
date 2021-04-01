@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Component } from 'react'
 import { Link } from 'react-router-dom'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import { Button } from './Button'
@@ -19,12 +19,48 @@ class Navbar extends React.Component {
             showWeather: false,
             loggedIn: false,
         };
-        this.isLoggedIn();
         window.addEventListener('resize', this.showButton)
-        window.addEventListener('click', this.isLoggedIn)
     }
 
-    isLoggedIn= (e) => {
+    componentDidMount() {
+        this.isLoggedIn();
+        this.navbar.addEventListener('click', this.isLoggedIn);
+    }
+
+    componentWillUnmount() {
+        this.navbar.removeEventListener('click', this.isLoggedIn);
+    }
+
+    async isLoggedIn() {
+        // alert("checking if logged in: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
+        try {
+            let res = await fetch('/isLoggedIn', {
+              method: 'post',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            });
+            let result = await res.json();
+            if (result && result.success) {
+              UserStore.loading = false;
+              UserStore.isLoggedIn = true;
+              UserStore.username = result.username;
+              UserStore.profilePicture = result.profilePicture;
+              UserStore.nickname = result.nickname;
+      
+            } else {
+              UserStore.loading = false;
+              UserStore.isLoggedIn = false;
+            }
+          }
+      
+          catch(e) {
+            UserStore.loading = false;
+            UserStore.isLoggedIn = false;
+          }
+
+        // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
         this.setState({ loggedIn: UserStore.isLoggedIn })
     }
 
@@ -50,7 +86,7 @@ class Navbar extends React.Component {
 
     render() {
         return (
-            <div className='navbar'>
+            <div ref={elem => this.navbar = elem} className='navbar'>
                 <div className='navbar-container'>
                     <Link to='/' className='navbar-logo' onClick={ (e) => this.closeMobileMenu(e) }>
                         {/* no text */}

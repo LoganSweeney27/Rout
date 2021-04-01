@@ -1,10 +1,31 @@
 .profile-container {
-    height: 60vh;
+    height: 50vh;
     width: 100%;
 }
 
-.profile-text {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+.profile-header {
+    text-align: center;
+    font-size: 36px;
+    color: var(--text-color);
+}
+
+.profile-subheader {
+    text-align: center;
+    font-size: 30px;
+    color: var(--text-color);
+}
+
+.profile-content {
+    padding-left: 10vh;
+}
+
+.profile-input-field {
+    width: 200px;
+    height: 30px;
+    margin: 5px;
+    padding: 3px 7px;
+    font-size: 17px;
+    border-color: var(--text-color);
+    border-radius: 3px;
+    transition: 0.3s all;
 }
