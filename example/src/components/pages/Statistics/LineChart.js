@@ -1,5 +1,6 @@
 import React from 'react'
 import { Line } from 'react-chartjs-2';
+import UserStore from '../Login/Stores/UserStore';
 
 import './LineChart.css'
 
@@ -10,7 +11,7 @@ class LineChart extends React.Component {
         data: [],
         labels: [],
         loading: true,
-        userID: '1',
+        username: UserStore.username,
     };
     this.fetchLinePastRoutes();
   }
@@ -24,7 +25,7 @@ class LineChart extends React.Component {
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
-            userID: this.state.userID
+          username: this.state.username
           })
       });
       let result = await res.json();

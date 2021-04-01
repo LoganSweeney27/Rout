@@ -380,9 +380,9 @@ class Router {
     getCompare(app, db) {
         app.post('/getCompare', (req, res) => {
             let dist = req.body.dist;
-            let userID = req.body.userID;
+            let username = req.body.username;
         
-            var sql = "SELECT distance, time FROM prevroutes WHERE userID = \"" + userID + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time";
+            var sql = "SELECT distance, time FROM prevroutes WHERE username = \"" + username + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
@@ -412,9 +412,9 @@ class Router {
 
     getLine(app, db) {
         app.post('/getLine', (req, res) => {
-            let userID = req.body.userID;
+            let username = req.body.username;
         
-            var sql = "SELECT calories, date FROM prevroutes WHERE userID = \"" + userID + "\" ORDER BY date";
+            var sql = "SELECT calories, date FROM prevroutes WHERE username = \"" + username + "\" ORDER BY date";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
@@ -450,9 +450,9 @@ class Router {
 
     getPrevRoutes(app, db) {
         app.post('/getPrevRoutes', (req, res) => {
-            let userID = req.body.userID;
+            let username = req.body.username;
         
-            var sql = "SELECT distance, time, calories, date FROM prevroutes WHERE userID = \"" + userID + "\" ORDER BY date";
+            var sql = "SELECT distance, time, calories, date FROM prevroutes WHERE username = \"" + username + "\" ORDER BY date";
             var query = db.query(sql,
             function(err, data) {
                 if (err){

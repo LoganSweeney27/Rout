@@ -1,4 +1,5 @@
 import React from 'react'
+import UserStore from '../Login/Stores/UserStore';
 
 import './PreviousRoutes.css'
 
@@ -13,7 +14,7 @@ class PreviousRoutes extends React.Component {
             calories: [],
             dates: [],
             loading: true,
-            userID: '1',
+            username: UserStore.username,
         };
         this.fetchPrevRoutes();
     }
@@ -27,7 +28,7 @@ class PreviousRoutes extends React.Component {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                userID: this.state.userID
+                username: this.state.username
               })
           });
           let result = await res.json();
