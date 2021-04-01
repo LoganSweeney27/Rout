@@ -65,7 +65,7 @@ class Navbar extends React.Component {
     }
 
     reRender = (e) => {
-        this.isLoggedIn()
+        // this.isLoggedIn()
         this.forceUpdate()
     }
 
