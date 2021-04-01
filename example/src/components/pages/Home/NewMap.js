@@ -22,15 +22,13 @@ class NewMap extends Component {
     super(props);
     this.state ={
       mapIsReady:false,
-      query:"",
       chartIsReady:false,
-      places:[],
-      filtered:[],
-      m:[],
       routeDistance:"",
       d_service:null,
       d_renderer:null,
       my_map:null,
+      wayptListener:null,
+
     }
 
     this.initMap = this.initMap.bind(this)
@@ -133,11 +131,75 @@ class NewMap extends Component {
 
   }
 
+  myCalculateAndDisplayRoute(
+    start,
+    distance,
+    directionsService,
+    directionsRenderer,
+    map,
+  ) {
+  
+    addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
+  
+    console.log("added marker");
+    //add that location as a waypoint
+    if (!wayptOn) {
+        distance = distance / 2;
+        waypts.push({
+            location: newCoordinatesLocation(start.lat(), start.lng(), distance),
+            stopover: false,
+        });
+    }
+  
+    var totaldistance = 0;
+  
+    directionsService.route(
+        {
+            origin: start,
+            destination: start,
+            waypoints: waypts,
+            optimizeWaypoints: false,
+            avoidHighways: true,
+            travelMode: window.google.maps.TravelMode.WALKING,
+        },
+        (response, status) => {
+            if (status === "OK" && response) {
+                const route = response.routes[0];
+  
+                for (let i = 0; i < route.legs.length; i++) {
+                    totaldistance += route.legs[i].distance.value;
+                }
+                console.log(totaldistance);
+                // directionsRenderer.setDirections(response);
+                // directionsRenderer.setMap(map);
+                if (!wayptOn) {
+                    directionsRenderer.setDirections(response);
+                    directionsRenderer.setMap(map);
+  
+                } else if (wayptOn && (totaldistance <= distance)) {
+                    directionsRenderer.setDirections(response);
+                    directionsRenderer.setMap(map);
+  
+                } else {
+                    window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
+                }
+                const elevator = new window.google.maps.ElevationService();
+                // Draw the path, using the Visualization API and the Elevation service.
+                displayPathElevation(route.overview_path, elevator, map);
+  
+            } else {
+                window.alert("Directions request failed due to " + status);
+            }
+            this.setState({routeDistance: totaldistance});
+        }
+    );
+    
+  }
+
 
 gm_authFailure(){
     window.alert("Google Maps error!")
 }
-
 
  handleErrors(response) {
   if (!response.ok) {
@@ -153,16 +215,41 @@ clearMap = () => {
   startPoint = null;
   waypts = [];
   wayptOn = false;
+  if (this.state.wayptListener != null) {
+    window.google.maps.event.removeListener(this.state.wayptListener);
+    this.setState({wayptListener:null});
+  }
   listenforStart(this.state.my_map);
+}
+addWaypoints = () => {
+  wayptOn = true;
+  if (this.state.wayptListener == null) {
+    var myWayptListener = this.state.my_map.addListener("click", (event) => {
+      addMarker(event.latLng, this.state.my_map);
+      waypts.push({
+        location: event.latLng,
+        stopover: false,
+      });
+    })
+    this.setState({wayptListener: myWayptListener});
+  }
 }
 addData = (data, e) => {
   //alert(e);
   //e.preventDefault();
   console.log(data)
   console.log(data.distance)
-  //this.setState({routeDistance: data.distance});
-  myCalculateAndDisplayRoute(startPoint, data.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
+  if (startPoint) {
+    if (data.distance) {
+    //this.setState({routeDistance: data.distance});
+      this.myCalculateAndDisplayRoute(startPoint, data.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
 
+    } else {
+      alert("No Distance or Time and Pace entered");
+    }
+  } else {
+    alert("No start point selected");
+  }
 } 
 
   render() {
@@ -170,8 +257,10 @@ addData = (data, e) => {
     return (
       
       <div>
-          <Input onPress={ (data, e) => this.addData(data, e) } onClear={this.clearMap}/>
-          {/* <h1>{this.state.routeDistance}</h1> */}
+          <Input onPress={ (data, e) => this.addData(data, e) }
+                 onClear={this.clearMap}
+                 onWaypoints={this.addWaypoints}/>
+          <h1>{this.state.routeDistance}</h1>
           <main id="map" role="application"></main>
           <div id="elevation_chart"></div>
       </div>
@@ -206,94 +295,7 @@ function deleteMarkers() {
 }
 
 
-function myCalculateAndDisplayRoute(
-  start,
-  distance,
-  directionsService,
-  directionsRenderer,
-  map,
-) {
 
-  // ts-ignore
-  //var distance = 5000//document.getElementById("distance").value;
-//   if (map == null) {
-// console.log("problem");
-//   }
-  //add marker at a location a given distance away
-  //addMarker( {lat: 40.4259, lng: -86.9081}, map);
-  //start = new window.google.maps.LatLng(40.4259, -86.9081);
-
-  addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
-
-  console.log("added marker");
-  //add that location as a waypoint
-  if (!wayptOn) {
-      distance = distance / 2;
-      waypts.push({
-          location: newCoordinatesLocation(start.lat(), start.lng(), distance),
-          stopover: false,
-      });
-  }
-
-
-  directionsService.route(
-      {
-          origin: start,
-          destination: start,
-          waypoints: waypts,
-          optimizeWaypoints: false,
-          avoidHighways: true,
-          travelMode: window.google.maps.TravelMode.WALKING,
-      },
-      (response, status) => {
-          if (status === "OK" && response) {
-              const route = response.routes[0];
-              var totaldistance = 0;
-
-              for (let i = 0; i < route.legs.length; i++) {
-                  totaldistance += route.legs[i].distance.value;
-              }
-              console.log(totaldistance);
-              // directionsRenderer.setDirections(response);
-              // directionsRenderer.setMap(map);
-              if (!wayptOn) {
-                  directionsRenderer.setDirections(response);
-                  directionsRenderer.setMap(map);
-                  // const summaryPanel = document.getElementById(
-                  //     "directions-panel"
-                  // ) as HTMLElement;
-                  // summaryPanel.innerHTML = "";
-                  // for (let i = 0; i < route.legs.length; i++) {
-                  //     const routeSegment = i + 1;
-
-                  //     summaryPanel.innerHTML += route.legs[i].distance!.text + "<br><br>";
-                  // }
-              } else if (wayptOn && (totaldistance <= distance)) {
-                  directionsRenderer.setDirections(response);
-                  directionsRenderer.setMap(map);
-                  // const summaryPanel = document.getElementById(
-                  //     "directions-panel"
-                  // ) as HTMLElement;
-                  // summaryPanel.innerHTML = "";
-                  // for (let i = 0; i < route.legs.length; i++) {
-                  //     const routeSegment = i + 1;
-
-                  //     summaryPanel.innerHTML += route.legs[i].distance!.text + "<br><br>";
-                  // }
-              } else {
-                  window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
-              }
-              const elevator = new window.google.maps.ElevationService();
-
-                    // Draw the path, using the Visualization API and the Elevation service.
-                    displayPathElevation(route.overview_path, elevator, map);
-
-          } else {
-              window.alert("Directions request failed due to " + status);
-          }
-      }
-  );
-}
 
 function newCoordinatesLocation(lat, lng, distance) {
   let direction = Math.random() * Math.PI * 2;

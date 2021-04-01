@@ -2,7 +2,7 @@ import { React, useState } from 'react'
 import { Button } from '../../Button'
 import './Input.css'
 
-const Input = ({ onPress, onClear }) => {
+const Input = ({ onPress, onClear, onWaypoints}) => {
     const [distance, setDistance] = useState('')
     const [pace, setPace] = useState('')
     const [time, setTime] = useState('')
@@ -25,6 +25,9 @@ const Input = ({ onPress, onClear }) => {
     const handleClear = () => {
         onClear()
     } 
+    const handleWaypoints = () => {
+        onWaypoints()
+    }
 
     return (
         <div className='map-inputs'>
@@ -41,6 +44,9 @@ const Input = ({ onPress, onClear }) => {
             </Button>
             <Button buttonStyle='btn--input' onClick={handleClear}>
                 Clear
+            </Button>
+            <Button buttonStyle='btn--input' onClick={handleWaypoints}>
+                Waypoints
             </Button>
         </div>
     )
