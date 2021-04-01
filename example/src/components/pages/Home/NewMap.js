@@ -10,7 +10,7 @@ const styles = {
   },
   
 };
-let startPoint;
+let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
@@ -102,6 +102,7 @@ class NewMap extends Component {
 
     //if map is ready to load
     if(this.state.mapIsReady && this.state.chartIsReady){
+
     const map = new window.google.maps.Map(document.getElementById('map'), {
       center: {lat: 40.4259, lng: -86.9081},
       zoom: 13,
@@ -220,6 +221,7 @@ function myCalculateAndDisplayRoute(
 //   }
   //add marker at a location a given distance away
   //addMarker( {lat: 40.4259, lng: -86.9081}, map);
+  //start = new window.google.maps.LatLng(40.4259, -86.9081);
 
   addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
 
@@ -228,8 +230,7 @@ function myCalculateAndDisplayRoute(
   if (!wayptOn) {
       distance = distance / 2;
       waypts.push({
-          location: newCoordinatesLocation(start.lat(), start.lng(),
-              distance),
+          location: newCoordinatesLocation(start.lat(), start.lng(), distance),
           stopover: false,
       });
   }
@@ -295,7 +296,7 @@ function myCalculateAndDisplayRoute(
 }
 
 function newCoordinatesLocation(lat, lng, distance) {
-  let direction = Math.random * Math.PI * 2;
+  let direction = Math.random() * Math.PI * 2;
   lat = lat + (distance * Math.cos(direction) / 111111);
   lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
   let latlng = new window.google.maps.LatLng(lat, lng);
