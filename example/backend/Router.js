@@ -98,6 +98,29 @@ class Router {
                 }
                 // if user is found
                 if (data && data.length == 1) {
+                    let phone = data[0].phone;
+                    const accountSid = "AC7a6d07b8f2f5d7667b5bdb54180b8f3b";
+                    const authToken = "652c8fd265ce89575e34c40446dd4ada";
+                    const client = require('twilio')(accountSid, authToken);
+                    if (phone != '') {
+                        client.messages
+                            .create({
+                            body: 'Hello ' + username + ', we have noticed your attempt to reset your password. Please enter this code when prompted : ' + FACODE,
+                            from: '+17088016706',
+                            to: '+1' + phone
+                            })
+                    .then(message => console.log(message.sid));
+                    var sql = "UPDATE user set FACODE = \"" + FACODE + "\" WHERE phone = \"" + phone + "\"";
+                    var query = db.query(sql,
+                    function(err, rows) {
+                        if (err){
+                            console.log(err);
+                            console.log("Error in DB for updating 2FA Code for SMS");
+                        } else {
+                            console.log("Hello");
+                        }
+                    });
+                    }
                     var transporter = nodemailer.createTransport({
                         service: 'Gmail',
                         auth: {
@@ -145,7 +168,6 @@ class Router {
             let FACODE = Math.random().toString(20).substr(2, 6);
             let username = req.body.username;
             let phone = req.body.phone;
-            console.log(phone);
             const accountSid = "AC7a6d07b8f2f5d7667b5bdb54180b8f3b";
             const authToken = "652c8fd265ce89575e34c40446dd4ada";
             const client = require('twilio')(accountSid, authToken);
@@ -354,9 +376,7 @@ class Router {
                     if (data && data.length === 1) {
                         res.json({
                             success: true,
-                            username: data[0].username,
-                            profilePicture: data[0].profilePicture,
-                            nickname: data[0].nickname
+                            username: data[0].username
                         })
                         return true;
                     } else {
