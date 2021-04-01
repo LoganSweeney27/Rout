@@ -1,4 +1,5 @@
 import React from 'react'
+import UserStore from '../Login/Stores/UserStore';
 
 import './PreviousRoutes.css'
 
@@ -13,7 +14,7 @@ class PreviousRoutes extends React.Component {
             calories: [],
             dates: [],
             loading: true,
-            userID: '1',
+            username: UserStore.username,
         };
         this.fetchPrevRoutes();
     }
@@ -27,7 +28,7 @@ class PreviousRoutes extends React.Component {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                userID: this.state.userID
+                username: this.state.username
               })
           });
           let result = await res.json();
@@ -36,7 +37,7 @@ class PreviousRoutes extends React.Component {
                 this.setState({ distances: result.distances, times: result.times, calories: result.calories, dates: result.dates })
             } else {
                 alert("Could not find prevoius routes to display.");
-                this.setState({ distances: 'N/A', times:'N/A', calories: 'N/A', dates: 'N/A' })
+                this.setState({ distances: ['N/A'], times:['N/A'], calories: ['N/A'], dates: ['N/A'] })
             }
         } catch(e) {
             console.log(e)

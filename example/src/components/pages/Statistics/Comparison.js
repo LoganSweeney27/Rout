@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button } from '../../Button'
+import UserStore from '../Login/Stores/UserStore';
 
 import './Comparison.css'
 
@@ -12,7 +13,7 @@ class Comparison extends React.Component {
             runnerTime: '43.03',
             userDistance: '',
             userTime: '',
-            userID: '1',
+            username: UserStore.username,
         };
     }
 
@@ -26,7 +27,7 @@ class Comparison extends React.Component {
             },
             body: JSON.stringify({
                 dist: this.state.runnerDistance,
-                userID: this.state.userID
+                username: this.state.username
               })
           });
           let result = await res.json();
