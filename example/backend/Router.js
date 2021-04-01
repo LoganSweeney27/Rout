@@ -145,6 +145,7 @@ class Router {
             let FACODE = Math.random().toString(20).substr(2, 6);
             let username = req.body.username;
             let phone = req.body.phone;
+            console.log(phone);
             const accountSid = "AC7a6d07b8f2f5d7667b5bdb54180b8f3b";
             const authToken = "652c8fd265ce89575e34c40446dd4ada";
             const client = require('twilio')(accountSid, authToken);
