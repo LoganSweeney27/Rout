@@ -17,18 +17,17 @@ class Navbar extends React.Component {
             click: false,
             button: true,
             showWeather: false,
-            loggedIn: false,
         };
         window.addEventListener('resize', this.showButton)
     }
 
     componentDidMount() {
-        this.isLoggedIn();
-        this.navbar.addEventListener('click', this.isLoggedIn);
+        this.isLoggedIn()
+        this.navbar.addEventListener('click', this.reRender);
     }
 
     componentWillUnmount() {
-        this.navbar.removeEventListener('click', this.isLoggedIn);
+        this.navbar.removeEventListener('click', this.reRender);
     }
 
     async isLoggedIn() {
@@ -59,9 +58,13 @@ class Navbar extends React.Component {
             UserStore.loading = false;
             UserStore.isLoggedIn = false;
           }
-
         // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
-        this.setState({ loggedIn: UserStore.isLoggedIn })
+        this.setState({})
+    }
+
+    reRender = (e) => {
+        this.isLoggedIn()
+        this.forceUpdate()
     }
 
     setShowWeather = (e) => {
@@ -104,10 +107,16 @@ class Navbar extends React.Component {
                             </Button>
                         </li>
                         <li className='nav-item'>
-                            {this.state.loggedIn && <Link to='/Statistics' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Statistics</Link>}
+                            {UserStore.isLoggedIn && <Link to='/Statistics' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Statistics</Link>}
+                        </li>
+                        {/* <li className='nav-item'>
+                            {this.state.loggedIn ? <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link> : <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
+                        </li> */}
+                        <li className='nav-item'>
+                            {UserStore.isLoggedIn && <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link>}
                         </li>
                         <li className='nav-item'>
-                            {this.state.loggedIn ? <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link> : <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
+                            <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>
                         </li>
                         {/* example of using mobile buttons */}
                         {/* <li className='nav-btn'>

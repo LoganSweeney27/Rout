@@ -37,7 +37,7 @@ class PreviousRoutes extends React.Component {
                 this.setState({ distances: result.distances, times: result.times, calories: result.calories, dates: result.dates })
             } else {
                 alert("Could not find prevoius routes to display.");
-                this.setState({ distances: 'N/A', times:'N/A', calories: 'N/A', dates: 'N/A' })
+                this.setState({ distances: ['N/A'], times:['N/A'], calories: ['N/A'], dates: ['N/A'] })
             }
         } catch(e) {
             console.log(e)
