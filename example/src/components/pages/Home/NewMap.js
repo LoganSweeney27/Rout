@@ -2,6 +2,9 @@ import React, { Component, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
 import Input from './Input';
+import { Button } from '../../Button';
+
+import './Input.css'
 
 
 const styles = {
@@ -14,6 +17,114 @@ let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
+
+function addMarker(location, map) {
+  const marker = new window.google.maps.Marker({
+      position: location,
+      map: map,
+  });
+  markers.push(marker);
+}
+
+function setMapOnAll(map) {
+  for (let i = 0; i < markers.length; i++) {
+      markers[i].setMap(map);
+  }
+}
+
+function clearMarkers() {
+  setMapOnAll(null);
+}
+
+function deleteMarkers() {
+  clearMarkers();
+  markers = [];
+}
+
+
+function geocodeAddr(geocoder, addr) {
+  //const addr = document.getElementById("addr");
+  geocoder.geocode({address: addr}, (results, status) => {
+    if (status == "OK") {
+      startPoint = results[0].geometry.location;
+    } else {
+      alert(
+        "Address geocoding was not successful for the following reason: " + status
+      );
+    }
+  });
+}
+
+function newCoordinatesLocation(lat, lng, distance) {
+  let direction = Math.random() * Math.PI * 2;
+  lat = lat + (distance * Math.cos(direction) / 111111);
+  lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
+  let latlng = new window.google.maps.LatLng(lat, lng);
+  return latlng;
+}
+
+function displayPathElevation(
+  path,
+  elevator,
+  map
+) {
+
+// Create a PathElevationRequest object using this array.
+// Ask for 256 samples along that path.
+// Initiate the path request.
+elevator.getElevationAlongPath(
+    {
+      path: path,
+      samples: 256,
+    },
+    plotElevation
+);
+}
+
+// Takes an array of ElevationResult objects, draws the path on the map
+// and plots the elevation profile on a Visualization API ColumnChart.
+function plotElevation(elevations, status) {
+const chartDiv = document.getElementById("elevation_chart");
+
+if (status !== "OK") {
+// Show the error code inside the chartDiv.
+chartDiv.innerHTML =
+      "Cannot show elevation: request failed because " + status;
+return;
+}
+// Create a new chart in the elevation_chart DIV.
+const chart = new window.google.visualization.ColumnChart(chartDiv);
+
+// Extract the data from which to populate the chart.
+// Because the samples are equidistant, the 'Sample'
+// column here does double duty as distance along the
+// X axis.
+const data = new window.google.visualization.DataTable();
+data.addColumn("string", "Sample");
+data.addColumn("number", "Elevation");
+
+for (let i = 0; i < elevations.length; i++) {
+data.addRow(["", elevations[i].elevation]);
+}
+
+// Draw the chart using the data within its DIV.
+chart.draw(data, {
+height: 150,
+legend: "none",
+// @ts-ignore TODO(jpoehnelt) update to newest visualization library
+titleY: "Elevation (m)",
+});
+}
+
+
+function listenforStart(map) {
+  var startPointListener = map.addListener("click", (event) => {
+    addMarker(event.latLng, map);
+    startPoint = event.latLng;
+    window.google.maps.event.removeListener(startPointListener);
+
+  });
+}
 
 class NewMap extends Component {
 
@@ -29,7 +140,12 @@ class NewMap extends Component {
       d_geocoder:null,
       my_map:null,
       wayptListener:null,
-
+      addr: '',
+      distance: '',
+      pace: '',
+      time: '',
+      units: 'Distance (Meters)',
+      unitType: 'meters',
     }
 
     this.initMap = this.initMap.bind(this)
@@ -240,18 +356,21 @@ addWaypoints = () => {
     this.setState({wayptListener: myWayptListener});
   }
 }
-addData = (data, e) => {
+
+// addData = (data, e) => {
+addData = () => {
   //alert(e);
   //e.preventDefault();
-  console.log(data)
-  console.log(data.distance)
-  console.log(data.addr)
-  geocodeAddr(this.state.d_geocoder, data.addr);
-  const autocomplete = new window.google.maps.places.Autocomplete(data.addr);
+  // console.log(data)
+  // console.log(data.distance)
+  // console.log(data.addr)
+  alert(this.state.addr)
+  geocodeAddr(this.state.d_geocoder, this.state.addr);
+  const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
   if (startPoint) {
-    if (data.distance) {
+    if (this.state.distance) {
     //this.setState({routeDistance: data.distance});
-      this.myCalculateAndDisplayRoute(startPoint, data.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
+      this.myCalculateAndDisplayRoute(startPoint, this.state.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
 
     } else {
       alert("No Distance or Time and Pace entered");
@@ -261,129 +380,84 @@ addData = (data, e) => {
   }
 } 
 
+
+  handleEnter = (e) => {
+    e.preventDefault();
+    if (!this.state.distance && (!this.state.pace && !this.state.time)) {
+        alert('Please add either a distance or pace and time!')
+        return
+    }
+
+    // let data = [this.state.addr, this.state.distance, this.state.pace, this.state.time, this.state.unitType]
+    // alert(data)
+    // this.addData(data, e)
+    this.addData()
+
+    // Submit button is already resetting, but can use these function to make sure or keep values
+    // setDistance('')
+    // setPace('')
+    // setTime('')
+  }
+
+  handleChangeUnit = (e) => {
+    // e.preventDefault();
+    if (this.state.units === 'Distance (Meters)') {
+        this.setState({ units: 'Distance (Miles)' })
+        this.setState({ unitType: 'miles' })
+    } else {
+      this.setState({ units: 'Distance (Meters)' })
+      this.setState({ unitType: 'meters' })
+    }
+  } 
+
+  handleClear = () => {
+    this.onClear()
+  } 
+  handleWaypoints = () => {
+    this.onWaypoints()
+  }
+
   render() {
     //console.log(this.state.m)
     return (
       
       <div>
-          <Input onPress={ (data, e) => this.addData(data, e) }
+        <div>
+          {/* <Input onPress={ (data, e) => this.addData(data, e) }
                  onClear={this.clearMap}
-                 onWaypoints={this.addWaypoints}/>
+                 onWaypoints={this.addWaypoints}/> */}
+          <div className='map-inputs'>
+            <div>
+                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' placeholder='Address' />
+                <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => this.setState({ distance: e.target.value })} type='text' placeholder={this.state.units} />
+                <h1 className='input-text'>OR</h1>
+            </div>
+            <div>
+                <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => this.setState({ pace: e.target.value })} type='text' placeholder='Pace (minutes/km)' />
+                <input className='input-field' name='time' value={this.state.time} onChange={(e) => this.setState({ time: e.target.value })} type='text' placeholder='Time (mm:ss)' />
+            </div>
+            <Button buttonStyle='btn--input' onClick={(e) => this.handleEnter(e)}>
+                Enter
+            </Button>
+            <Button buttonStyle='btn--input' onClick={(e) => this.handleChangeUnit(e)}>
+                Change Units
+            </Button>
+            <Button buttonStyle='btn--input' onClick={this.handleClear}>
+                Clear
+            </Button>
+            <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
+                Waypoints
+            </Button>
+        </div>
           <h1>{this.state.routeDistance}</h1>
+        </div>
+        <div>
           <main id="map" role="application"></main>
           <div id="elevation_chart"></div>
+        </div>
       </div>
     )
   }
 }
 
 export default withStyles(styles)(NewMap);
-
-
-function addMarker(location, map) {
-  const marker = new window.google.maps.Marker({
-      position: location,
-      map: map,
-  });
-  markers.push(marker);
-}
-
-function setMapOnAll(map) {
-  for (let i = 0; i < markers.length; i++) {
-      markers[i].setMap(map);
-  }
-}
-
-function clearMarkers() {
-  setMapOnAll(null);
-}
-
-function deleteMarkers() {
-  clearMarkers();
-  markers = [];
-}
-
-
-function geocodeAddr(geocoder, addr) {
-  //const addr = document.getElementById("addr");
-  geocoder.geocode({address: addr}, (results, status) => {
-    if (status == "OK") {
-      startPoint = results[0].geometry.location;
-    } else {
-      alert(
-        "Address geocoding was not successful for the following reason: " + status
-      );
-    }
-  });
-}
-
-function newCoordinatesLocation(lat, lng, distance) {
-  let direction = Math.random() * Math.PI * 2;
-  lat = lat + (distance * Math.cos(direction) / 111111);
-  lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
-  let latlng = new window.google.maps.LatLng(lat, lng);
-  return latlng;
-}
-
-function displayPathElevation(
-  path,
-  elevator,
-  map
-) {
-
-// Create a PathElevationRequest object using this array.
-// Ask for 256 samples along that path.
-// Initiate the path request.
-elevator.getElevationAlongPath(
-    {
-      path: path,
-      samples: 256,
-    },
-    plotElevation
-);
-}
-
-// Takes an array of ElevationResult objects, draws the path on the map
-// and plots the elevation profile on a Visualization API ColumnChart.
-function plotElevation(elevations, status) {
-const chartDiv = document.getElementById("elevation_chart");
-
-if (status !== "OK") {
-// Show the error code inside the chartDiv.
-chartDiv.innerHTML =
-      "Cannot show elevation: request failed because " + status;
-return;
-}
-// Create a new chart in the elevation_chart DIV.
-const chart = new window.google.visualization.ColumnChart(chartDiv);
-
-// Extract the data from which to populate the chart.
-// Because the samples are equidistant, the 'Sample'
-// column here does double duty as distance along the
-// X axis.
-const data = new window.google.visualization.DataTable();
-data.addColumn("string", "Sample");
-data.addColumn("number", "Elevation");
-
-for (let i = 0; i < elevations.length; i++) {
-data.addRow(["", elevations[i].elevation]);
-}
-
-// Draw the chart using the data within its DIV.
-chart.draw(data, {
-height: 150,
-legend: "none",
-// @ts-ignore TODO(jpoehnelt) update to newest visualization library
-titleY: "Elevation (m)",
-});
-}
-
-
-function listenforStart(map) {
-  var startPointListener = map.addListener("click", (event) => {
-    addMarker(event.latLng, map);
-    startPoint = event.latLng;
-    window.google.maps.event.removeListener(startPointListener);
-
-  });
-}
