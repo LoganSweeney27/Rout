@@ -1,64 +1,113 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Component } from 'react'
 import { Link } from 'react-router-dom'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import { Button } from './Button'
 import Weather from './Weather'
 import DarkMode from './DarkMode'
+import UserStore from './pages/Login/Stores/UserStore'
 
 import './Navbar.css'
 
 var mainLogo = require('./assests/rout_logo_dark_small.png');
 
-function Navbar() {
-    const [click, setClick] = useState(false)
-    const [button, setButton] = useState(true)
-    const [showDetails, setShowDetails] = useState(false)
+class Navbar extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            click: false,
+            button: true,
+            showWeather: false,
+            loggedIn: false,
+        };
+        window.addEventListener('resize', this.showButton)
+    }
 
-    const handleClick = () => setClick(!click)
-    const closeMobileMenu = () => setClick(false)
+    componentDidMount() {
+        this.isLoggedIn();
+        this.navbar.addEventListener('click', this.isLoggedIn);
+    }
 
-    const showButton = () => {
+    componentWillUnmount() {
+        this.navbar.removeEventListener('click', this.isLoggedIn);
+    }
+
+    async isLoggedIn() {
+        // alert("checking if logged in: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
+        try {
+            let res = await fetch('/isLoggedIn', {
+              method: 'post',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              }
+            });
+            let result = await res.json();
+            if (result && result.success) {
+              UserStore.loading = false;
+              UserStore.isLoggedIn = true;
+              UserStore.username = result.username;
+              UserStore.profilePicture = result.profilePicture;
+              UserStore.nickname = result.nickname;
+      
+            } else {
+              UserStore.loading = false;
+              UserStore.isLoggedIn = false;
+            }
+          }
+      
+          catch(e) {
+            UserStore.loading = false;
+            UserStore.isLoggedIn = false;
+          }
+
+        // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
+        this.setState({ loggedIn: UserStore.isLoggedIn })
+    }
+
+    setShowWeather = (e) => {
+        this.setState({ showWeather: !(this.state.showWeather) })
+    }
+
+    handleClick = (e) => {
+        this.setState({ click: !(this.state.click) })
+    }
+
+    closeMobileMenu = (e) => {
+        this.setState({ click: false })
+    }
+
+    showButton = (e) => {
         if(window.innerWidth <= 960) {
-            setButton(false)
+            this.setState({ button: false })
         } else {
-            setButton(true)
+            this.setState({ button: true })
         }
     }
 
-    useEffect(() => {
-        showButton()
-    }, [])
-
-    window.addEventListener('resize', showButton)
-
-    return (
-        <>
-            <div className='navbar'>
+    render() {
+        return (
+            <div ref={elem => this.navbar = elem} className='navbar'>
                 <div className='navbar-container'>
-                    <Link to='/' className='navbar-logo' onClick={closeMobileMenu}>
+                    <Link to='/' className='navbar-logo' onClick={ (e) => this.closeMobileMenu(e) }>
                         {/* no text */}
                         <img src={mainLogo.default}  alt='Rout Logo'/>
                     </Link>
                     {/* Handles the menu links with resizing */}
-                    <div className='menu-icon' onClick={handleClick}>
-                        {click ? <FaTimes /> : <FaBars />}
+                    <div className='menu-icon' onClick={ (e) => this.handleClick(e) }>
+                        {this.state.click ? <FaTimes /> : <FaBars />}
                     </div>
-                    <ul className={click ? 'nav-menu active' : 'nav-menu'}>
-                        {showDetails && <Weather />}
+                    <ul className={this.state.click ? 'nav-menu active' : 'nav-menu'}>
+                        {this.state.showWeather && <Weather />}
                         <li className='nav-weather-btn'>
-                            <Button buttonStyle='btn--weather' onClick={() => setShowDetails(!showDetails)}>
+                            <Button buttonStyle='btn--weather' onClick={ (e) => this.setShowWeather(e) }>
                                 Weather
                             </Button>
                         </li>
                         <li className='nav-item'>
-                            <Link to='/Statistics' className='nav-links' onClick={closeMobileMenu}>
-                                Statistics
-                            </Link>
+                            {this.state.loggedIn && <Link to='/Statistics' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Statistics</Link>}
                         </li>
                         <li className='nav-item'>
-                            <Link to='/Login' className='nav-links' onClick={closeMobileMenu}>
-                                Login
-                            </Link>
+                            {this.state.loggedIn ? <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link> : <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
                         </li>
                         {/* example of using mobile buttons */}
                         {/* <li className='nav-btn'>
@@ -82,8 +131,8 @@ function Navbar() {
                     </ul>
                 </div>
             </div>
-        </>
-    )
+        )
+    }
 }
 
 export default Navbar
