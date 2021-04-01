@@ -54,7 +54,7 @@ class NewMap extends Component {
     const ApiKey = 'AIzaSyDekWG_GZBqJ3j0Kt9t-B0ayBcU9wLHlsk'
 
     const scriptMap = window.document.createElement('script')
-    scriptMap.src = `https://maps.googleapis.com/maps/api/js?key=${ApiKey}`
+    scriptMap.src = `https://maps.googleapis.com/maps/api/js?key=${ApiKey}&libraries=places`
     scriptMap.async = true;
     scriptMap.defer= true;
     scriptMap.onerror = function(){window.alert("The Google Maps API failed to load data!")}
@@ -127,6 +127,7 @@ class NewMap extends Component {
       const geocoder = new window.google.maps.Geocoder();
       this.setState({d_geocoder : geocoder});
     }
+
 
     listenforStart(map);
   
@@ -215,6 +216,7 @@ clearMap = () => {
   //window.alert("clearing map");
   this.state.d_renderer.setDirections(null);
   this.state.d_renderer.setMap(null);
+  this.state.d_geocoder.setAddr(null);
   deleteMarkers();
   startPoint = null;
   waypts = [];
@@ -245,6 +247,7 @@ addData = (data, e) => {
   console.log(data.distance)
   console.log(data.addr)
   geocodeAddr(this.state.d_geocoder, data.addr);
+  const autocomplete = new window.google.maps.places.Autocomplete(data.addr);
   if (startPoint) {
     if (data.distance) {
     //this.setState({routeDistance: data.distance});
@@ -308,7 +311,7 @@ function geocodeAddr(geocoder, addr) {
       startPoint = results[0].geometry.location;
     } else {
       alert(
-        "Geocoder was not successful for the following reason: " + status
+        "Address geocoding was not successful for the following reason: " + status
       );
     }
   });
