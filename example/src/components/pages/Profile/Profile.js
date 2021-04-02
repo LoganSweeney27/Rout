@@ -15,11 +15,61 @@ class Profile extends React.Component {
     }
 
     handleChangeNickname = (e) => {
-        // e.preventDefault();
-        // ^ is about stopping or not stopping refreshes, this is the function for the change nickname functino, i.e., either a function that calls a fucntion to make the db call or just the db call.
-        // If you want this to just be the db call, just change it to "async...." however you want your db functions to work
+        this.changeNickname();
     }
+    async changeNickname() {
+        let username = UserStore.username;
+        try {
+          let res = await fetch('/changeNickname', {
+            method: 'post',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              username: UserStore.username,
+              nickname: this.state.newNickname
+            })
+          });
+          let result = await res.json();
+          if (result && result.success) {
+            alert("Nickname successfully Updated");
+            UserStore.nickname = result.nickname;
+          } else if (result && result.success === false) {
+            alert(result.msg);
+          }
+        } catch (e) {
+          console.log(e);
+          this.resetForm();
+        }
+      }
 
+    //   async changeProfilePicture() {
+    //     let username = UserStore.username;
+    //     try {
+    //       let res = await fetch('/changeProfilePicture', {
+    //         method: 'post',
+    //         headers: {
+    //           'Accept': 'application/json',
+    //           'Content-Type': 'application/json'
+    //         },
+    //         body: JSON.stringify({
+    //           username: this.state.username,
+    //           profilePicture: this.state.profilePicture
+    //         })
+    //       });
+    //       let result = await res.json();
+    //       if (result && result.success) {
+    //         alert("Nickname successfully Updated");
+    //         UserStore.profilePicture = result.profilePicture;
+    //       } else if (result && result.success === false) {
+    //         alert(result.msg);
+    //       }
+    //     } catch (e) {
+    //       console.log(e);
+    //       this.resetForm();
+    //     }
+    //   }
     handleSomethingElse = (e) => {
         //Other db call or function for other buttons
     }

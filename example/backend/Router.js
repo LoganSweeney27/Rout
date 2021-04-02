@@ -14,8 +14,61 @@ class Router {
         this.getLine(app, db);
         this.getPrevRoutes(app, db);
         this.sendCodeFA(app, db);
+        this.changeNickname(app, db);
+        this.changeProfilePicture(app, db);
     }
 
+
+    changeNickname(app, db) {
+        app.post('/changeNickname', (req, res) => {
+            let nickname = req.body.nickname;
+            console.log(nickname);
+            let username = req.body.username;
+            console.log(username);
+            var sql = "UPDATE user set nickname = \"" + nickname + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'Nickname Successfully Updated',
+                            nickname: nickname
+                        })
+                    }
+                });
+            
+        });
+    }
+
+
+    changeProfilePicture(app, db) {
+        app.post('/changeProfilePicture', (req, res) => {
+            let profilePicture = req.body.profilePicture;
+            let username = req.body.username;
+            var sql = "UPDATE user set profilePicture = \"" + profilePicture + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'Profile Picture Successfully Updated',
+                            profilePicture: profilePicture
+                        })
+                    }
+                });
+            
+        });
+    }
     submitCode(app, db) {
         app.post('/submitCode', (req, res) => {
             let email = req.body.email;
