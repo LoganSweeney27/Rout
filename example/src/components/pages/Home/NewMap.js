@@ -255,7 +255,8 @@ class NewMap extends Component {
       const geocoder = new window.google.maps.Geocoder();
       this.setState({d_geocoder : geocoder});
     }
-
+    const addy = document.getElementById("addy");
+    const autocomplete = new window.google.maps.places.Autocomplete(addy);
 
     listenforStart(map);
   
@@ -428,8 +429,9 @@ addData = () => {
   // console.log(data.distance)
   // console.log(data.addr)
   //alert(this.state.addr)
+  const address = document.getElementById("addr");
   geocodeAddr(this.state.d_geocoder, this.state.addr);
-  const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
+  //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
   setTimeout(() => {
     if (startPoint) {
       if (this.state.distance) {
@@ -442,7 +444,7 @@ addData = () => {
     } else {
       alert("No start point selected");
     }
-  }, 100)
+  }, 150)
 } 
 
 
@@ -493,13 +495,15 @@ addData = () => {
                  onWaypoints={this.addWaypoints}/> */}
           <div className='map-inputs'>
             <div>
-                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' placeholder='Address' />
                 <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => this.setState({ distance: e.target.value })} type='text' placeholder={this.state.units} />
                 <h1 className='input-text'>OR</h1>
             </div>
             <div>
                 <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => this.setState({ pace: e.target.value })} type='text' placeholder='Pace (minutes/km)' />
                 <input className='input-field' name='time' value={this.state.time} onChange={(e) => this.setState({ time: e.target.value })} type='text' placeholder='Time (mm:ss)' />
+            </div>
+            <div>
+                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' id='addy' placeholder='Address' />
             </div>
             <Button buttonStyle='btn--input' onClick={(e) => this.handleEnter(e)}>
                 Enter
