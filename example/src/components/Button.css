@@ -44,6 +44,7 @@
 .btn--input {
     background-color: #fff;
     color: #1c2237;
+    margin-left: 10px;
     border: 1px solid #1c2237;
     transition: all 0.3s ease-out;
 }
