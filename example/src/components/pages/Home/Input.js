@@ -3,6 +3,7 @@ import { Button } from '../../Button'
 import './Input.css'
 
 const Input = ({ onPress, onClear, onWaypoints}) => {
+    const [addr, setAddr] = useState('')
     const [distance, setDistance] = useState('')
     const [pace, setPace] = useState('')
     const [time, setTime] = useState('')
@@ -16,7 +17,7 @@ const Input = ({ onPress, onClear, onWaypoints}) => {
             return
         }
 
-        onPress({ distance, pace, time, unitType }, e)
+        onPress({ addr, distance, pace, time, unitType }, e)
 
         // Submit button is already resetting, but can use these function to make sure or keep values
         // setDistance('')
@@ -45,6 +46,7 @@ const Input = ({ onPress, onClear, onWaypoints}) => {
     return (
         <div className='map-inputs'>
             <div>
+                <input className='input-field' name='addr' value={addr} onChange={(e) => setAddr(e.target.value)} type='text' placeholder='Address' />
                 <input className='input-field' name='distance' value={distance} onChange={(e) => setDistance(e.target.value)} type='text' placeholder={units} />
                 <h1 className='input-text'>OR</h1>
             </div>

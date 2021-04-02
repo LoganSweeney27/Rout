@@ -2,7 +2,10 @@ import React, { Component, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
 import Input from './Input';
-import SelectInput from '@material-ui/core/Select/SelectInput';
+//import SelectInput from '@material-ui/core/Select/SelectInput';
+import { Button } from '../../Button';
+
+import './Input.css'
 
 
 const styles = {
@@ -114,6 +117,28 @@ function listenforStart(map) {
 }
 
 
+
+
+
+function geocodeAddr(geocoder, addr) {
+  //const addr = document.getElementById("addr");
+  geocoder.geocode({address: addr}, (results, status) => {
+    if (status == "OK") {
+      startPoint = results[0].geometry.location;
+    } else {
+      alert(
+        "Address geocoding was not successful for the following reason: " + status
+      );
+    }
+  });
+}
+
+
+
+
+
+
+
 class NewMap extends Component {
 
 
@@ -125,9 +150,15 @@ class NewMap extends Component {
       routeDistance:"",
       d_service:null,
       d_renderer:null,
+      d_geocoder:null,
       my_map:null,
       wayptListener:null,
-
+      addr: '',
+      distance: '',
+      pace: '',
+      time: '',
+      units: 'Distance (Meters)',
+      unitType: 'meters',
     }
 
     this.initMap = this.initMap.bind(this)
@@ -151,7 +182,7 @@ class NewMap extends Component {
     const ApiKey = 'AIzaSyDekWG_GZBqJ3j0Kt9t-B0ayBcU9wLHlsk'
 
     const scriptMap = window.document.createElement('script')
-    scriptMap.src = `https://maps.googleapis.com/maps/api/js?key=${ApiKey}`
+    scriptMap.src = `https://maps.googleapis.com/maps/api/js?key=${ApiKey}&libraries=places`
     scriptMap.async = true;
     scriptMap.defer= true;
     scriptMap.onerror = function(){window.alert("The Google Maps API failed to load data!")}
@@ -218,9 +249,13 @@ class NewMap extends Component {
     }
     if (this.state.d_service == null) {
       const directionsService = new window.google.maps.DirectionsService();
-
       this.setState({d_service : directionsService});
     }
+    if (this.state.d_geocoder == null) {
+      const geocoder = new window.google.maps.Geocoder();
+      this.setState({d_geocoder : geocoder});
+    }
+
 
     listenforStart(map);
   
@@ -237,7 +272,11 @@ class NewMap extends Component {
     map,
   ) {
   
+
     //addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
+
+    //addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2), map);
+
   
     console.log("added marker");
     //add that location as a waypoint
@@ -357,6 +396,7 @@ clearMap = () => {
   //window.alert("clearing map");
   this.state.d_renderer.setDirections(null);
   this.state.d_renderer.setMap(null);
+  this.state.d_geocoder.setAddr(null);
   deleteMarkers();
   startPoint = null;
   waypts = [];
@@ -380,15 +420,21 @@ addWaypoints = () => {
     this.setState({wayptListener: myWayptListener});
   }
 }
-addData = (data, e) => {
+
+// addData = (data, e) => {
+addData = () => {
   //alert(e);
   //e.preventDefault();
-  console.log(data)
-  console.log(data.distance)
+  // console.log(data)
+  // console.log(data.distance)
+  // console.log(data.addr)
+  alert(this.state.addr)
+  geocodeAddr(this.state.d_geocoder, this.state.addr);
+  const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
   if (startPoint) {
-    if (data.distance) {
+    if (this.state.distance) {
     //this.setState({routeDistance: data.distance});
-      this.myCalculateAndDisplayRoute(startPoint, data.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
+      this.myCalculateAndDisplayRoute(startPoint, this.state.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
 
     } else {
       alert("No Distance or Time and Pace entered");
@@ -398,17 +444,81 @@ addData = (data, e) => {
   }
 } 
 
+
+  handleEnter = (e) => {
+    e.preventDefault();
+    if (!this.state.distance && (!this.state.pace && !this.state.time)) {
+        alert('Please add either a distance or pace and time!')
+        return
+    }
+
+    // let data = [this.state.addr, this.state.distance, this.state.pace, this.state.time, this.state.unitType]
+    // alert(data)
+    // this.addData(data, e)
+    this.addData()
+
+    // Submit button is already resetting, but can use these function to make sure or keep values
+    // setDistance('')
+    // setPace('')
+    // setTime('')
+  }
+
+  handleChangeUnit = (e) => {
+    // e.preventDefault();
+    if (this.state.units === 'Distance (Meters)') {
+        this.setState({ units: 'Distance (Miles)' })
+        this.setState({ unitType: 'miles' })
+    } else {
+      this.setState({ units: 'Distance (Meters)' })
+      this.setState({ unitType: 'meters' })
+    }
+  } 
+
+  handleClear = () => {
+    this.onClear()
+  } 
+  handleWaypoints = () => {
+    this.onWaypoints()
+  }
+
   render() {
     //console.log(this.state.m)
     return (
       
       <div>
-          <Input onPress={ (data, e) => this.addData(data, e) }
+        <div>
+          {/* <Input onPress={ (data, e) => this.addData(data, e) }
                  onClear={this.clearMap}
-                 onWaypoints={this.addWaypoints}/>
+                 onWaypoints={this.addWaypoints}/> */}
+          <div className='map-inputs'>
+            <div>
+                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' placeholder='Address' />
+                <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => this.setState({ distance: e.target.value })} type='text' placeholder={this.state.units} />
+                <h1 className='input-text'>OR</h1>
+            </div>
+            <div>
+                <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => this.setState({ pace: e.target.value })} type='text' placeholder='Pace (minutes/km)' />
+                <input className='input-field' name='time' value={this.state.time} onChange={(e) => this.setState({ time: e.target.value })} type='text' placeholder='Time (mm:ss)' />
+            </div>
+            <Button buttonStyle='btn--input' onClick={(e) => this.handleEnter(e)}>
+                Enter
+            </Button>
+            <Button buttonStyle='btn--input' onClick={(e) => this.handleChangeUnit(e)}>
+                Change Units
+            </Button>
+            <Button buttonStyle='btn--input' onClick={this.handleClear}>
+                Clear
+            </Button>
+            <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
+                Waypoints
+            </Button>
+        </div>
           <h1>{this.state.routeDistance}</h1>
+        </div>
+        <div>
           <main id="map" role="application"></main>
           <div id="elevation_chart"></div>
+        </div>
       </div>
     )
   }
