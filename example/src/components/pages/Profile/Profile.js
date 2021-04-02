@@ -9,14 +9,14 @@ class Profile extends React.Component {
         super(props);
         this.state = {
             newNickname: UserStore.nickname,
-            newState: "",
-            newNewState: "",
+            profilePicture: UserStore.profilePicture,
         };
     }
 
     handleChangeNickname = (e) => {
         this.changeNickname();
     }
+
     async changeNickname() {
         let username = UserStore.username;
         try {
@@ -27,7 +27,7 @@ class Profile extends React.Component {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              username: UserStore.username,
+              username: username,
               nickname: this.state.newNickname
             })
           });
@@ -40,38 +40,38 @@ class Profile extends React.Component {
           }
         } catch (e) {
           console.log(e);
-          this.resetForm();
         }
-      }
+    }
 
-    //   async changeProfilePicture() {
-    //     let username = UserStore.username;
-    //     try {
-    //       let res = await fetch('/changeProfilePicture', {
-    //         method: 'post',
-    //         headers: {
-    //           'Accept': 'application/json',
-    //           'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify({
-    //           username: this.state.username,
-    //           profilePicture: this.state.profilePicture
-    //         })
-    //       });
-    //       let result = await res.json();
-    //       if (result && result.success) {
-    //         alert("Nickname successfully Updated");
-    //         UserStore.profilePicture = result.profilePicture;
-    //       } else if (result && result.success === false) {
-    //         alert(result.msg);
-    //       }
-    //     } catch (e) {
-    //       console.log(e);
-    //       this.resetForm();
-    //     }
-    //   }
-    handleSomethingElse = (e) => {
-        //Other db call or function for other buttons
+    handleChangeProfilePicture = (e) => {
+        this.changeProfilePicture()
+    }
+
+    async changeProfilePicture() {
+        let username = UserStore.username;
+        alert("username:" + username + " and profile pic is:" + this.state.profilePicture)
+        try {
+            let res = await fetch('/changeProfilePicture', {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    profilePicture: this.state.profilePicture
+                })
+            });
+            let result = await res.json();
+            if (result && result.success) {
+                alert("Profile picture successfully Updated");
+                UserStore.profilePicture = result.profilePicture;
+            } else if (result && result.success === false) {
+                alert(result.msg);
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 
     handleLogOut = (e) => {
@@ -96,19 +96,14 @@ class Profile extends React.Component {
                     </Button>
                 </div>
                 <div className='profile-content'>
-                    <input className='profile-input-field' name='newButton' value={this.state.newState} onChange={(e) => this.setState({ newState: e.target.value })} type='text' placeholder='Change this to change placeholder text!' />
-                    <Button buttonStyle='btn--regular' onClick={ (e) => this.handleSomethingElse(e) }>
-                        Insert Button Here
+                    <input className='profile-input-field' name='newButton' value={this.state.profilePicture} onChange={(e) => this.setState({ profilePicture: e.target.value })} type='text' placeholder={this.state.profilePicture} />
+                    <Button buttonStyle='btn--regular' onClick={ (e) => this.handleChangeProfilePicture(e) }>
+                        Change Profile Picture
                     </Button>
+                    {/* <img src={this.state.profilePicture}  alt='ProfilePic'/> */}
                 </div>
                 <div className='profile-content'>
-                    <input className='profile-input-field' name='newNewButton' value={this.state.newNewState} onChange={(e) => this.setState({ newNewState: e.target.value })} type='text' placeholder='Change this to change placeholder text!' />
-                    <Button buttonStyle='btn--regular' onClick={ (e) => this.handleSomethingElse(e) }>
-                        Maybe Another Button Here
-                    </Button>
-                </div>
-                <div className='profile-content'>
-                    <Button buttonStyle='btn--regular' onClick={ (e) => this.handleLogOut(e) }>
+                    <Button buttonStyle='btn--logout' onClick={ (e) => this.handleLogOut(e) }>
                         Logout
                     </Button>
                 </div>
