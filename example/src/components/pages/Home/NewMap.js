@@ -2,6 +2,7 @@ import React, { Component, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
 import Input from './Input';
+import SelectInput from '@material-ui/core/Select/SelectInput';
 
 
 const styles = {
@@ -14,6 +15,104 @@ let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
+function addMarker(location, map) {
+  const marker = new window.google.maps.Marker({
+      position: location,
+      map: map,
+  });
+  markers.push(marker);
+}
+
+function setMapOnAll(map) {
+  for (let i = 0; i < markers.length; i++) {
+      markers[i].setMap(map);
+  }
+}
+
+function clearMarkers() {
+  setMapOnAll(null);
+}
+
+function deleteMarkers() {
+  clearMarkers();
+  markers = [];
+}
+
+
+
+
+function newCoordinatesLocation(lat, lng, distance, direction) {
+  //direction = (direction * 180) / Math.PI;
+  direction = Math.random() * Math.PI * 2;
+  lat = lat + (distance * Math.cos(direction) / 111111);
+  lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
+  let latlng = new window.google.maps.LatLng(lat, lng);
+  return latlng;
+}
+
+function displayPathElevation(
+  path,
+  elevator,
+  map
+) {
+
+// Create a PathElevationRequest object using this array.
+// Ask for 256 samples along that path.
+// Initiate the path request.
+elevator.getElevationAlongPath(
+    {
+      path: path,
+      samples: 256,
+    },
+    plotElevation
+);
+}
+
+// Takes an array of ElevationResult objects, draws the path on the map
+// and plots the elevation profile on a Visualization API ColumnChart.
+function plotElevation(elevations, status) {
+const chartDiv = document.getElementById("elevation_chart");
+
+if (status !== "OK") {
+// Show the error code inside the chartDiv.
+chartDiv.innerHTML =
+      "Cannot show elevation: request failed because " + status;
+return;
+}
+// Create a new chart in the elevation_chart DIV.
+const chart = new window.google.visualization.ColumnChart(chartDiv);
+
+// Extract the data from which to populate the chart.
+// Because the samples are equidistant, the 'Sample'
+// column here does double duty as distance along the
+// X axis.
+const data = new window.google.visualization.DataTable();
+data.addColumn("string", "Sample");
+data.addColumn("number", "Elevation");
+
+for (let i = 0; i < elevations.length; i++) {
+data.addRow(["", elevations[i].elevation]);
+}
+
+// Draw the chart using the data within its DIV.
+chart.draw(data, {
+height: 150,
+legend: "none",
+// @ts-ignore TODO(jpoehnelt) update to newest visualization library
+titleY: "Elevation (m)",
+});
+}
+
+
+function listenforStart(map) {
+  var startPointListener = map.addListener("click", (event) => {
+    addMarker(event.latLng, map);
+    startPoint = event.latLng;
+    window.google.maps.event.removeListener(startPointListener);
+
+  });
+}
+
 
 class NewMap extends Component {
 
@@ -32,14 +131,13 @@ class NewMap extends Component {
     }
 
     this.initMap = this.initMap.bind(this)
+    //this.loadGoogleMapScript();
 
   }
 
-  componentWillMount() {
-    this.loadGoogleMapScript();
-    
-  }
+
   componentDidMount(){
+    this.loadGoogleMapScript();
 
     window.gm_authFailure = this.gm_authFailure;
 
@@ -131,7 +229,7 @@ class NewMap extends Component {
 
   }
 
-  myCalculateAndDisplayRoute(
+  async myCalculateAndDisplayRoute(
     start,
     distance,
     directionsService,
@@ -139,39 +237,85 @@ class NewMap extends Component {
     map,
   ) {
   
-    addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
+    //addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
   
     console.log("added marker");
     //add that location as a waypoint
-    if (!wayptOn) {
-        distance = distance / 2;
-        waypts.push({
-            location: newCoordinatesLocation(start.lat(), start.lng(), distance),
-            stopover: false,
-        });
-    }
+    
   
     var totaldistance = 0;
-  
+    var isCalculating = false;
+    //var counter = 0;
+    console.log("distance : " + distance); //3000
+    console.log("distance : " + totaldistance); //0
+    //totaldistance = 3500;
+
+    //while distance is not with +-error of request distance
+    var error = 250;
+    //while ( (distance + error < totaldistance) || (distance - error > totaldistance)) {
+      // if (counter > 8) {
+      //   console.log("breaking");
+      //   break;
+      // }
+      // counter++;
+      // console.log(counter);
+
+    
+      
+      this.createRoute(start, error, distance, 0);
+      //wait(1000);
+      //console.log(counter);
+        
+    //}
+    
+  }
+
+
+  createRoute(start, error, distance, depth) {
+    if (depth > 8) {
+      alert("Requests Exceeded");
+      return;
+    }
+    var directionsService = this.state.d_service;
+    var directionsRenderer = this.state.d_renderer;
+    var map = this.state.my_map;
+
+    if (!wayptOn) {
+      waypts = [];
+      waypts.push({
+          location: newCoordinatesLocation(start.lat(), start.lng(), distance / 2, 90),
+          stopover: false,
+      });
+    }
     directionsService.route(
-        {
-            origin: start,
-            destination: start,
-            waypoints: waypts,
-            optimizeWaypoints: false,
-            avoidHighways: true,
-            travelMode: window.google.maps.TravelMode.WALKING,
-        },
-        (response, status) => {
-            if (status === "OK" && response) {
-                const route = response.routes[0];
+      {
+          origin: start,
+          destination: start,
+          waypoints: waypts,
+          optimizeWaypoints: false,
+          avoidHighways: true,
+          travelMode: window.google.maps.TravelMode.WALKING,
+      },
+      (response, status) => {
+          if (status === "OK" && response) {
+              const route = response.routes[0];
+              let totaldistance = 0;
   
-                for (let i = 0; i < route.legs.length; i++) {
-                    totaldistance += route.legs[i].distance.value;
-                }
-                console.log(totaldistance);
-                // directionsRenderer.setDirections(response);
-                // directionsRenderer.setMap(map);
+              for (let i = 0; i < route.legs.length; i++) {
+                  totaldistance += route.legs[i].distance.value;
+              }
+              console.log("totaldistance : " + totaldistance);
+              console.log("error : " + error);
+              console.log("distance : " + distance);
+
+
+              // directionsRenderer.setDirections(response);
+              // directionsRenderer.setMap(map);
+              console.log(parseInt(distance) + parseInt(error));
+              console.log(totaldistance);
+              if (((parseInt(distance) + parseInt(error)) > totaldistance)
+                  && ((parseInt(distance) - parseInt(error)) < totaldistance)) {
+                console.log("test");
                 if (!wayptOn) {
                     directionsRenderer.setDirections(response);
                     directionsRenderer.setMap(map);
@@ -186,16 +330,18 @@ class NewMap extends Component {
                 const elevator = new window.google.maps.ElevationService();
                 // Draw the path, using the Visualization API and the Elevation service.
                 displayPathElevation(route.overview_path, elevator, map);
+                this.setState({routeDistance: totaldistance});
   
-            } else {
-                window.alert("Directions request failed due to " + status);
-            }
-            this.setState({routeDistance: totaldistance});
-        }
+              } else {
+                this.createRoute(start,error,distance, ++depth);
+              }
+  
+          } else {
+              window.alert("Directions request failed due to " + status);
+          }
+      }
     );
-    
   }
-
 
 gm_authFailure(){
     window.alert("Google Maps error!")
@@ -269,101 +415,3 @@ addData = (data, e) => {
 }
 
 export default withStyles(styles)(NewMap);
-
-
-function addMarker(location, map) {
-  const marker = new window.google.maps.Marker({
-      position: location,
-      map: map,
-  });
-  markers.push(marker);
-}
-
-function setMapOnAll(map) {
-  for (let i = 0; i < markers.length; i++) {
-      markers[i].setMap(map);
-  }
-}
-
-function clearMarkers() {
-  setMapOnAll(null);
-}
-
-function deleteMarkers() {
-  clearMarkers();
-  markers = [];
-}
-
-
-
-
-function newCoordinatesLocation(lat, lng, distance) {
-  let direction = Math.random() * Math.PI * 2;
-  lat = lat + (distance * Math.cos(direction) / 111111);
-  lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
-  let latlng = new window.google.maps.LatLng(lat, lng);
-  return latlng;
-}
-
-function displayPathElevation(
-  path,
-  elevator,
-  map
-) {
-
-// Create a PathElevationRequest object using this array.
-// Ask for 256 samples along that path.
-// Initiate the path request.
-elevator.getElevationAlongPath(
-    {
-      path: path,
-      samples: 256,
-    },
-    plotElevation
-);
-}
-
-// Takes an array of ElevationResult objects, draws the path on the map
-// and plots the elevation profile on a Visualization API ColumnChart.
-function plotElevation(elevations, status) {
-const chartDiv = document.getElementById("elevation_chart");
-
-if (status !== "OK") {
-// Show the error code inside the chartDiv.
-chartDiv.innerHTML =
-      "Cannot show elevation: request failed because " + status;
-return;
-}
-// Create a new chart in the elevation_chart DIV.
-const chart = new window.google.visualization.ColumnChart(chartDiv);
-
-// Extract the data from which to populate the chart.
-// Because the samples are equidistant, the 'Sample'
-// column here does double duty as distance along the
-// X axis.
-const data = new window.google.visualization.DataTable();
-data.addColumn("string", "Sample");
-data.addColumn("number", "Elevation");
-
-for (let i = 0; i < elevations.length; i++) {
-data.addRow(["", elevations[i].elevation]);
-}
-
-// Draw the chart using the data within its DIV.
-chart.draw(data, {
-height: 150,
-legend: "none",
-// @ts-ignore TODO(jpoehnelt) update to newest visualization library
-titleY: "Elevation (m)",
-});
-}
-
-
-function listenforStart(map) {
-  var startPointListener = map.addListener("click", (event) => {
-    addMarker(event.latLng, map);
-    startPoint = event.latLng;
-    window.google.maps.event.removeListener(startPointListener);
-
-  });
-}
