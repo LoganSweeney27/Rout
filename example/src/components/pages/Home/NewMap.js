@@ -137,8 +137,6 @@ function geocodeAddr(geocoder, addr) {
 
 
 
-
-
 class NewMap extends Component {
 
 
@@ -155,10 +153,11 @@ class NewMap extends Component {
       wayptListener:null,
       addr: '',
       distance: '',
+      distance_m:'',
       pace: '',
       time: '',
-      units: 'Distance (Meters)',
-      unitType: 'meters',
+      units: 'Distance (Kilometers)',
+      unitType: 'kilometers',
     }
 
     this.initMap = this.initMap.bind(this)
@@ -265,18 +264,14 @@ class NewMap extends Component {
 
   }
 
-  async myCalculateAndDisplayRoute(
+  myCalculateAndDisplayRoute(
     start,
     distance,
     directionsService,
     directionsRenderer,
     map,
   ) {
-  
 
-    //addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2, 90), map);
-
-    //addMarker(newCoordinatesLocation(start.lat(), start.lng(), distance/2), map);
 
   
     console.log("added marker");
@@ -284,21 +279,13 @@ class NewMap extends Component {
     
   
     var totaldistance = 0;
-    var isCalculating = false;
     //var counter = 0;
     console.log("distance : " + distance); //3000
-    console.log("distance : " + totaldistance); //0
+    console.log("totaldistance : " + totaldistance); //0
     //totaldistance = 3500;
 
     //while distance is not with +-error of request distance
-    var error = 250;
-    //while ( (distance + error < totaldistance) || (distance - error > totaldistance)) {
-      // if (counter > 8) {
-      //   console.log("breaking");
-      //   break;
-      // }
-      // counter++;
-      // console.log(counter);
+    var error = 400;
 
     
       
@@ -313,7 +300,7 @@ class NewMap extends Component {
 
   createRoute(start, error, distance, depth) {
     if (depth > 8) {
-      alert("Requests Exceeded");
+      alert("Could not find route at this starting point.");
       return;
     }
     var directionsService = this.state.d_service;
@@ -370,7 +357,8 @@ class NewMap extends Component {
                 const elevator = new window.google.maps.ElevationService();
                 // Draw the path, using the Visualization API and the Elevation service.
                 displayPathElevation(route.overview_path, elevator, map);
-                this.setState({routeDistance: totaldistance});
+                this.convertToDisplayDistance(totaldistance);
+                //this.setState({routeDistance: displayDistance});
   
               } else {
                 this.createRoute(start,error,distance, ++depth);
@@ -393,6 +381,31 @@ gm_authFailure(){
   }
   return response;
 }
+
+convertToMeters() {
+  if (this.state.distance) {
+    if (this.state.unitType === 'kilometers') {
+      this.state.distance_m = parseInt(this.state.distance) * 1000;
+    } else {
+      //conversion from miles to meters
+      this.state.distance_m = parseInt(this.state.distance) * 1609.34;
+    }
+  } else {
+    if ((this.state.pace != null) && (this.state.time != null)) {
+      this.state.distance_m = (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34;
+    }
+  }
+}
+
+convertToDisplayDistance(distance) {
+  if (this.state.unitType === 'kilometers') {
+    this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
+  } else {
+    //convert meters to miles
+    this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
+  }
+}
+
 clearMap = () => {
 
   this.state.d_renderer.setDirections(null);
@@ -430,13 +443,18 @@ addData = () => {
   // console.log(data.addr)
   //alert(this.state.addr)
   const address = document.getElementById("addr");
-  geocodeAddr(this.state.d_geocoder, this.state.addr);
+  if (address) {
+    geocodeAddr(this.state.d_geocoder, this.state.addr);
+  }
+  this.convertToMeters();
+  
   //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
   setTimeout(() => {
     if (startPoint) {
-      if (this.state.distance) {
-      //this.setState({routeDistance: data.distance});
-        this.myCalculateAndDisplayRoute(startPoint, this.state.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
+      if (this.state.distance_m) {
+
+        //this.setState({routeDistance: data.distance});
+        this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m, this.state.d_service, this.state.d_renderer, this.state.my_map);
 
       } else {
         alert("No Distance or Time and Pace entered");
@@ -444,7 +462,7 @@ addData = () => {
     } else {
       alert("No start point selected");
     }
-  }, 150)
+  }, 400)
 } 
 
 
@@ -468,12 +486,12 @@ addData = () => {
 
   handleChangeUnit = (e) => {
     // e.preventDefault();
-    if (this.state.units === 'Distance (Meters)') {
+    if (this.state.units === 'Distance (Kilometers)') {
         this.setState({ units: 'Distance (Miles)' })
         this.setState({ unitType: 'miles' })
     } else {
-      this.setState({ units: 'Distance (Meters)' })
-      this.setState({ unitType: 'meters' })
+      this.setState({ units: 'Distance (Kilometers)' })
+      this.setState({ unitType: 'kilometers' })
     }
   } 
 
@@ -499,8 +517,8 @@ addData = () => {
                 <h1 className='input-text'>OR</h1>
             </div>
             <div>
-                <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => this.setState({ pace: e.target.value })} type='text' placeholder='Pace (minutes/km)' />
-                <input className='input-field' name='time' value={this.state.time} onChange={(e) => this.setState({ time: e.target.value })} type='text' placeholder='Time (mm:ss)' />
+                <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => this.setState({ pace: e.target.value })} type='text' placeholder='Pace (minutes/mile)' />
+                <input className='input-field' name='time' value={this.state.time} onChange={(e) => this.setState({ time: e.target.value })} type='text' placeholder='Time (minutes)' />
             </div>
             <div>
                 <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' id='addy' placeholder='Address' />
