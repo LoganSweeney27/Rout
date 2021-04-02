@@ -58,7 +58,25 @@ class Comparison extends React.Component {
                 this.setState({ runnerDistance: this.runners[i][1], runnerTime: this.runners[i][2] })
             }
         }
-        
+    }
+
+    minutesSeconds() {
+        if (this.state.userTime === '' || this.state.userTime === 'N/A') {
+            return this.state.userTime;
+        } else {
+            var minutes = Math.floor(parseFloat(this.state.userTime) / 60);
+            var seconds = parseFloat(this.state.userTime) - minutes * 60;
+            seconds = (seconds).toFixed(2);
+            if (minutes === 0) {
+                return seconds;
+            }
+            alert(seconds[0])
+            if (seconds[0] == 0) {
+                return minutes + ":0" + seconds;
+            } else {
+                return minutes + ":" + seconds;
+            }
+        }
     }
 
     render () {
@@ -94,7 +112,7 @@ class Comparison extends React.Component {
                         </tr>
                         <tr>
                         <td>Time (Seconds)</td>
-                        <td>{this.state.userTime}</td>
+                        <td>{this.minutesSeconds()}</td>
                         <td>{this.state.runnerTime}</td>
                         </tr>
                     </tbody>
