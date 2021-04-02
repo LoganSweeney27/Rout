@@ -118,7 +118,7 @@ class Navbar extends React.Component {
                             {UserStore.isLoggedIn && <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link>}
                         </li>
 						<li className='nav-item'>
-							{UserStore.isDev && <Link to='/phpmyadmin' className='nav-links'>Database</Link>}
+                            {UserStore.isDev && <a class="nav-links" href="https://rout.link/phpmyadmin">Database</a>}
 						</li>
                         <li className='nav-item'>
                             <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>
