@@ -54,7 +54,7 @@ const Input = ({ onPress, onClear, onWaypoints}) => {
                 <input className='input-field' name='pace' value={pace} onChange={(e) => setPace(e.target.value)} type='text' placeholder='Pace (minutes/km)' />
                 <input className='input-field' name='time' value={time} onChange={(e) => setTime(e.target.value)} type='text' placeholder='Time (mm:ss)' />
             </div>
-            <Button buttonStyle='btn--input' onClick={(e) => handleEnter(e)}>
+            {/* <Button buttonStyle='btn--input' onClick={(e) => handleEnter(e)}>
                 Enter
             </Button>
             <Button buttonStyle='btn--input' onClick={(e) => handleChangeUnit(e)}>
@@ -65,7 +65,7 @@ const Input = ({ onPress, onClear, onWaypoints}) => {
             </Button>
             <Button buttonStyle='btn--input' onClick={handleWaypoints}>
                 Waypoints
-            </Button>
+            </Button> */}
         </div>
     )
 }

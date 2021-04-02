@@ -126,9 +126,9 @@ function geocodeAddr(geocoder, addr) {
     if (status == "OK") {
       startPoint = results[0].geometry.location;
     } else {
-      alert(
-        "Address geocoding was not successful for the following reason: " + status
-      );
+      // alert(
+      //   "Address geocoding was not successful for the following reason: " + status
+      // );
     }
   });
 }
@@ -393,10 +393,9 @@ gm_authFailure(){
   return response;
 }
 clearMap = () => {
-  //window.alert("clearing map");
+
   this.state.d_renderer.setDirections(null);
   this.state.d_renderer.setMap(null);
-  this.state.d_geocoder.setAddr(null);
   deleteMarkers();
   startPoint = null;
   waypts = [];
@@ -477,10 +476,10 @@ addData = () => {
   } 
 
   handleClear = () => {
-    this.onClear()
+    this.clearMap()
   } 
   handleWaypoints = () => {
-    this.onWaypoints()
+    this.addWaypoints()
   }
 
   render() {
