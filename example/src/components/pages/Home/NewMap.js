@@ -428,20 +428,22 @@ addData = () => {
   // console.log(data)
   // console.log(data.distance)
   // console.log(data.addr)
-  alert(this.state.addr)
+  //alert(this.state.addr)
   geocodeAddr(this.state.d_geocoder, this.state.addr);
   const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
-  if (startPoint) {
-    if (this.state.distance) {
-    //this.setState({routeDistance: data.distance});
-      this.myCalculateAndDisplayRoute(startPoint, this.state.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
+  setTimeout(() => {
+    if (startPoint) {
+      if (this.state.distance) {
+      //this.setState({routeDistance: data.distance});
+        this.myCalculateAndDisplayRoute(startPoint, this.state.distance, this.state.d_service, this.state.d_renderer, this.state.my_map);
 
+      } else {
+        alert("No Distance or Time and Pace entered");
+      }
     } else {
-      alert("No Distance or Time and Pace entered");
+      alert("No start point selected");
     }
-  } else {
-    alert("No start point selected");
-  }
+  }, 100)
 } 
 
 
