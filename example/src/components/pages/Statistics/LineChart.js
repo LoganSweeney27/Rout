@@ -63,7 +63,7 @@ class LineChart extends React.Component {
       },
       title: {
         display: true,
-        text: "Calores Burned",
+        text: "Calories Burned",
         fontSize: 20,
         fontColor: 'rgba(100, 150, 250, 1)',
       },

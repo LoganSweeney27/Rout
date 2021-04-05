@@ -117,6 +117,7 @@ class Navbar extends React.Component {
                         <li className='nav-item'>
                             {UserStore.isLoggedIn && <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link>}
                         </li>
+                        {/* I think the UserStore.isDev is being rendered on the navbar as a 0, because the user is not a dev, i.e. (isdev=0) */}
 						<li className='nav-item'>
                             {UserStore.isDev && <a class="nav-links" href="https://rout.link/phpmyadmin">Database</a>}
 						</li>
