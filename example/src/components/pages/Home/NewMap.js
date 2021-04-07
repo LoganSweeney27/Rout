@@ -161,13 +161,13 @@ class NewMap extends Component {
     }
 
     this.initMap = this.initMap.bind(this)
-    //this.loadGoogleMapScript();
+    this.loadGoogleMapScript();
 
   }
 
 
   componentDidMount(){
-    this.loadGoogleMapScript();
+    // this.loadGoogleMapScript();
 
     window.gm_authFailure = this.gm_authFailure;
 
@@ -196,16 +196,16 @@ class NewMap extends Component {
     //this is a callback to wait until the code has loaded
     scriptMap.addEventListener('load', () =>{
       this.setState({mapIsReady:true})
-      
+      scriptChart.addEventListener('load', () => {
+        if (this.state.mapIsReady) {
+          window.google.charts.load('current', {packages: ['corechart']});
+          this.setState({chartIsReady:true});
+  
+        }
+      });
 
     });
-    scriptChart.addEventListener('load', () => {
-      if (this.state.mapIsReady) {
-        window.google.charts.load('current', {packages: ['corechart']});
-        this.setState({chartIsReady:true});
-
-      }
-    });
+    
     window.document.body.appendChild(scriptMap)
     window.document.body.appendChild(scriptChart);
 
