@@ -338,10 +338,10 @@ class NewMap extends Component {
 
               // directionsRenderer.setDirections(response);
               // directionsRenderer.setMap(map);
-              console.log(parseInt(distance) + parseInt(error));
+              console.log(parseFloat(distance) + parseFloat(error));
               console.log(totaldistance);
-              if (((parseInt(distance) + parseInt(error)) > totaldistance)
-                  && ((parseInt(distance) - parseInt(error)) < totaldistance)) {
+              if (((parseFloat(distance) + parseFloat(error)) > totaldistance)
+                  && ((parseFloat(distance) - parseFloat(error)) < totaldistance)) {
                 console.log("test");
                 if (!wayptOn) {
                     directionsRenderer.setDirections(response);
@@ -385,24 +385,24 @@ gm_authFailure(){
 convertToMeters() {
   if (this.state.distance) {
     if (this.state.unitType === 'kilometers') {
-      this.state.distance_m = parseInt(this.state.distance) * 1000;
+      this.state.distance_m = parseFloat(this.state.distance) * 1000;
     } else {
       //conversion from miles to meters
-      this.state.distance_m = parseInt(this.state.distance) * 1609.34;
+      this.state.distance_m = parseFloat(this.state.distance) * 1609.34;
     }
   } else {
     if ((this.state.pace != null) && (this.state.time != null)) {
-      this.state.distance_m = (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34;
+      this.state.distance_m = (parseFloat(this.state.time) / parseFloat(this.state.pace)) * 1609.34;
     }
   }
 }
 
 convertToDisplayDistance(distance) {
   if (this.state.unitType === 'kilometers') {
-    this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
+    this.setState({routeDistance : ((parseFloat(distance) / 1000) + " km") });
   } else {
     //convert meters to miles
-    this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
+    this.setState({routeDistance : ((parseFloat(distance) * 0.000621371) + " miles")});
   }
 }
 
