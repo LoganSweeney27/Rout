@@ -502,6 +502,13 @@ addData = () => {
     this.addWaypoints()
   }
 
+  handleSave = function() {
+	  
+  }
+  handleLoad = function() {
+	  
+  }
+
   render() {
     //console.log(this.state.m)
     return (
@@ -535,6 +542,13 @@ addData = () => {
             <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
                 Waypoints
             </Button>
+			<Button buttonStyle='btn--input' onClick={this.handleSave}>
+                Save
+            </Button>
+			<Button buttonStyle='btn--input' onClick={this.handleLoad}>
+                Load
+            </Button>
+			
         </div>
           <h1>{this.state.routeDistance}</h1>
         </div>
