@@ -162,6 +162,8 @@ class NewMap extends Component {
 
     this.initMap = this.initMap.bind(this)
     this.loadGoogleMapScript();
+	this.lastDirections = null;
+	this.savedDirections = null;
 
   }
 
@@ -293,10 +295,7 @@ class NewMap extends Component {
       //wait(1000);
       //console.log(counter);
         
-    //}
-    
-  }
-
+    }
 
   createRoute(start, error, distance, depth) {
     if (depth > 8) {
@@ -345,10 +344,12 @@ class NewMap extends Component {
                 console.log("test");
                 if (!wayptOn) {
                     directionsRenderer.setDirections(response);
+					this.lastDirections = response;
                     directionsRenderer.setMap(map);
   
                 } else if (wayptOn && (totaldistance <= distance)) {
                     directionsRenderer.setDirections(response);
+					this.lastDirections = response;
                     directionsRenderer.setMap(map);
   
                 } else {
@@ -369,6 +370,21 @@ class NewMap extends Component {
           }
       }
     );
+  }
+  
+  saveRoute() {
+	this.savedDirections = this.lastDirections;
+  }
+  
+  loadRoute() {
+	if (this.lastDirections == null) {
+	  alert("lastDirections is null!");
+	}
+	else {
+	  this.clearMap();
+	  this.state.d_renderer.setDirections(this.savedDirections);
+	  this.state.d_renderer.setMap(this.state.my_map);
+	}
   }
 
 gm_authFailure(){
@@ -502,11 +518,11 @@ addData = () => {
     this.addWaypoints()
   }
 
-  handleSave = function() {
-	  
+  handleSave = () => {
+	this.saveRoute();
   }
-  handleLoad = function() {
-	  
+  handleLoad = () => {
+	this.loadRoute();
   }
 
   render() {
