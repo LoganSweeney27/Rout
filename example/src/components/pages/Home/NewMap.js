@@ -5,6 +5,7 @@ import Input from './Input';
 //import SelectInput from '@material-ui/core/Select/SelectInput';
 import { Button } from '../../Button';
 import Details from './Details';
+import UserStore from '../Login/Stores/UserStore';
 
 import './Input.css'
 
@@ -135,11 +136,13 @@ function geocodeAddr(geocoder, addr) {
 
 
 
-
-
 class NewMap extends Component {
   constructor(props){
     super(props);
+
+    var today = new Date(),
+    mdy = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
+
     this.state ={
       mapIsReady:false,
       chartIsReady:false,
@@ -158,6 +161,8 @@ class NewMap extends Component {
       unitType: 'kilometers',
       showDetails: false,
       route: null,
+      wasCreated: false,
+      date: mdy,
     }
 
     this.initMap = this.initMap.bind(this)
@@ -218,7 +223,6 @@ class NewMap extends Component {
 
   //create markers
   initMap() {
-    
 
     //if map is ready to load
     if(this.state.mapIsReady && this.state.chartIsReady){
@@ -272,8 +276,14 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
+    // this.setState({ wasCreated: this.createRoute(start, error, distance, 0) });
     this.createRoute(start, error, distance, 0);
-    // setTimeout(() => {console.log(this.state.route.routes[0].legs.length)}, 2000)
+    setTimeout(() => {
+      if (this.state.wasCreated) {
+        this.pushRoute()
+      }
+    }, 2000);
+    
     // setTimeout(() => {this.setState({ route: this.createRoute(start, error, distance, 0)})}, 100)
     // this.setState({ route: this.createRoute(start, error, distance, 0)})
     // alert(this.state.route)
@@ -300,6 +310,7 @@ class NewMap extends Component {
     console.log("test1");
     if (depth > 8) {
       alert("Could not find route at this starting point.");
+      this.setState({ wasCreated: false });
       return;
     }
     var directionsService = this.state.d_service;
@@ -354,6 +365,7 @@ class NewMap extends Component {
 
                 } else {
                     window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
+                    this.setState({ wasCreated: false });
                 }
                 const elevator = new window.google.maps.ElevationService();
                 // Draw the path, using the Visualization API and the Elevation service.
@@ -361,12 +373,15 @@ class NewMap extends Component {
                 this.convertToDisplayDistance(totaldistance);
                 //this.setState({routeDistance: displayDistance});
                 this.setState({ route: response })
+                this.setState({ wasCreated: true });
+                return;
               } else {
                 this.createRoute(start,error,distance, ++depth);
               }
   
           } else {
               window.alert("Directions request failed due to " + status);
+              this.setState({ wasCreated: false });
           }
       }
     );
@@ -387,16 +402,16 @@ class NewMap extends Component {
 	}
   }
 
-gm_authFailure(){
+  gm_authFailure(){
     window.alert("Google Maps error!")
-}
+  }
 
- handleErrors(response) {
+  handleErrors(response) {
   if (!response.ok) {
       throw Error(response.statusText);
   }
   return response;
-}
+  }
 
 convertToMeters() {
   if (this.state.distance) {
@@ -480,6 +495,41 @@ addData = () => {
     }
   }, 400)
 } 
+
+  //Call to push data to database
+  async pushRoute() {
+    try {
+      let res = await fetch('/sendRoute', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            response: this.state.route,
+            username: UserStore.username,
+            distance: this.state.distance,
+            pace: this.state.pace,
+            time: this.state.time,
+            calories: "Not done.",
+            difficulty: "Not done.",
+            location: this.state.addr,
+            date: this.state.date,
+          })
+      });
+      let result = await res.json();
+        if (result && result.success) {
+            // If successful we should set user distance and time to route fetched
+            alert("Success")
+        } else {
+            alert("Could not insert information into database or user is not logged in!");
+        }
+    } catch(e) {
+        console.log(e)
+    }
+}
+
+
 
 
   handleEnter = (e) => {
