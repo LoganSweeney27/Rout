@@ -157,13 +157,13 @@ class NewMap extends Component {
       units: 'Distance (Kilometers)',
       unitType: 'kilometers',
       showDetails: false,
+      route: null,
     }
 
     this.initMap = this.initMap.bind(this)
     this.loadGoogleMapScript();
-	this.lastDirections = null;
-	this.savedDirections = null;
-
+    this.lastDirections = null;
+    this.savedDirections = null;
   }
 
 
@@ -217,7 +217,7 @@ class NewMap extends Component {
 
 
   //create markers
-  initMap(){
+  initMap() {
     
 
     //if map is ready to load
@@ -272,12 +272,21 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
-    let route = this.createRoute(start, error, distance, 0);
+    this.createRoute(start, error, distance, 0);
+    // setTimeout(() => {console.log(this.state.route.routes[0].legs.length)}, 2000)
+    // setTimeout(() => {this.setState({ route: this.createRoute(start, error, distance, 0)})}, 100)
+    // this.setState({ route: this.createRoute(start, error, distance, 0)})
+    // alert(this.state.route)
     // setTimeout(()=> {
     //   console.log("test2");
     //   this.state.d_renderer.setDirections(null);
     //   this.state.d_renderer.setMap(null);
+    // }, 2000);
 
+    // setTimeout(()=> {
+    //   console.log("test3");
+    //   this.state.d_renderer.setDirections(this.state.route);
+    //   this.state.d_renderer.setMap(this.state.my_map);
     // }, 2000);
     
     
@@ -335,12 +344,12 @@ class NewMap extends Component {
                 console.log("test");
                 if (!wayptOn) {
                     directionsRenderer.setDirections(response);
-					this.lastDirections = response;
+					          this.lastDirections = response;
                     directionsRenderer.setMap(map);
 
                 } else if (wayptOn && (totaldistance <= distance)) {
                     directionsRenderer.setDirections(response);
-					this.lastDirections = response;
+					          this.lastDirections = response;
                     directionsRenderer.setMap(map);
 
                 } else {
@@ -351,9 +360,9 @@ class NewMap extends Component {
                 displayPathElevation(route.overview_path, elevator);
                 this.convertToDisplayDistance(totaldistance);
                 //this.setState({routeDistance: displayDistance});
-                return response;
+                this.setState({ route: response })
               } else {
-                return this.createRoute(start,error,distance, ++depth);
+                this.createRoute(start,error,distance, ++depth);
               }
   
           } else {
