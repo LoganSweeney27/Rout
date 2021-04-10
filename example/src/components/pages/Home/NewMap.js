@@ -154,19 +154,20 @@ class NewMap extends Component {
       distance: '',
       distance_m:'',
       pace: '',
+      route:null,
       time: '',
       units: 'Distance (Kilometers)',
       unitType: 'kilometers',
     }
 
     this.initMap = this.initMap.bind(this)
-    this.loadGoogleMapScript();
 
   }
 
 
   componentDidMount(){
     // this.loadGoogleMapScript();
+    this.loadGoogleMapScript();
 
     window.gm_authFailure = this.gm_authFailure;
 
@@ -212,17 +213,14 @@ class NewMap extends Component {
    //once the script is uploaded to the window load up the map 
     
     if (this.state.my_map == null) {
-      
       this.initMap()
     }
   }
 
 
 
-  //create markers
+  /* this function initializes the map and prepares*/
   initMap(){
-    
-
     //if map is ready to load
     if(this.state.mapIsReady && this.state.chartIsReady){
 
@@ -278,19 +276,16 @@ class NewMap extends Component {
     var error = 400;
 
     let route = this.createRoute(start, error, distance, 0);
-    // setTimeout(()=> {
-    //   console.log("test2");
-    //   this.state.d_renderer.setDirections(null);
-    //   this.state.d_renderer.setMap(null);
+    setTimeout(()=> {
+      window.alert(this.state.route.routes[0].legs.length);
 
-    // }, 2000);
+    }, 2000);
     
     
       //wait(1000);
       //console.log(counter);
         
   }
-
 
   createRoute(start, error, distance, depth) {
     console.log("test1");
@@ -353,9 +348,10 @@ class NewMap extends Component {
                 displayPathElevation(route.overview_path, elevator);
                 this.convertToDisplayDistance(totaldistance);
                 //this.setState({routeDistance: displayDistance});
-                return response;
+                this.setState({route: response});
+
               } else {
-                return this.createRoute(start,error,distance, ++depth);
+                this.createRoute(start,error,distance, ++depth);
               }
   
           } else {
@@ -430,12 +426,7 @@ addWaypoints = () => {
 
 // addData = (data, e) => {
 addData = () => {
-  //alert(e);
-  //e.preventDefault();
-  // console.log(data)
-  // console.log(data.distance)
-  // console.log(data.addr)
-  //alert(this.state.addr)
+
   const address = document.getElementById("addr");
   if (address) {
     geocodeAddr(this.state.d_geocoder, this.state.addr);
@@ -467,15 +458,7 @@ addData = () => {
         return
     }
 
-    // let data = [this.state.addr, this.state.distance, this.state.pace, this.state.time, this.state.unitType]
-    // alert(data)
-    // this.addData(data, e)
     this.addData()
-
-    // Submit button is already resetting, but can use these function to make sure or keep values
-    // setDistance('')
-    // setPace('')
-    // setTime('')
   }
 
   handleChangeUnit = (e) => {
