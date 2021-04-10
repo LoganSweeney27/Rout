@@ -465,36 +465,36 @@ addWaypoints = () => {
   }
 }
 
-// addData = (data, e) => {
-addData = () => {
-  //alert(e);
-  //e.preventDefault();
-  // console.log(data)
-  // console.log(data.distance)
-  // console.log(data.addr)
-  //alert(this.state.addr)
-  const address = document.getElementById("addr");
-  if (address) {
-    geocodeAddr(this.state.d_geocoder, this.state.addr);
-  }
-  this.convertToMeters();
-  
-  //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
-  setTimeout(() => {
-    if (startPoint) {
-      if (this.state.distance_m) {
-
-        //this.setState({routeDistance: data.distance});
-        this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m);
-
-      } else {
-        alert("No Distance or Time and Pace entered");
-      }
-    } else {
-      alert("No start point selected");
+  // addData = (data, e) => {
+  addData = () => {
+    //alert(e);
+    //e.preventDefault();
+    // console.log(data)
+    // console.log(data.distance)
+    // console.log(data.addr)
+    //alert(this.state.addr)
+    const address = document.getElementById("addr");
+    if (address) {
+      geocodeAddr(this.state.d_geocoder, this.state.addr);
     }
-  }, 400)
-} 
+    this.convertToMeters();
+    
+    //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
+    setTimeout(() => {
+      if (startPoint) {
+        if (this.state.distance_m) {
+
+          //this.setState({routeDistance: data.distance});
+          this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m);
+
+        } else {
+          alert("No Distance or Time and Pace entered");
+        }
+      } else {
+        alert("No start point selected");
+      }
+    }, 400)
+  } 
 
   //Call to push data to database
   async pushRoute() {
@@ -508,7 +508,7 @@ addData = () => {
         body: JSON.stringify({
             response: this.state.route,
             username: UserStore.username,
-            distance: this.state.distance,
+            distance: this.state.distance_m,
             pace: this.state.pace,
             time: this.state.time,
             calories: "Not done.",
@@ -527,7 +527,7 @@ addData = () => {
     } catch(e) {
         console.log(e)
     }
-}
+  }
 
 
 
@@ -607,13 +607,12 @@ addData = () => {
             <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
                 Waypoints
             </Button>
-			<Button buttonStyle='btn--input' onClick={this.handleSave}>
+			      <Button buttonStyle='btn--input' onClick={this.handleSave}>
                 Save
             </Button>
-			<Button buttonStyle='btn--input' onClick={this.handleLoad}>
+			      <Button buttonStyle='btn--input' onClick={this.handleLoad}>
                 Load
             </Button>
-			
         </div>
           <h1>{this.state.routeDistance}</h1>
         </div>
