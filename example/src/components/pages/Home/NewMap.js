@@ -272,10 +272,7 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
-    this.createRoute(start, error, distance, 0);
-
-
-        
+    this.createRoute(start, error, distance, 0); 
   }
 
 
