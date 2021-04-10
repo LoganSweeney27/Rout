@@ -1,9 +1,10 @@
-import React, { Component, useState } from 'react';
+import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
 import Input from './Input';
 //import SelectInput from '@material-ui/core/Select/SelectInput';
 import { Button } from '../../Button';
+import Details from './Details';
 
 import './Input.css'
 
@@ -138,8 +139,6 @@ function geocodeAddr(geocoder, addr) {
 
 
 class NewMap extends Component {
-
-
   constructor(props){
     super(props);
     this.state ={
@@ -158,6 +157,7 @@ class NewMap extends Component {
       time: '',
       units: 'Distance (Kilometers)',
       unitType: 'kilometers',
+      showDetails: false,
     }
 
     this.initMap = this.initMap.bind(this)
@@ -168,13 +168,8 @@ class NewMap extends Component {
 
   componentDidMount(){
     // this.loadGoogleMapScript();
-
     window.gm_authFailure = this.gm_authFailure;
-
-    //we load the google map script when its ready
-    //we get the venues when they are ready
-    //this.getVenues()
-    
+    //we load the google map script when its ready, we get the venues when they are ready then this.getVenues()
   }
 
   loadGoogleMapScript(){
@@ -258,10 +253,8 @@ class NewMap extends Component {
     const autocomplete = new window.google.maps.places.Autocomplete(addy);
 
     listenforStart(map);
-  
-  
-  }//end of if statement
 
+    }//end of if statement
   }
 
   myCalculateAndDisplayRoute(
@@ -505,7 +498,6 @@ addData = () => {
   render() {
     //console.log(this.state.m)
     return (
-      
       <div>
         <div>
           {/* <Input onPress={ (data, e) => this.addData(data, e) }
@@ -541,6 +533,14 @@ addData = () => {
         <div>
           <main id="map" role="application"></main>
           <div id="elevation_chart"></div>
+        </div>
+        <div>
+        {this.state.showDetails && <Details routeDistance={this.state.routeDistance}/>}
+            <div className='details-btn'>
+                <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
+                    Details ^
+                </Button>
+            </div>
         </div>
       </div>
     )
