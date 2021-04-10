@@ -56,54 +56,53 @@ function newCoordinatesLocation(lat, lng, distance, direction) {
 function displayPathElevation(
   path,
   elevator,
-  map
-) {
+  ) {
 
-// Create a PathElevationRequest object using this array.
-// Ask for 256 samples along that path.
-// Initiate the path request.
-elevator.getElevationAlongPath(
-    {
-      path: path,
-      samples: 256,
-    },
-    plotElevation
-);
+  // Create a PathElevationRequest object using this array.
+  // Ask for 256 samples along that path.
+  // Initiate the path request.
+  elevator.getElevationAlongPath(
+      {
+        path: path,
+        samples: 256,
+      },
+      plotElevation
+  );
 }
 
 // Takes an array of ElevationResult objects, draws the path on the map
 // and plots the elevation profile on a Visualization API ColumnChart.
 function plotElevation(elevations, status) {
-const chartDiv = document.getElementById("elevation_chart");
+  const chartDiv = document.getElementById("elevation_chart");
 
-if (status !== "OK") {
-// Show the error code inside the chartDiv.
-chartDiv.innerHTML =
-      "Cannot show elevation: request failed because " + status;
-return;
-}
-// Create a new chart in the elevation_chart DIV.
-const chart = new window.google.visualization.ColumnChart(chartDiv);
+  if (status !== "OK") {
+  // Show the error code inside the chartDiv.
+  chartDiv.innerHTML =
+        "Cannot show elevation: request failed because " + status;
+  return;
+  }
+  // Create a new chart in the elevation_chart DIV.
+  const chart = new window.google.visualization.ColumnChart(chartDiv);
 
-// Extract the data from which to populate the chart.
-// Because the samples are equidistant, the 'Sample'
-// column here does double duty as distance along the
-// X axis.
-const data = new window.google.visualization.DataTable();
-data.addColumn("string", "Sample");
-data.addColumn("number", "Elevation");
+  // Extract the data from which to populate the chart.
+  // Because the samples are equidistant, the 'Sample'
+  // column here does double duty as distance along the
+  // X axis.
+  const data = new window.google.visualization.DataTable();
+  data.addColumn("string", "Sample");
+  data.addColumn("number", "Elevation");
 
-for (let i = 0; i < elevations.length; i++) {
-data.addRow(["", elevations[i].elevation]);
-}
+  for (let i = 0; i < elevations.length; i++) {
+  data.addRow(["", elevations[i].elevation]);
+  }
 
-// Draw the chart using the data within its DIV.
-chart.draw(data, {
-height: 150,
-legend: "none",
-// @ts-ignore TODO(jpoehnelt) update to newest visualization library
-titleY: "Elevation (m)",
-});
+  // Draw the chart using the data within its DIV.
+  chart.draw(data, {
+  height: 150,
+  legend: "none",
+  // @ts-ignore TODO(jpoehnelt) update to newest visualization library
+  titleY: "Elevation (m)",
+  });
 }
 
 
@@ -189,8 +188,6 @@ class NewMap extends Component {
     const scriptChart = window.document.createElement('script')
 
     scriptChart.src = 'https://www.gstatic.com/charts/loader.js'
-    // scriptChart.async = true;
-    // scriptChart.defer = true;
     scriptChart.onerror = function(){window.alert("The Google Charts API failed to load data!")}
 
     //this is a callback to wait until the code has loaded
@@ -266,18 +263,11 @@ class NewMap extends Component {
 
   myCalculateAndDisplayRoute(
     start,
-    distance,
-    directionsService,
-    directionsRenderer,
-    map,
+    distance
   ) {
-
-
-  
     console.log("added marker");
     //add that location as a waypoint
     
-  
     var totaldistance = 0;
     //var counter = 0;
     console.log("distance : " + distance); //3000
@@ -287,18 +277,23 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
+    let route = this.createRoute(start, error, distance, 0);
+    // setTimeout(()=> {
+    //   console.log("test2");
+    //   this.state.d_renderer.setDirections(null);
+    //   this.state.d_renderer.setMap(null);
+
+    // }, 2000);
     
-      
-      this.createRoute(start, error, distance, 0);
+    
       //wait(1000);
       //console.log(counter);
         
-    //}
-    
   }
 
 
   createRoute(start, error, distance, depth) {
+    console.log("test1");
     if (depth > 8) {
       alert("Could not find route at this starting point.");
       return;
@@ -342,26 +337,25 @@ class NewMap extends Component {
               console.log(totaldistance);
               if (((parseInt(distance) + parseInt(error)) > totaldistance)
                   && ((parseInt(distance) - parseInt(error)) < totaldistance)) {
-                console.log("test");
                 if (!wayptOn) {
                     directionsRenderer.setDirections(response);
                     directionsRenderer.setMap(map);
-  
+
                 } else if (wayptOn && (totaldistance <= distance)) {
                     directionsRenderer.setDirections(response);
                     directionsRenderer.setMap(map);
-  
+
                 } else {
                     window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
                 }
                 const elevator = new window.google.maps.ElevationService();
                 // Draw the path, using the Visualization API and the Elevation service.
-                displayPathElevation(route.overview_path, elevator, map);
+                displayPathElevation(route.overview_path, elevator);
                 this.convertToDisplayDistance(totaldistance);
                 //this.setState({routeDistance: displayDistance});
-  
+                return response;
               } else {
-                this.createRoute(start,error,distance, ++depth);
+                return this.createRoute(start,error,distance, ++depth);
               }
   
           } else {
@@ -454,7 +448,7 @@ addData = () => {
       if (this.state.distance_m) {
 
         //this.setState({routeDistance: data.distance});
-        this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m, this.state.d_service, this.state.d_renderer, this.state.my_map);
+        this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m);
 
       } else {
         alert("No Distance or Time and Pace entered");
