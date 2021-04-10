@@ -161,6 +161,8 @@ class NewMap extends Component {
 
     this.initMap = this.initMap.bind(this)
     this.loadGoogleMapScript();
+	this.lastDirections = null;
+	this.savedDirections = null;
 
   }
 
@@ -326,16 +328,19 @@ class NewMap extends Component {
 
               // directionsRenderer.setDirections(response);
               // directionsRenderer.setMap(map);
-              console.log(parseInt(distance) + parseInt(error));
+              console.log(parseFloat(distance) + parseFloat(error));
               console.log(totaldistance);
-              if (((parseInt(distance) + parseInt(error)) > totaldistance)
-                  && ((parseInt(distance) - parseInt(error)) < totaldistance)) {
+              if (((parseFloat(distance) + parseFloat(error)) > totaldistance)
+                  && ((parseFloat(distance) - parseFloat(error)) < totaldistance)) {
+                console.log("test");
                 if (!wayptOn) {
                     directionsRenderer.setDirections(response);
+					this.lastDirections = response;
                     directionsRenderer.setMap(map);
 
                 } else if (wayptOn && (totaldistance <= distance)) {
                     directionsRenderer.setDirections(response);
+					this.lastDirections = response;
                     directionsRenderer.setMap(map);
 
                 } else {
@@ -357,6 +362,21 @@ class NewMap extends Component {
       }
     );
   }
+  
+  saveRoute() {
+	this.savedDirections = this.lastDirections;
+  }
+  
+  loadRoute() {
+	if (this.lastDirections == null) {
+	  alert("lastDirections is null!");
+	}
+	else {
+	  this.clearMap();
+	  this.state.d_renderer.setDirections(this.savedDirections);
+	  this.state.d_renderer.setMap(this.state.my_map);
+	}
+  }
 
 gm_authFailure(){
     window.alert("Google Maps error!")
@@ -372,24 +392,24 @@ gm_authFailure(){
 convertToMeters() {
   if (this.state.distance) {
     if (this.state.unitType === 'kilometers') {
-      this.state.distance_m = parseInt(this.state.distance) * 1000;
+      this.state.distance_m = parseFloat(this.state.distance) * 1000;
     } else {
       //conversion from miles to meters
-      this.state.distance_m = parseInt(this.state.distance) * 1609.34;
+      this.state.distance_m = parseFloat(this.state.distance) * 1609.34;
     }
   } else {
     if ((this.state.pace != null) && (this.state.time != null)) {
-      this.state.distance_m = (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34;
+      this.state.distance_m = (parseFloat(this.state.time) / parseFloat(this.state.pace)) * 1609.34;
     }
   }
 }
 
 convertToDisplayDistance(distance) {
   if (this.state.unitType === 'kilometers') {
-    this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
+    this.setState({routeDistance : ((parseFloat(distance) / 1000) + " km") });
   } else {
     //convert meters to miles
-    this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
+    this.setState({routeDistance : ((parseFloat(distance) * 0.000621371) + " miles")});
   }
 }
 
@@ -489,6 +509,13 @@ addData = () => {
     this.addWaypoints()
   }
 
+  handleSave = () => {
+	this.saveRoute();
+  }
+  handleLoad = () => {
+	this.loadRoute();
+  }
+
   render() {
     //console.log(this.state.m)
     return (
@@ -521,6 +548,13 @@ addData = () => {
             <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
                 Waypoints
             </Button>
+			<Button buttonStyle='btn--input' onClick={this.handleSave}>
+                Save
+            </Button>
+			<Button buttonStyle='btn--input' onClick={this.handleLoad}>
+                Load
+            </Button>
+			
         </div>
           <h1>{this.state.routeDistance}</h1>
         </div>
