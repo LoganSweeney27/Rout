@@ -5,6 +5,7 @@ import Input from './Input';
 //import SelectInput from '@material-ui/core/Select/SelectInput';
 import { Button } from '../../Button';
 import Details from './Details';
+import UserStore from '../Login/Stores/UserStore';
 
 import './Input.css'
 
@@ -135,11 +136,13 @@ function geocodeAddr(geocoder, addr) {
 
 
 
-
-
 class NewMap extends Component {
   constructor(props){
     super(props);
+
+    var today = new Date(),
+    mdy = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
+
     this.state ={
       mapIsReady:false,
       chartIsReady:false,
@@ -159,11 +162,14 @@ class NewMap extends Component {
       unitType: 'kilometers',
       showDetails: false,
       calories:0,
+      route: null,
+      wasCreated: false,
+      date: mdy,
     }
 
     this.initMap = this.initMap.bind(this)
-	  this.lastDirections = null;
-	  this.savedDirections = null;
+    this.lastDirections = null;
+    this.savedDirections = null;
   }
 
 
@@ -217,8 +223,7 @@ class NewMap extends Component {
 
 
   //create markers
-  initMap(){
-    
+  initMap() {
 
     //if map is ready to load
     if(this.state.mapIsReady && this.state.chartIsReady){
@@ -272,7 +277,15 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
-    this.createRoute(start, error, distance, 0); 
+    // this.setState({ wasCreated: this.createRoute(start, error, distance, 0) });
+    this.createRoute(start, error, distance, 0);
+    setTimeout(() => {
+      if (this.state.wasCreated) {
+        this.pushRoute()
+      }
+    }, 2000);
+
+        
   }
 
 
@@ -280,6 +293,7 @@ class NewMap extends Component {
     console.log("test1");
     if (depth > 8) {
       alert("Could not find route at this starting point.");
+      this.setState({ wasCreated: false });
       return;
     }
     var directionsService = this.state.d_service;
@@ -334,6 +348,7 @@ class NewMap extends Component {
 
                 } else {
                     window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
+                    this.setState({ wasCreated: false });
                 }
                 const elevator = new window.google.maps.ElevationService();
                 // Draw the path, using the Visualization API and the Elevation service.
@@ -343,13 +358,16 @@ class NewMap extends Component {
                 //TODO implement calculator for calories estimator
 
                 //this.setState({routeDistance: displayDistance});
-                return response;
+                this.setState({ route: response })
+                this.setState({ wasCreated: true });
+                return;
               } else {
-                return this.createRoute(start,error,distance, ++depth);
+                this.createRoute(start,error,distance, ++depth);
               }
   
           } else {
               window.alert("Directions request failed due to " + status);
+              this.setState({ wasCreated: false });
           }
       }
     );
@@ -371,10 +389,10 @@ class NewMap extends Component {
   }
 
   gm_authFailure(){
-      window.alert("Google Maps error!")
+    window.alert("Google Maps error!")
   }
 
- handleErrors(response) {
+  handleErrors(response) {
   if (!response.ok) {
       throw Error(response.statusText);
   }
@@ -412,7 +430,6 @@ class NewMap extends Component {
     // 0.00559234 is 9 min/mile as min/meter
     // multiplied by 60 to get in seconds
     this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
-    alert(this.state.final_time);
   }
 
 
@@ -445,7 +462,7 @@ class NewMap extends Component {
     }
   }
 
-// addData = (data, e) => {
+  // addData = (data, e) => {
   addData = () => {
     //alert(e);
     //e.preventDefault();
@@ -476,6 +493,41 @@ class NewMap extends Component {
     }, 400)
   } 
 
+  //Call to push data to database
+  async pushRoute() {
+    try {
+      let res = await fetch('/sendRoute', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+            response: this.state.route,
+            username: UserStore.username,
+            distance: this.state.distance_m,
+            pace: this.state.pace,
+            time: this.state.time,
+            calories: "Not done.",
+            difficulty: "Not done.",
+            location: this.state.addr,
+            date: this.state.date,
+          })
+      });
+      let result = await res.json();
+        if (result && result.success) {
+            // If successful we should set user distance and time to route fetched
+            alert("Success")
+        } else {
+            alert("Could not insert information into database or user is not logged in!");
+        }
+    } catch(e) {
+        console.log(e)
+    }
+  }
+
+
+
 
   handleEnter = (e) => {
     e.preventDefault();
@@ -489,10 +541,6 @@ class NewMap extends Component {
     // this.addData(data, e)
     this.addData()
 
-    // Submit button is already resetting, but can use these function to make sure or keep values
-    // setDistance('')
-    // setPace('')
-    // setTime('')
   }
 
 
@@ -523,13 +571,9 @@ class NewMap extends Component {
 
 
   render() {
-    //console.log(this.state.m)
     return (
       <div>
         <div>
-          {/* <Input onPress={ (data, e) => this.addData(data, e) }
-                 onClear={this.clearMap}
-                 onWaypoints={this.addWaypoints}/> */}
           <div className='map-inputs'>
             <div>
                 <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => this.setState({ distance: e.target.value })} type='text' placeholder={this.state.units} />

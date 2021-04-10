@@ -16,6 +16,7 @@ class Router {
         this.sendCodeFA(app, db);
         this.changeNickname(app, db);
         this.changeProfilePicture(app, db);
+        this.sendRoute(app, db);
     }
 
 
@@ -453,6 +454,38 @@ class Router {
         });
     }
 
+
+    // ROUTE SENDING QUERIES
+    sendRoute(app, db) {
+        app.post('/sendRoute', (req, res) => {
+            let response = req.body.response;
+            let username = req.body.username;
+            let distance = req.body.distance;
+            let pace = req.body.pace;
+            let time = req.body.time;
+            let calories = req.body.calories;
+            let difficulty = req.body.difficulty;
+            let location = req.body.location;
+            let date = req.body.date;
+        
+            var sql = "INSERT INTO `prevroutes` (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `location`, `date`) VALUES (NULL, '" + response + "', '" + username + "', '" + distance + "', '" + pace + "', '" + time + "', '" + calories + "', '" + difficulty + "', '" + location + "', '" + date + "');";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for inserting");
+                    res.json({
+                        success: false,
+                        msg: 'Insert could not be completed.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        msg: 'Successfully inserted route.',
+                    })
+                }
+            });
+        });
+    }
 
 
 
