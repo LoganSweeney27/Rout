@@ -2,48 +2,53 @@ import React, { Component, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
 import Input from './Input';
-//import SelectInput from '@material-ui/core/Select/SelectInput';
 import { Button } from '../../Button';
-
 import './Input.css'
 
+let startPoint = null;
+let wayptOn = false;
+let markers = [];
+let waypts = [];
 
 const styles = {
   root: {
     flexGrow: 1,
   },
-  
 };
-let startPoint = null;
-let wayptOn = false;
-let markers = [];
-let waypts = [];
+
+/* This function adds markers to the given map */
 function addMarker(location, map) {
   const marker = new window.google.maps.Marker({
       position: location,
       map: map,
   });
   markers.push(marker);
-}
+} /* addMarker() */
 
+
+/* This  functions puts all the markers on the given map,
+  and clears them if map is null */
 function setMapOnAll(map) {
   for (let i = 0; i < markers.length; i++) {
       markers[i].setMap(map);
   }
-}
+} /* setMapOnAll() */
 
+/* Clears all the markers from the given map */
 function clearMarkers() {
   setMapOnAll(null);
-}
+} /* clearMarkers() */
 
+/* Deletes all the markers in global markers list */
 function deleteMarkers() {
   clearMarkers();
   markers = [];
-}
+} /* deleteMarkers() */
 
 
 
-
+/* Returns a location a given distance away from the lat lng given
+  using the given direction */
 function newCoordinatesLocation(lat, lng, distance, direction) {
   //direction = (direction * 180) / Math.PI;
   direction = Math.random() * Math.PI * 2;
@@ -51,8 +56,9 @@ function newCoordinatesLocation(lat, lng, distance, direction) {
   lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
   let latlng = new window.google.maps.LatLng(lat, lng);
   return latlng;
-}
+} /* newCoordinatesLocation() */
 
+/* Displays the elevation along the given path */
 function displayPathElevation(
   path,
   elevator,
@@ -68,10 +74,10 @@ function displayPathElevation(
       },
       plotElevation
   );
-}
+} /* displayPathElevation() */
 
-// Takes an array of ElevationResult objects, draws the path on the map
-// and plots the elevation profile on a Visualization API ColumnChart.
+/* Takes an array of ElevationResult objects, draws the path on the map
+ and plots the elevation profile on a Visualization API ColumnChart. */
 function plotElevation(elevations, status) {
   const chartDiv = document.getElementById("elevation_chart");
 
@@ -103,9 +109,10 @@ function plotElevation(elevations, status) {
   // @ts-ignore TODO(jpoehnelt) update to newest visualization library
   titleY: "Elevation (m)",
   });
-}
+} /* plotElevation() */
 
 
+/* Listens for starting marker to be placed */
 function listenforStart(map) {
   var startPointListener = map.addListener("click", (event) => {
     addMarker(event.latLng, map);
@@ -113,7 +120,7 @@ function listenforStart(map) {
     window.google.maps.event.removeListener(startPointListener);
 
   });
-}
+} /* listenforStart() */
 
 
 
@@ -135,7 +142,8 @@ function geocodeAddr(geocoder, addr) {
 
 
 
-
+/* NewMap class defines map and all functions that go with it
+  It also displays the map and the directions */
 class NewMap extends Component {
 
 
@@ -144,30 +152,30 @@ class NewMap extends Component {
     this.state ={
       mapIsReady:false,
       chartIsReady:false,
-      routeDistance:"",
+      routeDistance:"", //returned distance from algorithm, converted to units given by user
       d_service:null,
       d_renderer:null,
       d_geocoder:null,
-      my_map:null,
+      my_map:null, //Map object
       wayptListener:null,
       addr: '',
-      distance: '',
-      distance_m:'',
-      pace: '',
-      route:null,
-      time: '',
-      units: 'Distance (Kilometers)',
-      unitType: 'kilometers',
+      distance: '', //given distance from user (either in miles or kilometers)
+      distance_m:'', //distance from user converted to meters
+      pace: '', //pace given by user in min / mile
+      route:null, //route response, DirectionsResult object after algorithm runs
+      time: '', //time given by user
+      units: 'Distance (Kilometers)', //Text displayed in Distance input box
+      unitType: 'kilometers', //type of units in "units"
     }
 
     this.initMap = this.initMap.bind(this)
+    this.loadGoogleMapScript();
 
   }
 
-
+  /* Runs after component is mounted, initalizes Map and algorithm */
   componentDidMount(){
     // this.loadGoogleMapScript();
-    this.loadGoogleMapScript();
 
     window.gm_authFailure = this.gm_authFailure;
 
@@ -175,8 +183,9 @@ class NewMap extends Component {
     //we get the venues when they are ready
     //this.getVenues()
     
-  }
+  } /* componentDidMount() */
 
+  /* Loads information for Google Maps API */
   loadGoogleMapScript(){
     const ApiKey = 'AIzaSyDekWG_GZBqJ3j0Kt9t-B0ayBcU9wLHlsk'
 
@@ -206,16 +215,17 @@ class NewMap extends Component {
     
     window.document.body.appendChild(scriptMap)
     window.document.body.appendChild(scriptChart);
+  } /* loadGoogleMapScript() */
 
-  }
 
+  /* when component is updated, upload map */
   componentDidUpdate(){
    //once the script is uploaded to the window load up the map 
-    
+
     if (this.state.my_map == null) {
       this.initMap()
     }
-  }
+  } /* componentDidUpdate() */
 
 
 
@@ -223,42 +233,41 @@ class NewMap extends Component {
   initMap(){
     //if map is ready to load
     if(this.state.mapIsReady && this.state.chartIsReady){
+      const map = new window.google.maps.Map(document.getElementById('map'), {
+        center: {lat: 40.4259, lng: -86.9081},
+        zoom: 13,
+      });
+      if (this.state.my_map == null) {
+        this.setState({my_map: map});
+      }
+      // Create A Map use window so the browser can access it
+      //const map = this.state.my_map;
 
-    const map = new window.google.maps.Map(document.getElementById('map'), {
-      center: {lat: 40.4259, lng: -86.9081},
-      zoom: 13,
-    });
-    if (this.state.my_map == null) {
-      this.setState({my_map: map});
-    }
-    // Create A Map use window so the browser can access it
-    //const map = this.state.my_map;
+      if (this.state.d_renderer == null) {
+        const directionsRenderer = new window.google.maps.DirectionsRenderer({
+          draggable: true,
+          map,
+        }); 
+        this.setState({d_renderer : directionsRenderer});
+      }
+      if (this.state.d_service == null) {
+        const directionsService = new window.google.maps.DirectionsService();
+        this.setState({d_service : directionsService});
+      }
+      if (this.state.d_geocoder == null) {
+        const geocoder = new window.google.maps.Geocoder();
+        this.setState({d_geocoder : geocoder});
+      }
+      const addy = document.getElementById("addy");
+      const autocomplete = new window.google.maps.places.Autocomplete(addy);
 
-    if (this.state.d_renderer == null) {
-      const directionsRenderer = new window.google.maps.DirectionsRenderer({
-        draggable: true,
-        map,
-      }); 
-      this.setState({d_renderer : directionsRenderer});
-    }
-    if (this.state.d_service == null) {
-      const directionsService = new window.google.maps.DirectionsService();
-      this.setState({d_service : directionsService});
-    }
-    if (this.state.d_geocoder == null) {
-      const geocoder = new window.google.maps.Geocoder();
-      this.setState({d_geocoder : geocoder});
-    }
-    const addy = document.getElementById("addy");
-    const autocomplete = new window.google.maps.places.Autocomplete(addy);
+      listenforStart(map);
+    }//end of if statement
 
-    listenforStart(map);
-  
-  
-  }//end of if statement
+  } /* initMap() */
 
-  }
-
+  /* Calculates and displays route, also updates route state
+    for directions result */
   myCalculateAndDisplayRoute(
     start,
     distance
@@ -285,8 +294,9 @@ class NewMap extends Component {
       //wait(1000);
       //console.log(counter);
         
-  }
+  } /* myCalculateAndDisplayRoute() */
 
+  /* Recursive function to find route of specified distance */
   createRoute(start, error, distance, depth) {
     console.log("test1");
     if (depth > 8) {
@@ -359,98 +369,107 @@ class NewMap extends Component {
           }
       }
     );
-  }
+  } /* createRoute() */
 
-gm_authFailure(){
-    window.alert("Google Maps error!")
-}
+  /* Alerts user to error if Google Map does not load */
+  gm_authFailure(){
+      window.alert("Google Maps error!")
+  } /* gm_authFailure() */
 
- handleErrors(response) {
-  if (!response.ok) {
-      throw Error(response.statusText);
-  }
-  return response;
-}
 
-convertToMeters() {
-  if (this.state.distance) {
-    if (this.state.unitType === 'kilometers') {
-      this.state.distance_m = parseInt(this.state.distance) * 1000;
-    } else {
-      //conversion from miles to meters
-      this.state.distance_m = parseInt(this.state.distance) * 1609.34;
+  /* Handles errors */
+  handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
     }
-  } else {
-    if ((this.state.pace != null) && (this.state.time != null)) {
-      this.state.distance_m = (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34;
-    }
-  }
-}
+    return response;
+  } /* handleErrors() */
 
-convertToDisplayDistance(distance) {
-  if (this.state.unitType === 'kilometers') {
-    this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
-  } else {
-    //convert meters to miles
-    this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
-  }
-}
 
-clearMap = () => {
-
-  this.state.d_renderer.setDirections(null);
-  this.state.d_renderer.setMap(null);
-  deleteMarkers();
-  startPoint = null;
-  waypts = [];
-  wayptOn = false;
-  if (this.state.wayptListener != null) {
-    window.google.maps.event.removeListener(this.state.wayptListener);
-    this.setState({wayptListener:null});
-  }
-  listenforStart(this.state.my_map);
-}
-addWaypoints = () => {
-  wayptOn = true;
-  if (this.state.wayptListener == null) {
-    var myWayptListener = this.state.my_map.addListener("click", (event) => {
-      addMarker(event.latLng, this.state.my_map);
-      waypts.push({
-        location: event.latLng,
-        stopover: false,
-      });
-    })
-    this.setState({wayptListener: myWayptListener});
-  }
-}
-
-// addData = (data, e) => {
-addData = () => {
-
-  const address = document.getElementById("addr");
-  if (address) {
-    geocodeAddr(this.state.d_geocoder, this.state.addr);
-  }
-  this.convertToMeters();
-  
-  //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
-  setTimeout(() => {
-    if (startPoint) {
-      if (this.state.distance_m) {
-
-        //this.setState({routeDistance: data.distance});
-        this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m);
-
+  /* Converts user inputted distance to meters for algorithm */
+  convertToMeters() {
+    if (this.state.distance) {
+      if (this.state.unitType === 'kilometers') {
+        this.state.distance_m = parseInt(this.state.distance) * 1000;
       } else {
-        alert("No Distance or Time and Pace entered");
+        //conversion from miles to meters
+        this.state.distance_m = parseInt(this.state.distance) * 1609.34;
       }
     } else {
-      alert("No start point selected");
+      if ((this.state.pace != null) && (this.state.time != null)) {
+        this.state.distance_m = (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34;
+      }
     }
-  }, 400)
-} 
+  } /* convertToMeters() */
 
+  /* Converts given Distance to displayable distance */
+  convertToDisplayDistance(distance) {
+    if (this.state.unitType === 'kilometers') {
+      this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
+    } else {
+      //convert meters to miles
+      this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
+    }
+  } /* convertToDisplayDistance() */
 
+  /* clears the map object and resets directions variables */
+  clearMap = () => {
+
+    this.state.d_renderer.setDirections(null);
+    this.state.d_renderer.setMap(null);
+    deleteMarkers();
+    startPoint = null;
+    waypts = [];
+    wayptOn = false;
+    if (this.state.wayptListener != null) {
+      window.google.maps.event.removeListener(this.state.wayptListener);
+      this.setState({wayptListener:null});
+    }
+    listenforStart(this.state.my_map);
+  } /* clearMap */
+
+  /* adds listeners to add waypoints */
+  addWaypoints = () => {
+    wayptOn = true;
+    if (this.state.wayptListener == null) {
+      var myWayptListener = this.state.my_map.addListener("click", (event) => {
+        addMarker(event.latLng, this.state.my_map);
+        waypts.push({
+          location: event.latLng,
+          stopover: false,
+        });
+      })
+      this.setState({wayptListener: myWayptListener});
+    }
+  } /* addWaypoints */
+
+  /* Run algorithm with user inputted data */
+  runAlgorithmWithData = () => {
+
+    const address = document.getElementById("addr");
+    if (address) {
+      geocodeAddr(this.state.d_geocoder, this.state.addr);
+    }
+    this.convertToMeters();
+    
+    //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
+    setTimeout(() => {
+      if (startPoint) {
+        if (this.state.distance_m) {
+
+          //this.setState({routeDistance: data.distance});
+          this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m);
+
+        } else {
+          alert("No Distance or Time and Pace entered");
+        }
+      } else {
+        alert("No start point selected");
+      }
+    }, 400)
+  } /* runAlgorithmWithData */
+
+  /* Handles when Enter is pressed */
   handleEnter = (e) => {
     e.preventDefault();
     if (!this.state.distance && (!this.state.pace && !this.state.time)) {
@@ -458,9 +477,10 @@ addData = () => {
         return
     }
 
-    this.addData()
-  }
+    this.runAlgorithmWithData()
+  } /* handleEnter */
 
+  /* Changes type of user inputted units */
   handleChangeUnit = (e) => {
     // e.preventDefault();
     if (this.state.units === 'Distance (Kilometers)') {
@@ -470,22 +490,26 @@ addData = () => {
       this.setState({ units: 'Distance (Kilometers)' })
       this.setState({ unitType: 'kilometers' })
     }
-  } 
+  } /* handleChangeUnit */
 
+  /* Clears map when clear button is pressed */
   handleClear = () => {
     this.clearMap()
-  } 
+  } /* handleClear */
+
+  /* When Waypoints button is pressed, wait for waypoints */
   handleWaypoints = () => {
     this.addWaypoints()
-  }
+  } /* handleWaypoints */
 
+  /* HTML to be rendered */
   render() {
     //console.log(this.state.m)
     return (
       
       <div>
         <div>
-          {/* <Input onPress={ (data, e) => this.addData(data, e) }
+          {/* <Input onPress={ (data, e) => this.runAlgorithmWithData(data, e) }
                  onClear={this.clearMap}
                  onWaypoints={this.addWaypoints}/> */}
           <div className='map-inputs'>
@@ -522,6 +546,6 @@ addData = () => {
       </div>
     )
   }
-}
+} /* NewMap */
 
 export default withStyles(styles)(NewMap);
