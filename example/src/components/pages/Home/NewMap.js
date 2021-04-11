@@ -1,7 +1,6 @@
 import React, { Component, useState } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
-import Input from './Input';
 import { Button } from '../../Button';
 import './Input.css'
 
@@ -51,12 +50,15 @@ function deleteMarkers() {
   using the given direction */
 function newCoordinatesLocation(lat, lng, distance, direction) {
   //direction = (direction * 180) / Math.PI;
-  direction = Math.random() * Math.PI * 2;
   lat = lat + (distance * Math.cos(direction) / 111111);
   lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
   let latlng = new window.google.maps.LatLng(lat, lng);
+  
+
   return latlng;
 } /* newCoordinatesLocation() */
+
+
 
 /* Displays the elevation along the given path */
 function displayPathElevation(
@@ -75,6 +77,8 @@ function displayPathElevation(
       plotElevation
   );
 } /* displayPathElevation() */
+
+
 
 /* Takes an array of ElevationResult objects, draws the path on the map
  and plots the elevation profile on a Visualization API ColumnChart. */
@@ -284,9 +288,9 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
-    let route = this.createRoute(start, error, distance, 0);
+    let route = this.createRoute(start, error, distance, 0, Math.random() * 2 * Math.PI);
     setTimeout(()=> {
-      window.alert(this.state.route.routes[0].legs.length);
+      //window.alert(this.state.route.routes[0].legs.length);
 
     }, 2000);
     
@@ -297,7 +301,7 @@ class NewMap extends Component {
   } /* myCalculateAndDisplayRoute() */
 
   /* Recursive function to find route of specified distance */
-  createRoute(start, error, distance, depth) {
+  createRoute(start, error, distance, depth, beginDirection) {
     console.log("test1");
     if (depth > 8) {
       alert("Could not find route at this starting point.");
@@ -310,10 +314,16 @@ class NewMap extends Component {
     if (!wayptOn) {
       waypts = [];
       waypts.push({
-          location: newCoordinatesLocation(start.lat(), start.lng(), distance / 2, 90),
+          location: newCoordinatesLocation(start.lat(), start.lng(),
+                        distance / 2, beginDirection + (depth * (Math.PI / 4))),
           stopover: false,
       });
+
+      addMarker(newCoordinatesLocation(start.lat(), start.lng(),
+      distance / 2, beginDirection + (depth * (Math.PI / 4))), this.state.my_map);
     }
+
+
     directionsService.route(
       {
           origin: start,
@@ -361,7 +371,7 @@ class NewMap extends Component {
                 this.setState({route: response});
 
               } else {
-                this.createRoute(start,error,distance, ++depth);
+                this.createRoute(start,error,distance, ++depth, beginDirection);
               }
   
           } else {
