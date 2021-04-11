@@ -161,7 +161,7 @@ class NewMap extends Component {
       units: 'Distance (Kilometers)',
       unitType: 'kilometers',
       showDetails: false,
-      calories:0,
+      calories: 0,
       route: null,
       wasCreated: false,
       date: mdy,
@@ -355,8 +355,7 @@ class NewMap extends Component {
                 displayPathElevation(route.overview_path, elevator);
                 this.convertToDisplayDistance(totaldistance);
                 this.estimate_time(totaldistance); //estimate for final time value
-                //TODO implement calculator for calories estimator
-
+                this.estimate_calories(totaldistance); //estimate for final calories burned
                 //this.setState({routeDistance: displayDistance});
                 this.setState({ route: response })
                 this.setState({ wasCreated: true });
@@ -424,14 +423,18 @@ class NewMap extends Component {
   }
 
 
-
-
   estimate_time(distance_m) {
     // 0.00559234 is 9 min/mile as min/meter
     // multiplied by 60 to get in seconds
     this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
   }
 
+
+  estimate_calories(distance) {
+    // 0.00062 is the conversion rate from meters to miles
+    // 100 is the average calories burned per mile
+    this.setState({ calories: (100 * (distance * 0.00062)).toFixed(2) })
+  }
 
 
   clearMap = () => {
@@ -496,6 +499,12 @@ class NewMap extends Component {
   //Call to push data to database
   async pushRoute() {
     try {
+      let final_pace;
+      if (this.state.pace === '') {
+        final_pace = 9;
+      } else {
+        final_pace = this.state.pace;
+      }
       let res = await fetch('/sendRoute', {
         method: 'post',
         headers: {
@@ -506,10 +515,10 @@ class NewMap extends Component {
             response: this.state.route,
             username: UserStore.username,
             distance: this.state.distance_m,
-            pace: this.state.pace,
-            time: this.state.time,
-            calories: "Not done.",
-            difficulty: "Not done.",
+            pace: final_pace,
+            time: this.state.final_time,
+            calories: this.state.calories,
+            difficulty: 0,
             location: this.state.addr,
             date: this.state.date,
           })

@@ -467,8 +467,9 @@ class Router {
             let difficulty = req.body.difficulty;
             let location = req.body.location;
             let date = req.body.date;
+            // console.log(response + " " + username + " " + distance + " " +  pace + " " + time + " " + calories + " " + difficulty + " " + location + " " + date)
         
-            var sql = "INSERT INTO `prevroutes` (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `location`, `date`) VALUES (NULL, '" + response + "', '" + username + "', '" + distance + "', '" + pace + "', '" + time + "', '" + calories + "', '" + difficulty + "', '" + location + "', '" + date + "');";
+            var sql = "INSERT INTO prevroutes (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `location`, `date`) VALUES (NULL, \"" + response + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + location + "\", \"" + date + "\")";
             var query = db.query(sql,
             function(err, rows) {
                 if (err){
