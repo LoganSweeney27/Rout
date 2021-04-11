@@ -14,21 +14,21 @@ class Details extends React.Component {
                             Distance: {this.props.routeDistance}
                         </h1>
                         <h1 className='details-text'>
-                            Time: N/A
+                            Time: {this.props.time}
                         </h1>
                         <h1 className='details-text'>
-                            Pace: N/A
+                            Pace: {this.props.pace}
                         </h1>
                     </div>
                     <div className='details-row'>
                         <h1 className='details-text'>
-                            Calories Burned: N/A
+                            Calories Burned: {this.props.calories}
                         </h1>
                         <h1 className='details-text'>
-                            Difficulty Rating: N/A
+                            Difficulty Rating: {this.props.difficulty}
                         </h1>
                         <h1 className='details-text'>
-                            Starting Location: N/A
+                            Starting Location: {this.props.address}
                         </h1>
                     </div>
                 </div>

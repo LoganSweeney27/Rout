@@ -158,6 +158,7 @@ class NewMap extends Component {
       pace: '',
       time: '',
       final_time:'',
+      final_pace: '',
       units: 'Distance (Kilometers)',
       unitType: 'kilometers',
       showDetails: false,
@@ -505,6 +506,7 @@ class NewMap extends Component {
       } else {
         final_pace = this.state.pace;
       }
+      this.setState({ final_pace: final_pace });
       let res = await fetch('/sendRoute', {
         method: 'post',
         headers: {
@@ -628,7 +630,7 @@ class NewMap extends Component {
           <div id="elevation_chart"></div>
         </div>
         <div>
-        {this.state.showDetails && <Details routeDistance={this.state.routeDistance}/>}
+        {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr}/>}
             <div className='details-btn'>
                 <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
                     Details ^
