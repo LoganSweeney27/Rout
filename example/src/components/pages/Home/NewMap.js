@@ -520,7 +520,7 @@ class NewMap extends Component {
             pace: final_pace,
             time: this.state.final_time,
             calories: this.state.calories,
-            difficulty: 0,
+            difficulty: -1,
             location: this.state.addr,
             date: this.state.date,
           })

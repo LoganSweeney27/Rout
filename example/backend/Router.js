@@ -497,7 +497,7 @@ class Router {
             let dist = req.body.dist;
             let username = req.body.username;
         
-            var sql = "SELECT distance, time FROM prevroutes WHERE username = \"" + username + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time";
+            var sql = "SELECT distance, time FROM prevroutes WHERE username = \"" + username + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time LIMIT 1";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
@@ -529,7 +529,7 @@ class Router {
         app.post('/getLine', (req, res) => {
             let username = req.body.username;
         
-            var sql = "SELECT calories, date FROM prevroutes WHERE username = \"" + username + "\" ORDER BY date";
+            var sql = "SELECT sum(calories) as calories, date FROM prevroutes WHERE username = \"" + username + "\" GROUP BY date";
             var query = db.query(sql,
             function(err, data) {
                 if (err){

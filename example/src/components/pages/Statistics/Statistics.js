@@ -2,6 +2,7 @@ import React from 'react'
 import Comparison from './Comparison'
 import LineChart from './LineChart'
 import PreviousRoutes from './PreviousRoutes'
+import TotalCalories from './TotalCalories'
 
 import './Statistics.css'
 
@@ -23,6 +24,7 @@ const UserStatistics = () => {
                 <h1 className='stats-subheader'>
                     Calories
                 </h1>
+                <TotalCalories />
                 <LineChart className='stats-graph'/>
             </div>
             <div>

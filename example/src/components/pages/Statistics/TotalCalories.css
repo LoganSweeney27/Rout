@@ -1,0 +1,11 @@
+.loading {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.header {
+    text-align: center;
+    font-size: 26px;
+}
