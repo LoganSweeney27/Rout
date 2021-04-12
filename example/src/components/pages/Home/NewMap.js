@@ -168,6 +168,10 @@ class NewMap extends Component {
       wasCreated: false,
       date: mdy,
       routeID: '', // routeID used for updating rating of route
+      inputTypes: false, // input type boolean used to show either distance or pace/time input fields
+      hasDistance: false,
+      hasPace: false,
+      hasTime: false,
     }
 
     this.initMap = this.initMap.bind(this)
@@ -566,7 +570,7 @@ class NewMap extends Component {
 
   handleEnter = (e) => {
     e.preventDefault();
-    if (!this.state.distance && (!this.state.pace && !this.state.time)) {
+    if (!(this.state.hasDistance || (this.state.hasPace && this.state.hasTime))) {
         alert('Please add either a distance or pace and time!')
         return
     }
@@ -578,7 +582,6 @@ class NewMap extends Component {
 
   }
 
-
   handleChangeUnit = (e) => {
     // e.preventDefault();
     if (this.state.units === 'Distance (Kilometers)') {
@@ -588,7 +591,7 @@ class NewMap extends Component {
       this.setState({ units: 'Distance (Kilometers)' })
       this.setState({ unitType: 'kilometers' })
     }
-  } 
+  }
 
   handleClear = () => {
     this.clearMap()
@@ -611,34 +614,36 @@ class NewMap extends Component {
         <div>
           <div className='map-inputs'>
             <div>
-                <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => this.setState({ distance: e.target.value })} type='text' placeholder={this.state.units} />
-                <h1 className='input-text'>OR</h1>
-            </div>
-            <div>
-                <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => this.setState({ pace: e.target.value })} type='text' placeholder='Pace (minutes/mile)' />
-                <input className='input-field' name='time' value={this.state.time} onChange={(e) => this.setState({ time: e.target.value })} type='text' placeholder='Time (minutes)' />
-            </div>
-            <div>
                 <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' id='addy' placeholder='Address' />
             </div>
-            <Button buttonStyle='btn--input' onClick={(e) => this.handleEnter(e)}>
-                Enter
-            </Button>
-            <Button buttonStyle='btn--input' onClick={(e) => this.handleChangeUnit(e)}>
-                Change Units
-            </Button>
-            <Button buttonStyle='btn--input' onClick={this.handleClear}>
+            <div>
+              {!this.state.inputTypes && <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => { this.setState({ distance: e.target.value }); this.setState({ hasDistance: true })}} type='text' placeholder={this.state.units} />} 
+              {this.state.inputTypes && <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => {this.setState({ pace: e.target.value }); this.setState({ hasPace: true })}} type='text' placeholder='Pace (minutes/mile)' />}
+              {this.state.inputTypes && <input className='input-field' name='time' value={this.state.time} onChange={(e) => {this.setState({ time: e.target.value }); this.setState({ hasTime: true })}} type='text' placeholder='Time (minutes)' />}
+            </div>
+            <div>
+              {this.state.inputTypes ? <Button buttonStyle='btn--input' onClick={() => this.setState({ inputTypes: (!this.state.inputTypes) })}>Distance</Button> : <Button buttonStyle='btn--input' onClick={() => this.setState({ inputTypes: (!this.state.inputTypes) })}>Pace/Time</Button>}
+              <Button buttonStyle='btn--input' onClick={(e) => this.handleChangeUnit(e)}>
+                  Change Units
+              </Button>
+              <Button buttonStyle='btn--input' onClick={this.handleSave}>
+                  Save
+              </Button>
+              <Button buttonStyle='btn--input' onClick={this.handleLoad}>
+                  Load
+              </Button>
+            </div>
+            <div style={{ paddingTop: "10px" }}>
+              <Button buttonStyle='btn--input' onClick={(e) => this.handleEnter(e)}>
+                  Enter
+              </Button>
+              <Button buttonStyle='btn--input' onClick={this.handleClear}>
                 Clear
-            </Button>
-            <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
-                Waypoints
-            </Button>
-			      <Button buttonStyle='btn--input' onClick={this.handleSave}>
-                Save
-            </Button>
-			      <Button buttonStyle='btn--input' onClick={this.handleLoad}>
-                Load
-            </Button>
+              </Button>
+              <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
+                  Waypoints
+              </Button>
+            </div>
             {/* <div>
             <input className='input-field' name='final_time' value={this.state.final_time} onChange={(e) => this.setState({ final_time: e.target.value })} type='text' placeholder={'Final Run Time'} />
             </div>
