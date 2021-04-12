@@ -165,6 +165,7 @@ class NewMap extends Component {
       showDetails: false,
       calories: 0,
       route: null,
+      loadRoute: "Didn't work :(", // state for loading routes
       wasCreated: false,
       date: mdy,
       routeID: '', // routeID used for updating rating of route
@@ -381,18 +382,36 @@ class NewMap extends Component {
   }
   
   saveRoute() {
-	this.savedDirections = this.lastDirections;
+	  this.savedDirections = this.lastDirections;
   }
   
-  loadRoute() {
-	if (this.lastDirections == null) {
-	  alert("lastDirections is null!");
-	}
-	else {
-	  this.clearMap();
-	  this.state.d_renderer.setDirections(this.savedDirections);
-	  this.state.d_renderer.setMap(this.state.my_map);
-	}
+  async loadRoute() {
+    // if (this.lastDirections == null) {
+    //   alert("lastDirections is null!");
+    // }
+    // else {
+    //   this.clearMap();
+    //   this.state.d_renderer.setDirections(this.savedDirections);
+    //   this.state.d_renderer.setMap(this.state.my_map);
+    // }
+    try {
+      let res = await fetch('/getResponse', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-type': 'application/json'
+        }
+      });
+      let result = await res.json();
+        if (result && result.success) {
+            // If successful set response object
+            this.setState({ loadRoute: result.response })
+        } else {
+            alert("Could not get route response object.");
+        }
+    } catch(e) {
+        console.log(e)
+    }
   }
 
   gm_authFailure(){
@@ -446,7 +465,6 @@ class NewMap extends Component {
 
 
   clearMap = () => {
-
     this.state.d_renderer.setDirections(null);
     this.state.d_renderer.setMap(null);
     deleteMarkers();
@@ -459,6 +477,7 @@ class NewMap extends Component {
     }
     listenforStart(this.state.my_map);
   }
+
   addWaypoints = () => {
     wayptOn = true;
     if (this.state.wayptListener == null) {
@@ -558,7 +577,6 @@ class NewMap extends Component {
         if (result && result.success) {
             // If successful update routeID created for rating update later
             this.setState({ routeID: result.routeID })
-            alert(this.state.routeID)
         } else {
             alert("Could not get last routes routeID!");
         }
@@ -595,16 +613,18 @@ class NewMap extends Component {
 
   handleClear = () => {
     this.clearMap()
-  } 
+  }
+
   handleWaypoints = () => {
     this.addWaypoints()
   }
 
   handleSave = () => {
-	this.saveRoute();
+	  this.saveRoute();
   }
+
   handleLoad = () => {
-	this.loadRoute();
+	  this.loadRoute();
   }
 
 

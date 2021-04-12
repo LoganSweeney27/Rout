@@ -20,6 +20,7 @@ class Router {
         this.sendRoute(app, db);
         this.updateRating(app, db);
         this.getRouteID(app, db);
+        this.getResponse(app, db);
     }
 
 
@@ -457,11 +458,40 @@ class Router {
         });
     }
 
+    // Function for making string SQL nice!
+    mysql_real_escape_string (str) {
+        return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+            switch (char) {
+                case "\0":
+                    return "\\0";
+                case "\x08":
+                    return "\\b";
+                case "\x09":
+                    return "\\t";
+                case "\x1a":
+                    return "\\z";
+                case "\n":
+                    return "\\n";
+                case "\r":
+                    return "\\r";
+                case "\"":
+                case "'":
+                case "\\":
+                case "%":
+                    return "\\"+char; // prepends a backslash to backslash, percent,
+                                      // and double/single quotes
+                default:
+                    return char;
+            }
+        });
+    }
+
 
     // ROUTE SENDING QUERIES
     sendRoute(app, db) {
         app.post('/sendRoute', (req, res) => {
             let response = req.body.response;
+            let responseString = this.mysql_real_escape_string(JSON.stringify(response))
             let username = req.body.username;
             let distance = req.body.distance;
             let pace = req.body.pace;
@@ -472,10 +502,10 @@ class Router {
             let location = req.body.location;
             let date = req.body.date;
         
-            var sql = "INSERT INTO prevroutes (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (NULL, \"" + response + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
+            var sql = "INSERT INTO prevroutes (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (NULL, \"" + responseString + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
             var query = db.query(sql,
             function(err, rows) {
-                if (err){
+                if (err) {
                     console.log("Error in DB for inserting");
                     res.json({
                         success: false,
@@ -539,7 +569,27 @@ class Router {
         });
     }
 
-
+    getResponse(app, db) {
+        app.post('/getResponse', (req, res) => {
+            var sql = "SELECT response FROM prevroutes WHERE routeID = @@Identity;";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for selecting response form last route.");
+                    res.json({
+                        success: false,
+                        msg: 'Last response could not be selected.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        response: rows[0].response,
+                        msg: 'Successfully selected last response.',
+                    })
+                }
+            });
+        });
+    }
 
 
     // STATISTICS PAGE QUERIES
