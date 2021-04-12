@@ -25,10 +25,20 @@
     padding-right: 10vh;
 }
 
+.details-row-rating {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 50px;
+    /* padding-left: 10vh;
+    padding-right: 10vh; */
+}
+
 .details-text {
     /* display: flex; */
     /* text-align: center; */
     /* padding-top: 5vh; */
+    font-size: 26px;
     color: #1c2237;
 }
 

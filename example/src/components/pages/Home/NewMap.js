@@ -147,6 +147,7 @@ class NewMap extends Component {
       mapIsReady:false,
       chartIsReady:false,
       routeDistance:"", //distance of the produced route
+      routeDistance_m: '', //distance of real produced route in distance
       d_service:null,
       d_renderer:null,
       d_geocoder:null,
@@ -166,6 +167,7 @@ class NewMap extends Component {
       route: null,
       wasCreated: false,
       date: mdy,
+      routeID: '', // routeID used for updating rating of route
     }
 
     this.initMap = this.initMap.bind(this)
@@ -358,6 +360,7 @@ class NewMap extends Component {
                 this.estimate_time(totaldistance); //estimate for final time value
                 this.estimate_calories(totaldistance); //estimate for final calories burned
                 //this.setState({routeDistance: displayDistance});
+                this.setState({ routeDistance_m: totaldistance })
                 this.setState({ route: response })
                 this.setState({ wasCreated: true });
                 return;
@@ -434,7 +437,7 @@ class NewMap extends Component {
   estimate_calories(distance) {
     // 0.00062 is the conversion rate from meters to miles
     // 100 is the average calories burned per mile
-    this.setState({ calories: (100 * (distance * 0.00062)).toFixed(2) })
+    this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
   }
 
 
@@ -516,19 +519,20 @@ class NewMap extends Component {
         body: JSON.stringify({
             response: this.state.route,
             username: UserStore.username,
-            distance: this.state.distance_m,
+            distance: this.state.routeDistance_m,
             pace: final_pace,
             time: this.state.final_time,
             calories: this.state.calories,
             difficulty: -1,
+            rating: -1,
             location: this.state.addr,
             date: this.state.date,
           })
       });
       let result = await res.json();
         if (result && result.success) {
-            // If successful we should set user distance and time to route fetched
-            alert("Success")
+            // If successful call new sql query to obtain last routeID
+            this.setRouteID();
         } else {
             alert("Could not insert information into database or user is not logged in!");
         }
@@ -537,7 +541,27 @@ class NewMap extends Component {
     }
   }
 
-
+  async setRouteID() {
+    try {
+      let res = await fetch('/getRouteID', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-type': 'application/json'
+        }
+      });
+      let result = await res.json();
+        if (result && result.success) {
+            // If successful update routeID created for rating update later
+            this.setState({ routeID: result.routeID })
+            alert(this.state.routeID)
+        } else {
+            alert("Could not get last routes routeID!");
+        }
+    } catch(e) {
+        console.log(e)
+    }
+  }
 
 
   handleEnter = (e) => {
@@ -630,7 +654,7 @@ class NewMap extends Component {
           <div id="elevation_chart"></div>
         </div>
         <div>
-        {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr}/>}
+        {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
             <div className='details-btn'>
                 <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
                     Details ^

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Rating from './Rating';
 
 import './Details.css'
 
@@ -30,6 +31,9 @@ class Details extends React.Component {
                         <h1 className='details-text'>
                             Starting Location: {this.props.address}
                         </h1>
+                    </div>
+                    <div className='details-row-rating'>
+                        <Rating rating={0} starDimension="40px" starSpacing="15px" routeID={this.props.routeID}/>
                     </div>
                 </div>
                 <div className='details-pic'>

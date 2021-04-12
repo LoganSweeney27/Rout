@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
+const { parseIsolatedEntityName } = require('typescript');
 
 
 class Router {
@@ -17,6 +18,8 @@ class Router {
         this.changeNickname(app, db);
         this.changeProfilePicture(app, db);
         this.sendRoute(app, db);
+        this.updateRating(app, db);
+        this.getRouteID(app, db);
     }
 
 
@@ -465,11 +468,11 @@ class Router {
             let time = req.body.time;
             let calories = req.body.calories;
             let difficulty = req.body.difficulty;
+            let rating = req.body.rating;
             let location = req.body.location;
             let date = req.body.date;
-            // console.log(response + " " + username + " " + distance + " " +  pace + " " + time + " " + calories + " " + difficulty + " " + location + " " + date)
         
-            var sql = "INSERT INTO prevroutes (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `location`, `date`) VALUES (NULL, \"" + response + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + location + "\", \"" + date + "\")";
+            var sql = "INSERT INTO prevroutes (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (NULL, \"" + response + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
             var query = db.query(sql,
             function(err, rows) {
                 if (err){
@@ -482,6 +485,54 @@ class Router {
                     res.json({
                         success: true,
                         msg: 'Successfully inserted route.',
+                    })
+                }
+            });
+        });
+    }
+
+    getRouteID(app, db) {
+        app.post('/getRouteID', (req, res) => {
+    
+            var sql = "SELECT routeID FROM prevroutes WHERE routeID = @@Identity;";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for selecting last id.");
+                    res.json({
+                        success: false,
+                        msg: 'Last id could not be selected.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        routeID: rows[0].routeID,
+                        msg: 'Successfully selected last id.',
+                    })
+                }
+            });
+        });
+    }
+
+    updateRating(app, db) {
+        app.post('/updateRating', (req, res) => {
+            let username = req.body.username;
+            let routeID = req.body.routeID;
+            let rating = req.body.rating;
+        
+            var sql = "UPDATE prevroutes SET rating = '" + parseInt(rating) + "' WHERE username = \"" + username + "\" AND prevroutes.routeID = " + parseInt(routeID);
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for updating");
+                    res.json({
+                        success: false,
+                        msg: 'Update could not be completed.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        msg: 'Successfully updated rating.',
                     })
                 }
             });
