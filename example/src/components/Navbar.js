@@ -26,9 +26,9 @@ class Navbar extends React.Component {
         this.navbar.addEventListener('click', this.reRender);
     }
 
-    componentWillUnmount() {
-        this.navbar.removeEventListener('click', this.reRender);
-    }
+    // componentWillUnmount() {
+    //     this.navbar.removeEventListener('click', this.reRender);
+    // }
 
     async isLoggedIn() {
         // alert("checking if logged in: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
@@ -62,6 +62,10 @@ class Navbar extends React.Component {
           }
         // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn + " and .isDev=" + UserStore.isDev);
         this.setState({})
+    }
+
+    isUserADev = (e) => {
+        return (UserStore.isDev === 1)
     }
 
     reRender = (e) => {
@@ -119,7 +123,7 @@ class Navbar extends React.Component {
                         </li>
                         {/* I think the UserStore.isDev is being rendered on the navbar as a 0, because the user is not a dev, i.e. (isdev=0) */}
 						<li className='nav-item'>
-                            {UserStore.isDev && <a class="nav-links" href="https://rout.link/phpmyadmin">Database</a>}
+                            {this.isUserADev() && <a class="nav-links" href="https://rout.link/phpmyadmin">Database</a>}
 						</li>
                         <li className='nav-item'>
                             <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>

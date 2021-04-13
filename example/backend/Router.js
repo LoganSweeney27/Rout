@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
+const { parseIsolatedEntityName } = require('typescript');
 
 
 class Router {
@@ -16,6 +17,10 @@ class Router {
         this.sendCodeFA(app, db);
         this.changeNickname(app, db);
         this.changeProfilePicture(app, db);
+        this.sendRoute(app, db);
+        this.updateRating(app, db);
+        this.getRouteID(app, db);
+        this.getResponse(app, db);
     }
 
 
@@ -453,8 +458,138 @@ class Router {
         });
     }
 
+    // Function for making string SQL nice!
+    mysql_real_escape_string (str) {
+        return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+            switch (char) {
+                case "\0":
+                    return "\\0";
+                case "\x08":
+                    return "\\b";
+                case "\x09":
+                    return "\\t";
+                case "\x1a":
+                    return "\\z";
+                case "\n":
+                    return "\\n";
+                case "\r":
+                    return "\\r";
+                case "\"":
+                case "'":
+                case "\\":
+                case "%":
+                    return "\\"+char; // prepends a backslash to backslash, percent,
+                                      // and double/single quotes
+                default:
+                    return char;
+            }
+        });
+    }
 
 
+    // ROUTE SENDING QUERIES
+    sendRoute(app, db) {
+        app.post('/sendRoute', (req, res) => {
+            let response = req.body.response;
+            let responseString = this.mysql_real_escape_string(JSON.stringify(response))
+            let username = req.body.username;
+            let distance = req.body.distance;
+            let pace = req.body.pace;
+            let time = req.body.time;
+            let calories = req.body.calories;
+            let difficulty = req.body.difficulty;
+            let rating = req.body.rating;
+            let location = req.body.location;
+            let date = req.body.date;
+        
+            var sql = "INSERT INTO prevroutes (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (NULL, \"" + responseString + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err) {
+                    console.log("Error in DB for inserting");
+                    res.json({
+                        success: false,
+                        msg: 'Insert could not be completed.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        msg: 'Successfully inserted route.',
+                    })
+                }
+            });
+        });
+    }
+
+    getRouteID(app, db) {
+        app.post('/getRouteID', (req, res) => {
+    
+            var sql = "SELECT routeID FROM prevroutes WHERE routeID = @@Identity;";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for selecting last id.");
+                    res.json({
+                        success: false,
+                        msg: 'Last id could not be selected.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        routeID: rows[0].routeID,
+                        msg: 'Successfully selected last id.',
+                    })
+                }
+            });
+        });
+    }
+
+    updateRating(app, db) {
+        app.post('/updateRating', (req, res) => {
+            let username = req.body.username;
+            let routeID = req.body.routeID;
+            let rating = req.body.rating;
+        
+            var sql = "UPDATE prevroutes SET rating = '" + parseInt(rating) + "' WHERE username = \"" + username + "\" AND prevroutes.routeID = " + parseInt(routeID);
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for updating");
+                    res.json({
+                        success: false,
+                        msg: 'Update could not be completed.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        msg: 'Successfully updated rating.',
+                    })
+                }
+            });
+        });
+    }
+
+    getResponse(app, db) {
+        app.post('/getResponse', (req, res) => {
+            var sql = "SELECT response FROM prevroutes WHERE routeID = @@Identity;";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for selecting response form last route.");
+                    res.json({
+                        success: false,
+                        msg: 'Last response could not be selected.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        response: rows[0].response,
+                        msg: 'Successfully selected last response.',
+                    })
+                }
+            });
+        });
+    }
 
 
     // STATISTICS PAGE QUERIES
@@ -463,7 +598,7 @@ class Router {
             let dist = req.body.dist;
             let username = req.body.username;
         
-            var sql = "SELECT distance, time FROM prevroutes WHERE username = \"" + username + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time";
+            var sql = "SELECT distance, time FROM prevroutes WHERE username = \"" + username + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time LIMIT 1";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
@@ -495,7 +630,7 @@ class Router {
         app.post('/getLine', (req, res) => {
             let username = req.body.username;
         
-            var sql = "SELECT calories, date FROM prevroutes WHERE username = \"" + username + "\" ORDER BY date";
+            var sql = "SELECT sum(calories) as calories, date FROM prevroutes WHERE username = \"" + username + "\" GROUP BY date";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
