@@ -503,11 +503,11 @@ class Router {
             let location = req.body.location;
             let date = req.body.date;
         
-            var sql = "INSERT INTO prevroutes ('code', `routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (\"" + code + "\", NULL, \"" + responseString + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
+            var sql = "INSERT INTO prevroutes (`code`, `routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (\"" + code + "\", NULL, \"" + responseString + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
             var query = db.query(sql,
             function(err, rows) {
                 if (err) {
-                    console.log("Error in DB for inserting");
+                    console.log(err);
                     res.json({
                         success: false,
                         msg: 'Insert could not be completed.'
