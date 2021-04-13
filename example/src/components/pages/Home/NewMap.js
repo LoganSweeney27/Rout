@@ -419,13 +419,17 @@ class NewMap extends Component {
       }
       else if (multi == 1) {
         //alert("multi is 1");
+        /*alert("begin direction at multi 1 = " + beginDirection);
+        alert("depth at multi 1 = " + depth);*/
         loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
                                      beginDirection + (depth * (Math.PI / 4)));
       }
       else if (multi == 2) {
         //alert("multi is 2");
+        /*alert("begin direction at multi 2 = " + beginDirection);
+        alert("depth at multi 2 = " + depth);*/
         loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
-                                     beginDirection + (depth * (Math.PI / 4)));
+                                     (Math.PI / 4) + beginDirection + (depth * (Math.PI / 4)));
       }
 
       //clears waypoints array so that multiple routes can be created
