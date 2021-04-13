@@ -490,6 +490,7 @@ class Router {
     // ROUTE SENDING QUERIES
     sendRoute(app, db) {
         app.post('/sendRoute', (req, res) => {
+            let code = Math.random().toString(20).substr(2, 6);
             let response = req.body.response;
             let responseString = this.mysql_real_escape_string(JSON.stringify(response))
             let username = req.body.username;
@@ -502,7 +503,7 @@ class Router {
             let location = req.body.location;
             let date = req.body.date;
         
-            var sql = "INSERT INTO prevroutes (`routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (NULL, \"" + responseString + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
+            var sql = "INSERT INTO prevroutes ('code', `routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (\"" + code + "\", NULL, \"" + responseString + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
             var query = db.query(sql,
             function(err, rows) {
                 if (err) {
