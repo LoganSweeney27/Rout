@@ -241,8 +241,24 @@ class NewMap extends Component {
         center: {lat: 40.4259, lng: -86.9081},
         zoom: 13,
       });
+      // if (document.getElementById('pano') == null) {
+      //   alert("is null");
+      // }
+      // const panorama = new window.google.maps.StreetViewPanorama(
+      //   document.getElementById('pano'),
+      //   {
+      //     position: this.state.route.geocoded_waypoints[0],
+      //     pov: {
+      //       heading: 34,
+      //       pitch: 10,
+      //     },
+      //   }
+      // );
+      // map.setStreetView(panorama);
+
       if (this.state.my_map == null) {
         this.setState({my_map: map});
+        
       }
       // Create A Map use window so the browser can access it
       //const map = this.state.my_map;
@@ -288,10 +304,19 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
-    let route = this.createRoute(start, error, distance, 0, Math.random() * 2 * Math.PI);
+    this.createRoute(start, error, distance, 0, Math.random() * 2 * Math.PI);
     setTimeout(()=> {
-      //window.alert(this.state.route.routes[0].legs.length);
-
+      const panorama = new window.google.maps.StreetViewPanorama(
+        document.getElementById('pano'),
+        {
+          position: this.state.route.routes[0].overview_path[0],
+          pov: {
+            heading: 34,
+            pitch: 10,
+          },
+        }
+      );
+      this.state.my_map.setStreetView(panorama);
     }, 2000);
     
     
@@ -319,8 +344,8 @@ class NewMap extends Component {
           stopover: false,
       });
 
-      addMarker(newCoordinatesLocation(start.lat(), start.lng(),
-      distance / 2, beginDirection + (depth * (Math.PI / 4))), this.state.my_map);
+      // addMarker(newCoordinatesLocation(start.lat(), start.lng(),
+      // distance / 2, beginDirection + (depth * (Math.PI / 4))), this.state.my_map);
     }
 
 
@@ -552,6 +577,7 @@ class NewMap extends Component {
         <div>
           <main id="map" role="application"></main>
           <div id="elevation_chart"></div>
+          <div id="pano"></div>
         </div>
       </div>
     )
