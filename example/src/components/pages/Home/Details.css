@@ -1,8 +1,16 @@
+#pano {
+    width:80vh;
+    height:65vh;
+}
+
+#elevation_chart {
+    padding-top: 15px;
+}
 .details-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 35vh;
+    height: 65vh;
     width: 99.62%;
     /* background-color: #fff; */
     border: 5px solid #1c2237;
@@ -12,7 +20,7 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
-    height: 35vh;
+    height: 65vh;
     width: 60%;
     /* margin-left: auto; */
 }
@@ -47,7 +55,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 35vh;
+    height: 65vh;
     width: 40%;
     /* margin-right: auto; */
     /* margin-top: -7px; */

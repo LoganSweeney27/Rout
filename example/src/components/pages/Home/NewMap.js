@@ -86,7 +86,7 @@ function displayPathElevation(
 /* Takes an array of ElevationResult objects, draws the path on the map
  and plots the elevation profile on a Visualization API ColumnChart. */
 function plotElevation(elevations, status) {
-  const chartDiv = document.getElementById("elevation_chart");
+  const chartDiv = window.document.getElementById("elevation_chart");
 
   if (status !== "OK") {
   // Show the error code inside the chartDiv.
@@ -316,8 +316,9 @@ class NewMap extends Component {
     setTimeout(() => {
       if (this.state.wasCreated) {
         this.pushRoute()
+        //alert(window.document.getElementById("pano"));
         const panorama = new window.google.maps.StreetViewPanorama(
-          document.getElementById('pano'),
+          window.document.getElementById('pano'),
           {
             position: this.state.route.routes[0].overview_path[0],
             pov: {
@@ -326,7 +327,7 @@ class NewMap extends Component {
             },
           }
         );
-        this.state.my_map.setStreetView(panorama);
+        //this.state.my_map.setStreetView(panorama);
       }
       
     }, 2000);
@@ -414,7 +415,7 @@ class NewMap extends Component {
                 this.setState({ wasCreated: true });
                 return;
               } else {
-                this.createRoute(start,error,distance, ++depth);
+                this.createRoute(start,error,distance, ++depth, beginDirection);
               }
   
           } else {
@@ -729,8 +730,7 @@ class NewMap extends Component {
         </div>
         <div>
           <main id="map" role="application"></main>
-          <div id="elevation_chart"></div>
-          <div id="pano"></div>
+          {/* <div id="pano"></div> */}
         </div>
         <div>
         {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
