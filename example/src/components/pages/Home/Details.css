@@ -1,6 +1,6 @@
 #pano {
-    width:80vh;
-    height:65vh;
+    width:100%;
+    height:90%;
 }
 
 #elevation_chart {
@@ -52,9 +52,9 @@
 
 .details-pic {
     /* Vertically centers resized image without stretching */
-    display: flex;
+    /* display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center; */
     height: 65vh;
     width: 40%;
     /* margin-right: auto; */
@@ -63,7 +63,21 @@
     border: 5px solid #1c2237;
 }
 
-.details-img {
+.details-streetview {
+    max-width:100%;
+    max-height:80%;
+}
+
+.details-streetview-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width:100%;
+    max-height:10%;
+    padding-top: 15px;
+}
+
+/* .details-img {
     max-width:100%;
     max-height:100%;
-}
+} */

@@ -65,21 +65,20 @@ class Details extends React.Component {
                         <Rating rating={0} starDimension="40px" starSpacing="15px" routeID={this.props.routeID}/>
                     </div>
                     <div id="elevation_chart"></div>
-
                 </div>
                 <div className='details-pic'>
+                    {/* <div className='details-streetview'> */}
                     <div id="pano"></div>
-                    <div>
-                    <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
-                    Prev
-                    </Button> 
-                    <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
-                    Next
-                    </Button>
+                    <div className='details-streetview-buttons'>
+                        <Button buttonStyle='btn--regular' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
+                            Prev
+                        </Button> 
+                        <Button buttonStyle='btn--regular' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
+                            Next
+                        </Button>
                     </div>
                     {/* <img className='details-img' src={streetView.default}  alt='Street View'/> */}
                 </div>
-
             </div>
         )
         
