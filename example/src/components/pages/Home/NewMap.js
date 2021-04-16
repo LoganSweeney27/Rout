@@ -11,6 +11,7 @@ let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
+let elevationDiff = 0;
 
 const styles = {
   root: {
@@ -109,6 +110,8 @@ function plotElevation(elevations, status) {
   data.addRow(["", elevations[i].elevation]);
   }
 
+  elevationDiff = findHilliness(elevations);
+
   // Draw the chart using the data within its DIV.
   chart.draw(data, {
   height: 150,
@@ -132,22 +135,78 @@ function listenforStart(map) {
 
 
 
-
+/* Takes in an address string and uses a geocoder to convert into a latLng object */
 function geocodeAddr(geocoder, addr) {
   //const addr = document.getElementById("addr");
   geocoder.geocode({address: addr}, (results, status) => {
     if (status == "OK") {
       startPoint = results[0].geometry.location;
     } else {
-      // alert(
-      //   "Address geocoding was not successful for the following reason: " + status
-      // );
+      /*alert(
+        "Address geocoding was not successful for the following reason: " + status
+      );*/
     }
   });
 }
 
+/* Function to convert a distance (km) and time (min) into a pace */
+function calcPace(distance, time) {
+  distance = distance * 0.000621371;
+  var pace = time / distance;
+  /*if (Number.isInteger(pace)) {
+    return pace;
+  } else {
+  }*/
+  return pace;
+}
 
+/* Function to quantify the hilliness of a route */
+function findHilliness(arr) {
+  var prevElevation = arr[0].elevation;
+  var climb = 0;
+  var drop = 0;
+  var max = 0;
+  var min = Number.MAX_SAFE_INTEGER;
+  var diff = 0;
+  for (var i = 1; i < arr.length; i++) {
+    diff = arr[i].elevation - prevElevation;
+    prevElevation = arr[i].elevation;
+    if (diff > 0) {
+      climb += diff;
+      climb = Math.abs(climb / 1);
+    }
+    else {
+      drop -= diff;
+      drop = Math.abs(drop / 1);
+    }
+    if (arr[i].elevation > max) {
+      max = arr[i].elevation;
+    }
+    if (arr[i].elevation < min) {
+      min = arr[i].elevation;
+    }
+  }
+  diff = max - min;
+  return diff;
+};
 
+/* Function to calculate the difficulty of a route, based on distance and hilliness */
+function calcDifficulty(distance, hilliness) {
+  distance = distance / 1000;
+  var score = 0;
+  var tempDistance = 0
+  var tempHilliness = 0;
+  tempDistance = distance / 3.5;
+  if (tempDistance > 5) {
+    tempDistance = 5;
+  }
+  tempHilliness = hilliness / 15;
+  if (tempHilliness > 5) {
+    tempHilliness = 5;
+  }
+  score = tempDistance + tempHilliness;
+  return score;
+}
 
 /* NewMap class defines map and all functions that go with it
   It also displays the map and the directions */
@@ -190,6 +249,7 @@ class NewMap extends Component {
       hasDistance: false,
       hasPace: false,
       hasTime: false,
+      elevationDiff: 0,
     }
 
     this.initMap = this.initMap.bind(this)
@@ -429,7 +489,7 @@ class NewMap extends Component {
         /*alert("begin direction at multi 2 = " + beginDirection);
         alert("depth at multi 2 = " + depth);*/
         loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
-                                     (Math.PI / 4) + beginDirection + (depth * (Math.PI / 4)));
+                                     beginDirection + (depth * (Math.PI / 4)));
       }
 
       //clears waypoints array so that multiple routes can be created
@@ -477,6 +537,7 @@ class NewMap extends Component {
                   && ((parseFloat(distance) - parseFloat(error)) < totaldistance)) {
                 console.log("test");
                 if (multi == 0) {
+                  //alert("depth at multi 0 = " + depth);
                   if (!wayptOn) {
                       directionsRenderer1.setDirections(response);
                       this.lastDirections = response;
@@ -493,6 +554,7 @@ class NewMap extends Component {
                   }
                 }
                 else if (multi == 1) {
+                  //alert("depth at multi 1 = " + depth);
                   if (!wayptOn) {
                       directionsRenderer2.setDirections(response);
                       this.lastDirections = response;
@@ -509,6 +571,7 @@ class NewMap extends Component {
                   }
                 }
                 else if (multi == 2) {
+                  //alert("depth at multi 2 = " + depth);
                   if (!wayptOn) {
                       directionsRenderer3.setDirections(response);
                       this.lastDirections = response;
