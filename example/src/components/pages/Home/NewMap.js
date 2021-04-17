@@ -879,7 +879,7 @@ class NewMap extends Component {
         <div>
           <div className='map-inputs'>
             <div>
-                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' id='addy' placeholder='Address' />
+                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => {this.setState({ addr: e.target.value }); UserStore.address = e.target.value}} type='text' id='addy' placeholder='Address' />
             </div>
             <div>
               {!this.state.inputTypes && <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => { this.setState({ distance: e.target.value }); this.setState({ hasDistance: true })}} type='text' placeholder={this.state.units} />} 
