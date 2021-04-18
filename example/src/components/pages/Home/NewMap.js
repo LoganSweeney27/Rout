@@ -225,7 +225,7 @@ class NewMap extends Component {
       routeDistance:"", //distance of the produced route
       routeDistance_m: '', //distance of real produced route in distance
       d_service:null,
-	  uniqueCode:null,
+      uniqueCode:null,
       d_renderer1:null,
       d_renderer2:null,
       d_renderer3:null,
@@ -626,20 +626,17 @@ class NewMap extends Component {
   }
   
   async loadRoute() {
-    // if (this.lastDirections == null) {
-    //   alert("lastDirections is null!");
-    // }
-    // else {
-    //   this.clearMap();
-    //   this.state.d_renderer.setMap(this.state.my_map);
-    // }
-    /*try {
-      let res = await fetch('/getResponse', {
+    /*if (this.state.uniqueCode != null) {
+      try {
+      let res = await fetch('/getResponseByCode', {
         method: 'post',
         headers: {
             'Accept': 'application/json',
             'Content-type': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          uniqueCode: this.state.uniqueCode
+        })
       });
       let result = await res.json();
         if (result && result.success) {
@@ -648,9 +645,37 @@ class NewMap extends Component {
         } else {
             alert("Could not get route response object.");
         }
-    } catch(e) {
+      } catch(e) {
         console.log(e)
-    }*/
+      }
+    } else {
+      if (this.lastDirections == null) {
+        alert("lastDirections is null!");
+      }
+      else {
+        this.clearMap();
+        this.state.d_renderer.setMap(this.state.my_map);
+      }
+      try {
+        let res = await fetch('/getResponse', {
+          method: 'post',
+          headers: {
+              'Accept': 'application/json',
+              'Content-type': 'application/json'
+          }
+        });
+        let result = await res.json();
+          if (result && result.success) {
+              //If successful set response object
+              this.setState({ loadRoute: result.response })
+          } else {
+              alert("Could not get route response object.");
+          }
+      } catch(e) {
+          console.log(e)
+      }
+  }*/
+    
 	
 	
 	
@@ -1060,9 +1085,24 @@ class NewMap extends Component {
 				</tr>
 			</table>
 			<br />
+      <InputField
+              type='text'
+              placeholder='Unique Route Code'
+              value={this.state.uniqueCode ? this.state.uniqueCode : ''}
+              onChange={ (val) => this.setState({
+                uniqueCode: val
+              })}
+              />
+      
+			<br />
 			<button id="modal-btn" onClick={this.closeModal}>Confirm</button>
+
 		</Modal>
+
+
       </div>
+    
+
     )
   }
 } /* NewMap */
