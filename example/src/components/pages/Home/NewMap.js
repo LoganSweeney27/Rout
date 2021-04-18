@@ -190,23 +190,7 @@ function findHilliness(arr) {
   return diff;
 };
 
-/* Function to calculate the difficulty of a route, based on distance and hilliness */
-function calcDifficulty(distance, hilliness) {
-  distance = distance / 1000;
-  var score = 0;
-  var tempDistance = 0
-  var tempHilliness = 0;
-  tempDistance = distance / 3.5;
-  if (tempDistance > 5) {
-    tempDistance = 5;
-  }
-  tempHilliness = hilliness / 15;
-  if (tempHilliness > 5) {
-    tempHilliness = 5;
-  }
-  score = tempDistance + tempHilliness;
-  return score;
-}
+
 
 /* NewMap class defines map and all functions that go with it
   It also displays the map and the directions */
@@ -250,6 +234,7 @@ class NewMap extends Component {
       hasPace: false,
       hasTime: false,
       elevationDiff: 0,
+      difficulty: 0,
     }
 
     this.initMap = this.initMap.bind(this)
@@ -593,6 +578,7 @@ class NewMap extends Component {
                 this.convertToDisplayDistance(totaldistance);
                 this.estimate_time(totaldistance); //estimate for final time value
                 this.estimate_calories(totaldistance); //estimate for final calories burned
+                this.calcDifficulty(totaldistance); //calculates difficulty score
                 //this.setState({routeDistance: displayDistance});
                 this.setState({ routeDistance_m: totaldistance })
                 this.setState({ route: response })
@@ -755,7 +741,7 @@ class NewMap extends Component {
   estimate_time(distance_m) {
     // 0.00559234 is 9 min/mile as min/meter
     // multiplied by 60 to get in seconds
-    this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
+    this.setState({final_time: (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
   }
 
 
@@ -765,6 +751,25 @@ class NewMap extends Component {
     this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
   }
 
+  /* Function to calculate the difficulty of a route, based on distance and hilliness */
+  calcDifficulty(distance) {
+    distance = distance / 1000;
+    var score = 0;
+    var tempDistance = 0
+    var tempHilliness = 0;
+    tempDistance = distance / 3.5;
+    if (tempDistance > 5) {
+      tempDistance = 5;
+    }
+    tempHilliness = elevationDiff / 2;
+    if (tempHilliness > 5) {
+      tempHilliness = 5;
+    }
+    tempDistance = Math.round(tempDistance);
+    tempHilliness = Math.round(tempHilliness);
+    score = tempDistance + tempHilliness;
+    this.setState({ difficulty: score })
+  }
 
 
 
@@ -925,7 +930,7 @@ class NewMap extends Component {
           <div id="pano"></div>
         </div>
         <div>
-        {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
+        {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty={this.state.difficulty} address={this.state.addr} routeID={this.state.routeID}/>}
             <div className='details-btn'>
                 <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
                     Details ^
