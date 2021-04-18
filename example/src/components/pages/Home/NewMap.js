@@ -6,6 +6,7 @@ import Input from './Input';
 import { Button } from '../../Button';
 import Details from './Details';
 import UserStore from '../Login/Stores/UserStore';
+import Modal from "react-modal"
 
 import './Input.css'
 
@@ -20,6 +21,8 @@ let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
+Modal.setAppElement("#root");
+
 function addMarker(location, map) {
   const marker = new window.google.maps.Marker({
       position: location,
@@ -173,11 +176,13 @@ class NewMap extends Component {
       hasDistance: false,
       hasPace: false,
       hasTime: false,
+	  showModal: false,
     }
 
+	this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
     this.initMap = this.initMap.bind(this)
     this.lastDirections = null;
-    this.savedDirections = null;
   }
 
 
@@ -286,14 +291,7 @@ class NewMap extends Component {
     var error = 400;
 
     // this.setState({ wasCreated: this.createRoute(start, error, distance, 0) });
-    this.createRoute(start, error, distance, 0);
-    setTimeout(() => {
-      if (this.state.wasCreated) {
-        this.pushRoute()
-      }
-    }, 2000);
-
-        
+    this.createRoute(start, error, distance, 0);        
   }
 
 
@@ -381,8 +379,12 @@ class NewMap extends Component {
     );
   }
   
-  saveRoute() {
-	  this.savedDirections = this.lastDirections;
+  async saveRoute() {
+	if (this.state.wasCreated) {
+	  this.pushRoute();
+	} else {
+	  alert("Please create a route first!");
+	}
   }
   
   async loadRoute() {
@@ -391,10 +393,9 @@ class NewMap extends Component {
     // }
     // else {
     //   this.clearMap();
-    //   this.state.d_renderer.setDirections(this.savedDirections);
     //   this.state.d_renderer.setMap(this.state.my_map);
     // }
-    try {
+    /*try {
       let res = await fetch('/getResponse', {
         method: 'post',
         headers: {
@@ -411,7 +412,67 @@ class NewMap extends Component {
         }
     } catch(e) {
         console.log(e)
-    }
+    }*/
+	
+	
+	
+  }
+    
+  async propagateTable() {
+	  
+	  let table = document.getElementById("saved-routes-table");
+	  
+	  try {
+		
+		let res = await fetch('/getRoutesUsername', {
+			method: 'post',
+			headers: {
+			  'Accept': 'application/json',
+			  'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+			  username: UserStore.username
+			})
+		});
+		
+		let result = await res.json();
+		if (result && result.success) {
+		  for(let i = 0; i < result.responseCount; i++) {
+			let row = table.insertRow(i);
+			
+			let dateCell = row.insertCell(0);
+			let distanceCell = row.insertCell(1);
+			let difficultyCell = row.insertCell(2);
+			let caloriesCell = row.insertCell(3);
+			let locationCell = row.insertCell(4);
+			let codeCell = row.insertCell(5);
+			
+			dateCell.innerHTML = result.dates[i];
+			distanceCell.innerHTML = parseInt(result.distances[i]) + " m";
+			difficultyCell.innerHTML = result.difficulties[i];
+			caloriesCell.innerHTML = result.calories[i];
+			locationCell.innerHTML = result.locations[i];
+			codeCell.innerHTML = result.codes[i];
+		  }
+		  
+		  
+		  
+		} else {
+		  alert("Something went wrong :(");
+		  this.closeModal();
+		}
+		
+	  } catch (e) {
+		alert(e);
+	  }
+	  
+  }
+  
+  handleSelection(e) {
+	alert(e.target.parent);
+	let selected = e.target.parent.getElementsByClassName('selected');
+	if (selected[0]) { selected[0].classList.remove('selected'); }
+	e.target.parent.classList.add('selected');
   }
 
   gm_authFailure(){
@@ -624,9 +685,17 @@ class NewMap extends Component {
   }
 
   handleLoad = () => {
-	  this.loadRoute();
+	this.openModal();
   }
-
+  
+  openModal() {
+	this.setState({ showModal: true });
+  }
+  
+  closeModal() {
+	this.setState({ showModal: false });
+	
+  }
 
   render() {
     return (
@@ -646,12 +715,8 @@ class NewMap extends Component {
               <Button buttonStyle='btn--input' onClick={(e) => this.handleChangeUnit(e)}>
                   Change Units
               </Button>
-              <Button buttonStyle='btn--input' onClick={this.handleSave}>
-                  Save
-              </Button>
-              <Button buttonStyle='btn--input' onClick={this.handleLoad}>
-                  Load
-              </Button>
+			  {UserStore.isLoggedIn == true && <Button buttonStyle='btn--input' onClick={this.handleSave}>Save</Button>}
+			  {UserStore.isLoggedIn == true && <Button buttonStyle='btn--input' onClick={this.handleLoad}>Load</Button>}
             </div>
             <div style={{ paddingTop: "10px" }}>
               <Button buttonStyle='btn--input' onClick={(e) => this.handleEnter(e)}>
@@ -686,6 +751,32 @@ class NewMap extends Component {
                 </Button>
             </div>
         </div>
+		<Modal 
+		  isOpen={this.state.showModal}
+		  className="modal-box"
+		  onAfterOpen={this.propagateTable}
+		  overlayClassName="modal-overlay"
+		  closeTimeoutMS={500}
+		>
+			<h2 class="center">Select a route to load</h2>
+			<br />
+			<table cellspacing="0" class="center">
+				<tr>
+					<th>Date</th>
+					<th>Distance</th>
+					<th>Difficulty Score</th>
+					<th>Calories</th>
+					<th>Location</th>
+					<th>Sharing Code</th>
+				</tr>
+			</table>
+			<table id="saved-routes-table" cellspacing="0" class="center" onClick={(e) => this.handleSelection(e)}>
+				<tr>
+				</tr>
+			</table>
+			<br />
+			<button id="modal-btn" onClick={this.closeModal}>Confirm</button>
+		</Modal>
       </div>
     )
   }

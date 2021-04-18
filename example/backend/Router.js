@@ -20,6 +20,7 @@ class Router {
         this.sendRoute(app, db);
         this.updateRating(app, db);
         this.getRouteID(app, db);
+		this.getRoutesUsername(app, db);
         this.getResponse(app, db);
     }
 
@@ -544,6 +545,54 @@ class Router {
             });
         });
     }
+	
+	getRoutesUsername(app, db) {
+		app.post('/getRoutesUsername', (req, res) => {
+			let username = req.body.username;
+			
+			var sql = "SELECT `date`, `distance`, `difficulty`, `calories`, `location`, `code` FROM prevroutes WHERE username = \"" + username + "\";";
+			var query = db.query(sql, function(err, rows) {
+				
+				if (err) {
+					console.log("Error in DB fetching route by username:\r\n");
+					console.log(err);
+					res.json({
+						success: false,
+						msg: 'Could not fetch records for username ' + username
+					});
+				} else {
+					let dateResponses = [];
+					let distanceResponses = [];
+					let difficultyResponses = [];
+					let caloriesResponses = [];
+					let locationResponses = [];
+					let codeResponses = [];
+					rows.forEach(function(row) {
+						dateResponses.push(row.date);
+						distanceResponses.push(row.distance);
+						difficultyResponses.push(row.difficulty);
+						caloriesResponses.push(row.calories);
+						locationResponses.push(row.location);
+						codeResponses.push(row.code);
+					});
+					res.json({
+						success: true,
+						dates: dateResponses,
+						distances: distanceResponses,
+						difficulties: difficultyResponses,
+						calories: caloriesResponses,
+						locations: locationResponses,
+						codes: codeResponses,
+						responseCount: rows.length,
+						msg: 'Successfully selected ' + rows.length + ' responses'
+					});
+				}
+				
+			})
+			
+		})
+		
+	}
 
     updateRating(app, db) {
         app.post('/updateRating', (req, res) => {
