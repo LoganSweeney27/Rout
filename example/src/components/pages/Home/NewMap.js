@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import './NewMap.css'
-import Input from './Input';
-//import SelectInput from '@material-ui/core/Select/SelectInput';
 import { Button } from '../../Button';
 import Details from './Details';
 import UserStore from '../Login/Stores/UserStore';
@@ -10,54 +8,73 @@ import Modal from "react-modal"
 
 import './Input.css'
 
+let startPoint = null;
+let wayptOn = false;
+let markers = [];
+let waypts = [];
+let elevationDiff = 0;
 
 const styles = {
   root: {
     flexGrow: 1,
   },
-  
 };
+<<<<<<< HEAD
 let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
 Modal.setAppElement("#root");
 
+=======
+
+/* This function adds markers to the given map */
+>>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
 function addMarker(location, map) {
   const marker = new window.google.maps.Marker({
       position: location,
       map: map,
   });
   markers.push(marker);
-}
+} /* addMarker() */
 
+
+/* This  functions puts all the markers on the given map,
+  and clears them if map is null */
 function setMapOnAll(map) {
   for (let i = 0; i < markers.length; i++) {
       markers[i].setMap(map);
   }
-}
+} /* setMapOnAll() */
 
+/* Clears all the markers from the given map */
 function clearMarkers() {
   setMapOnAll(null);
-}
+} /* clearMarkers() */
 
+/* Deletes all the markers in global markers list */
 function deleteMarkers() {
   clearMarkers();
   markers = [];
-}
+} /* deleteMarkers() */
 
 
 
-
+/* Returns a location a given distance away from the lat lng given
+  using the given direction */
 function newCoordinatesLocation(lat, lng, distance, direction) {
   //direction = (direction * 180) / Math.PI;
-  direction = Math.random() * Math.PI * 2;
   lat = lat + (distance * Math.cos(direction) / 111111);
   lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
   let latlng = new window.google.maps.LatLng(lat, lng);
-  return latlng;
-}
+  
 
+  return latlng;
+} /* newCoordinatesLocation() */
+
+
+
+/* Displays the elevation along the given path */
 function displayPathElevation(
   path,
   elevator,
@@ -73,10 +90,12 @@ function displayPathElevation(
       },
       plotElevation
   );
-}
+} /* displayPathElevation() */
 
-// Takes an array of ElevationResult objects, draws the path on the map
-// and plots the elevation profile on a Visualization API ColumnChart.
+
+
+/* Takes an array of ElevationResult objects, draws the path on the map
+ and plots the elevation profile on a Visualization API ColumnChart. */
 function plotElevation(elevations, status) {
   const chartDiv = document.getElementById("elevation_chart");
 
@@ -101,6 +120,8 @@ function plotElevation(elevations, status) {
   data.addRow(["", elevations[i].elevation]);
   }
 
+  elevationDiff = findHilliness(elevations);
+
   // Draw the chart using the data within its DIV.
   chart.draw(data, {
   height: 150,
@@ -108,9 +129,10 @@ function plotElevation(elevations, status) {
   // @ts-ignore TODO(jpoehnelt) update to newest visualization library
   titleY: "Elevation (m)",
   });
-}
+} /* plotElevation() */
 
 
+/* Listens for starting marker to be placed */
 function listenforStart(map) {
   var startPointListener = map.addListener("click", (event) => {
     addMarker(event.latLng, map);
@@ -118,27 +140,86 @@ function listenforStart(map) {
     window.google.maps.event.removeListener(startPointListener);
 
   });
-}
+} /* listenforStart() */
 
 
 
 
-
+/* Takes in an address string and uses a geocoder to convert into a latLng object */
 function geocodeAddr(geocoder, addr) {
   //const addr = document.getElementById("addr");
   geocoder.geocode({address: addr}, (results, status) => {
     if (status == "OK") {
       startPoint = results[0].geometry.location;
     } else {
-      // alert(
-      //   "Address geocoding was not successful for the following reason: " + status
-      // );
+      /*alert(
+        "Address geocoding was not successful for the following reason: " + status
+      );*/
     }
   });
 }
 
+/* Function to convert a distance (km) and time (min) into a pace */
+function calcPace(distance, time) {
+  distance = distance * 0.000621371;
+  var pace = time / distance;
+  /*if (Number.isInteger(pace)) {
+    return pace;
+  } else {
+  }*/
+  return pace;
+}
 
+/* Function to quantify the hilliness of a route */
+function findHilliness(arr) {
+  var prevElevation = arr[0].elevation;
+  var climb = 0;
+  var drop = 0;
+  var max = 0;
+  var min = Number.MAX_SAFE_INTEGER;
+  var diff = 0;
+  for (var i = 1; i < arr.length; i++) {
+    diff = arr[i].elevation - prevElevation;
+    prevElevation = arr[i].elevation;
+    if (diff > 0) {
+      climb += diff;
+      climb = Math.abs(climb / 1);
+    }
+    else {
+      drop -= diff;
+      drop = Math.abs(drop / 1);
+    }
+    if (arr[i].elevation > max) {
+      max = arr[i].elevation;
+    }
+    if (arr[i].elevation < min) {
+      min = arr[i].elevation;
+    }
+  }
+  diff = max - min;
+  return diff;
+};
 
+/* Function to calculate the difficulty of a route, based on distance and hilliness */
+function calcDifficulty(distance, hilliness) {
+  distance = distance / 1000;
+  var score = 0;
+  var tempDistance = 0
+  var tempHilliness = 0;
+  tempDistance = distance / 3.5;
+  if (tempDistance > 5) {
+    tempDistance = 5;
+  }
+  tempHilliness = hilliness / 15;
+  if (tempHilliness > 5) {
+    tempHilliness = 5;
+  }
+  score = tempDistance + tempHilliness;
+  return score;
+}
+
+/* NewMap class defines map and all functions that go with it
+  It also displays the map and the directions */
 class NewMap extends Component {
   constructor(props){
     super(props);
@@ -152,9 +233,11 @@ class NewMap extends Component {
       routeDistance:"", //distance of the produced route
       routeDistance_m: '', //distance of real produced route in distance
       d_service:null,
-      d_renderer:null,
+      d_renderer1:null,
+      d_renderer2:null,
+      d_renderer3:null,
       d_geocoder:null,
-      my_map:null,
+      my_map:null, //Map object
       wayptListener:null,
       addr: '',
       distance: '', //inputted distance, could be in miles or kilometers
@@ -176,7 +259,11 @@ class NewMap extends Component {
       hasDistance: false,
       hasPace: false,
       hasTime: false,
+<<<<<<< HEAD
 	  showModal: false,
+=======
+      elevationDiff: 0,
+>>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
     }
 
 	this.openModal = this.openModal.bind(this);
@@ -185,13 +272,18 @@ class NewMap extends Component {
     this.lastDirections = null;
   }
 
-
+  /* Runs after component is mounted, initalizes Map and algorithm */
   componentDidMount(){
     this.loadGoogleMapScript();
     window.gm_authFailure = this.gm_authFailure;
-    //we load the google map script when its ready, we get the venues when they are ready then this.getVenues()
-  }
 
+    //we load the google map script when its ready
+    //we get the venues when they are ready
+    //this.getVenues()
+    
+  } /* componentDidMount() */
+
+  /* Loads information for Google Maps API */
   loadGoogleMapScript(){
     const ApiKey = 'AIzaSyDekWG_GZBqJ3j0Kt9t-B0ayBcU9wLHlsk'
 
@@ -221,59 +313,76 @@ class NewMap extends Component {
     
     window.document.body.appendChild(scriptMap)
     window.document.body.appendChild(scriptChart);
+  } /* loadGoogleMapScript() */
 
-  }
 
+  /* when component is updated, upload map */
   componentDidUpdate(){
    //once the script is uploaded to the window load up the map 
-    
+
     if (this.state.my_map == null) {
-      
       this.initMap()
     }
-  }
+  } /* componentDidUpdate() */
 
 
 
-  //create markers
-  initMap() {
-
+  /* this function initializes the map and prepares*/
+  initMap(){
     //if map is ready to load
     if(this.state.mapIsReady && this.state.chartIsReady){
+      const map = new window.google.maps.Map(document.getElementById('map'), {
+        center: {lat: 40.4259, lng: -86.9081},
+        zoom: 13,
+      });
 
-    const map = new window.google.maps.Map(document.getElementById('map'), {
-      center: {lat: 40.4259, lng: -86.9081},
-      zoom: 13,
-    });
-    if (this.state.my_map == null) {
-      this.setState({my_map: map});
-    }
-    // Create A Map use window so the browser can access it
-    //const map = this.state.my_map;
 
-    if (this.state.d_renderer == null) {
-      const directionsRenderer = new window.google.maps.DirectionsRenderer({
-        draggable: true,
-        map,
-      }); 
-      this.setState({d_renderer : directionsRenderer});
-    }
-    if (this.state.d_service == null) {
-      const directionsService = new window.google.maps.DirectionsService();
-      this.setState({d_service : directionsService});
-    }
-    if (this.state.d_geocoder == null) {
-      const geocoder = new window.google.maps.Geocoder();
-      this.setState({d_geocoder : geocoder});
-    }
-    const addy = document.getElementById("addy");
-    const autocomplete = new window.google.maps.places.Autocomplete(addy);
+      if (this.state.my_map == null) {
+        this.setState({my_map: map});
+        
+      }
+      // Create A Map use window so the browser can access it
+      //const map = this.state.my_map;
 
-    listenforStart(map);
+      if (this.state.d_renderer1 == null) {
+        const directionsRenderer1 = new window.google.maps.DirectionsRenderer({
+          draggable: true,
+          map,
+        }); 
+        this.setState({d_renderer1 : directionsRenderer1});
+      }
+      if (this.state.d_renderer2 == null) {
+        const directionsRenderer2 = new window.google.maps.DirectionsRenderer({
+          draggable: true,
+          map,
+        }); 
+        this.setState({d_renderer2 : directionsRenderer2});
+      }
+      if (this.state.d_renderer3 == null) {
+        const directionsRenderer3 = new window.google.maps.DirectionsRenderer({
+          draggable: true,
+          map,
+        }); 
+        this.setState({d_renderer3 : directionsRenderer3});
+      }
+      if (this.state.d_service == null) {
+        const directionsService = new window.google.maps.DirectionsService();
+        this.setState({d_service : directionsService});
+      }
+      if (this.state.d_geocoder == null) {
+        const geocoder = new window.google.maps.Geocoder();
+        this.setState({d_geocoder : geocoder});
+      }
+      const addy = document.getElementById("addy");
+      const autocomplete = new window.google.maps.places.Autocomplete(addy);
 
+      listenforStart(map);
     }//end of if statement
-  }
 
+  } /* initMap() */
+
+  /* Calculates and displays route, also updates route state
+    for directions result */
   myCalculateAndDisplayRoute(
     start,
     distance
@@ -290,29 +399,134 @@ class NewMap extends Component {
     //while distance is not with +-error of request distance
     var error = 400;
 
+
+    
+    
     // this.setState({ wasCreated: this.createRoute(start, error, distance, 0) });
+<<<<<<< HEAD
     this.createRoute(start, error, distance, 0);        
   }
+=======
+    this.createRoute(start, error, distance, 0, Math.random() * 2 * Math.PI, 0);
+    setTimeout(() => {
+      if (this.state.wasCreated) {
+        this.pushRoute()
+        const panorama = new window.google.maps.StreetViewPanorama(
+          document.getElementById('pano'),
+          {
+            position: this.state.route.routes[0].overview_path[0],
+            pov: {
+              heading: 34,
+              pitch: 10,
+            },
+          }
+        );
+        this.state.my_map.setStreetView(panorama);
+      }
+      
+    }, 2000);
 
+        
+  } /* myCalculateAndDisplayRoute() */
+>>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
 
-  createRoute(start, error, distance, depth) {
+  /* Recursive function to find route of specified distance */
+  createRoute(start, error, distance, depth, beginDirection, multi) {
     console.log("test1");
+    if (multi > 2) {
+      return;
+    }
+
     if (depth > 8) {
       alert("Could not find route at this starting point.");
       this.setState({ wasCreated: false });
       return;
     }
+
     var directionsService = this.state.d_service;
-    var directionsRenderer = this.state.d_renderer;
+    var directionsRenderer1 = this.state.d_renderer1;
+    var directionsRenderer2 = this.state.d_renderer2;
+    var directionsRenderer3 = this.state.d_renderer3;
     var map = this.state.my_map;
+
+    directionsRenderer1.setOptions({
+      polylineOptions: {
+        strokeWeight: 4,
+        strokeOpacity: 0.8,
+        strokeColor: "blue"
+      },
+      markerOptions:{
+        icon:{
+            scale: 3,
+            strokeColor: "blue"
+        }
+      }
+    });
+    directionsRenderer2.setOptions({
+      polylineOptions: {
+        strokeWeight: 4,
+        strokeOpacity: 0.8,
+        strokeColor: "green"
+      },
+      markerOptions:{
+        icon:{
+            scale: 3,
+            strokeColor: "green"
+        }
+      }
+    });
+    directionsRenderer3.setOptions({
+      polylineOptions: {
+        strokeWeight: 4,
+        strokeOpacity: 0.8,
+        strokeColor: "red"
+      },
+      markerOptions:{
+        icon:{
+            scale: 3,
+            strokeColor: "red"
+        }
+      }
+    });
 
     if (!wayptOn) {
       waypts = [];
+      let loc = 0; //newCoordinatesLocation(start.lat(), start.lng(), distance / 2, 0);
+      if (multi == 0) {
+        //alert("multi is 0");
+        loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
+                                     beginDirection + (depth * (Math.PI / 4)));
+      }
+      else if (multi == 1) {
+        //alert("multi is 1");
+        /*alert("begin direction at multi 1 = " + beginDirection);
+        alert("depth at multi 1 = " + depth);*/
+        loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
+                                     beginDirection + (depth * (Math.PI / 4)));
+      }
+      else if (multi == 2) {
+        //alert("multi is 2");
+        /*alert("begin direction at multi 2 = " + beginDirection);
+        alert("depth at multi 2 = " + depth);*/
+        loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
+                                     beginDirection + (depth * (Math.PI / 4)));
+      }
+
+      //clears waypoints array so that multiple routes can be created
+      waypts.length = 0;
+      
+      //addMarker(loc, this.state.my_map);
+      
       waypts.push({
-          location: newCoordinatesLocation(start.lat(), start.lng(), distance / 2, 90),
+          location: loc,
           stopover: false,
       });
+
+      // addMarker(newCoordinatesLocation(start.lat(), start.lng(),
+      // distance / 2, beginDirection + (depth * (Math.PI / 4))), this.state.my_map);
     }
+
+
     directionsService.route(
       {
           origin: start,
@@ -342,19 +556,56 @@ class NewMap extends Component {
               if (((parseFloat(distance) + parseFloat(error)) > totaldistance)
                   && ((parseFloat(distance) - parseFloat(error)) < totaldistance)) {
                 console.log("test");
-                if (!wayptOn) {
-                    directionsRenderer.setDirections(response);
-					          this.lastDirections = response;
-                    directionsRenderer.setMap(map);
+                if (multi == 0) {
+                  //alert("depth at multi 0 = " + depth);
+                  if (!wayptOn) {
+                      directionsRenderer1.setDirections(response);
+                      this.lastDirections = response;
+                      directionsRenderer1.setMap(map);
 
-                } else if (wayptOn && (totaldistance <= distance)) {
-                    directionsRenderer.setDirections(response);
-					          this.lastDirections = response;
-                    directionsRenderer.setMap(map);
+                  } else if (wayptOn && (totaldistance <= distance)) {
+                      directionsRenderer1.setDirections(response);
+                      this.lastDirections = response;
+                      directionsRenderer1.setMap(map);
 
-                } else {
-                    window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
-                    this.setState({ wasCreated: false });
+                  } else {
+                      window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
+                      this.setState({ wasCreated: false });
+                  }
+                }
+                else if (multi == 1) {
+                  //alert("depth at multi 1 = " + depth);
+                  if (!wayptOn) {
+                      directionsRenderer2.setDirections(response);
+                      this.lastDirections = response;
+                      directionsRenderer2.setMap(map);
+
+                  } else if (wayptOn && (totaldistance <= distance)) {
+                      directionsRenderer2.setDirections(response);
+                      this.lastDirections = response;
+                      directionsRenderer2.setMap(map);
+
+                  } else {
+                      window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
+                      this.setState({ wasCreated: false });
+                  }
+                }
+                else if (multi == 2) {
+                  //alert("depth at multi 2 = " + depth);
+                  if (!wayptOn) {
+                      directionsRenderer3.setDirections(response);
+                      this.lastDirections = response;
+                      directionsRenderer3.setMap(map);
+
+                  } else if (wayptOn && (totaldistance <= distance)) {
+                      directionsRenderer3.setDirections(response);
+                      this.lastDirections = response;
+                      directionsRenderer3.setMap(map);
+
+                  } else {
+                      window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
+                      this.setState({ wasCreated: false });
+                  }
                 }
                 const elevator = new window.google.maps.ElevationService();
                 // Draw the path, using the Visualization API and the Elevation service.
@@ -366,17 +617,20 @@ class NewMap extends Component {
                 this.setState({ routeDistance_m: totaldistance })
                 this.setState({ route: response })
                 this.setState({ wasCreated: true });
+                this.createRoute(start,error,distance, 0, 0, ++multi);
                 return;
               } else {
-                this.createRoute(start,error,distance, ++depth);
+                this.createRoute(start,error,distance, ++depth, 0, multi);
               }
   
           } else {
               window.alert("Directions request failed due to " + status);
               this.setState({ wasCreated: false });
           }
+          multi++;
       }
     );
+<<<<<<< HEAD
   }
   
   async saveRoute() {
@@ -474,60 +728,61 @@ class NewMap extends Component {
 	if (selected[0]) { selected[0].classList.remove('selected'); }
 	e.target.parent.classList.add('selected');
   }
+=======
+  } /* createRoute() */
+>>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
 
+  /* Alerts user to error if Google Map does not load */
   gm_authFailure(){
-    window.alert("Google Maps error!")
-  }
+      window.alert("Google Maps error!")
+  } /* gm_authFailure() */
 
+
+  /* Handles errors */
   handleErrors(response) {
-  if (!response.ok) {
-      throw Error(response.statusText);
-  }
-  return response;
-  }
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+  } /* handleErrors() */
 
+
+  /* Converts user inputted distance to meters for algorithm */
   convertToMeters() {
     if (this.state.distance) {
       if (this.state.unitType === 'kilometers') {
-        this.state.distance_m = parseFloat(this.state.distance) * 1000;
+        this.state.distance_m = parseInt(this.state.distance) * 1000;
       } else {
         //conversion from miles to meters
-        this.state.distance_m = parseFloat(this.state.distance) * 1609.34;
+        this.state.distance_m = parseInt(this.state.distance) * 1609.34;
       }
     } else {
       if ((this.state.pace != null) && (this.state.time != null)) {
-        this.state.distance_m = (parseFloat(this.state.time) / parseFloat(this.state.pace)) * 1609.34;
+        this.state.distance_m = (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34;
       }
     }
-  }
+  } /* convertToMeters() */
 
+  /* Converts given Distance to displayable distance */
   convertToDisplayDistance(distance) {
     if (this.state.unitType === 'kilometers') {
-      this.setState({routeDistance : ((parseFloat(distance) / 1000) + " km") });
+      this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
     } else {
       //convert meters to miles
-      this.setState({routeDistance : ((parseFloat(distance) * 0.000621371) + " miles")});
+      this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
     }
-  }
+  } /* convertToDisplayDistance() */
 
-
-  estimate_time(distance_m) {
-    // 0.00559234 is 9 min/mile as min/meter
-    // multiplied by 60 to get in seconds
-    this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
-  }
-
-
-  estimate_calories(distance) {
-    // 0.00062 is the conversion rate from meters to miles
-    // 100 is the average calories burned per mile
-    this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
-  }
-
-
+  /* clears the map object and resets directions variables */
   clearMap = () => {
-    this.state.d_renderer.setDirections(null);
-    this.state.d_renderer.setMap(null);
+
+    this.state.d_renderer1.setDirections(null);
+    this.state.d_renderer1.setMap(null);
+    this.state.d_renderer2.setDirections(null);
+    this.state.d_renderer2.setMap(null);
+    this.state.d_renderer3.setDirections(null);
+    this.state.d_renderer3.setMap(null);
+    //this.state.my_map.setCenter(40.4259, -86.9081);
     deleteMarkers();
     startPoint = null;
     waypts = [];
@@ -537,8 +792,9 @@ class NewMap extends Component {
       this.setState({wayptListener:null});
     }
     listenforStart(this.state.my_map);
-  }
+  } /* clearMap */
 
+  /* adds listeners to add waypoints */
   addWaypoints = () => {
     wayptOn = true;
     if (this.state.wayptListener == null) {
@@ -551,17 +807,12 @@ class NewMap extends Component {
       })
       this.setState({wayptListener: myWayptListener});
     }
-  }
+  } /* addWaypoints */
 
-  // addData = (data, e) => {
-  addData = () => {
-    //alert(e);
-    //e.preventDefault();
-    // console.log(data)
-    // console.log(data.distance)
-    // console.log(data.addr)
-    //alert(this.state.addr)
-    const address = document.getElementById("addr");
+  /* Run algorithm with user inputted data */
+  runAlgorithmWithData = () => {
+
+    const address = document.getElementById("addy");
     if (address) {
       geocodeAddr(this.state.d_geocoder, this.state.addr);
     }
@@ -582,7 +833,60 @@ class NewMap extends Component {
         alert("No start point selected");
       }
     }, 400)
-  } 
+
+  } /* runAlgorithmWithData */
+  
+  saveRoute() {
+	  this.savedDirections = this.lastDirections;
+  }
+  
+  async loadRoute() {
+    // if (this.lastDirections == null) {
+    //   alert("lastDirections is null!");
+    // }
+    // else {
+    //   this.clearMap();
+    //   this.state.d_renderer.setDirections(this.savedDirections);
+    //   this.state.d_renderer.setMap(this.state.my_map);
+    // }
+    try {
+      let res = await fetch('/getResponse', {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json',
+            'Content-type': 'application/json'
+        }
+      });
+      let result = await res.json();
+        if (result && result.success) {
+            // If successful set response object
+            this.setState({ loadRoute: result.response })
+        } else {
+            alert("Could not get route response object.");
+        }
+    } catch(e) {
+        console.log(e)
+    }
+  }
+
+
+
+
+  estimate_time(distance_m) {
+    // 0.00559234 is 9 min/mile as min/meter
+    // multiplied by 60 to get in seconds
+    this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
+  }
+
+
+  estimate_calories(distance) {
+    // 0.00062 is the conversion rate from meters to miles
+    // 100 is the average calories burned per mile
+    this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
+  }
+
+
+
 
   //Call to push data to database
   async pushRoute() {
@@ -647,6 +951,7 @@ class NewMap extends Component {
   }
 
 
+  /* Handles when Enter is pressed */
   handleEnter = (e) => {
     e.preventDefault();
     if (!(this.state.hasDistance || (this.state.hasPace && this.state.hasTime))) {
@@ -654,13 +959,10 @@ class NewMap extends Component {
         return
     }
 
-    // let data = [this.state.addr, this.state.distance, this.state.pace, this.state.time, this.state.unitType]
-    // alert(data)
-    // this.addData(data, e)
-    this.addData()
+    this.runAlgorithmWithData()
+  } /* handleEnter */
 
-  }
-
+  /* Changes type of user inputted units */
   handleChangeUnit = (e) => {
     // e.preventDefault();
     if (this.state.units === 'Distance (Kilometers)') {
@@ -670,15 +972,17 @@ class NewMap extends Component {
       this.setState({ units: 'Distance (Kilometers)' })
       this.setState({ unitType: 'kilometers' })
     }
-  }
+  } /* handleChangeUnit */
 
+  /* Clears map when clear button is pressed */
   handleClear = () => {
     this.clearMap()
-  }
+  } /* handleClear */
 
+  /* When Waypoints button is pressed, wait for waypoints */
   handleWaypoints = () => {
     this.addWaypoints()
-  }
+  } /* handleWaypoints */
 
   handleSave = () => {
 	  this.saveRoute();
@@ -703,7 +1007,7 @@ class NewMap extends Component {
         <div>
           <div className='map-inputs'>
             <div>
-                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' id='addy' placeholder='Address' />
+                <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => {this.setState({ addr: e.target.value }); UserStore.address = e.target.value}} type='text' id='addy' placeholder='Address' />
             </div>
             <div>
               {!this.state.inputTypes && <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => { this.setState({ distance: e.target.value }); this.setState({ hasDistance: true })}} type='text' placeholder={this.state.units} />} 
@@ -742,6 +1046,7 @@ class NewMap extends Component {
         <div>
           <main id="map" role="application"></main>
           <div id="elevation_chart"></div>
+          <div id="pano"></div>
         </div>
         <div>
         {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
@@ -780,6 +1085,6 @@ class NewMap extends Component {
       </div>
     )
   }
-}
+} /* NewMap */
 
 export default withStyles(styles)(NewMap);
