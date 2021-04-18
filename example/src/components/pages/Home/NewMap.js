@@ -13,18 +13,13 @@ let wayptOn = false;
 let markers = [];
 let waypts = [];
 let elevationDiff = 0;
+Modal.setAppElement("#root");
 
 const styles = {
   root: {
     flexGrow: 1,
   },
 };
-
-let startPoint = null;
-let wayptOn = false;
-let markers = [];
-let waypts = [];
-Modal.setAppElement("#root");
 
 /* This function adds markers to the given map */
 function addMarker(location, map) {
@@ -397,10 +392,6 @@ class NewMap extends Component {
     
     
     // this.setState({ wasCreated: this.createRoute(start, error, distance, 0) });
-<<<<<<< HEAD
-    this.createRoute(start, error, distance, 0);        
-  }
-=======
     this.createRoute(start, error, distance, 0, Math.random() * 2 * Math.PI, 0);
     setTimeout(() => {
       if (this.state.wasCreated) {
@@ -422,7 +413,6 @@ class NewMap extends Component {
 
         
   } /* myCalculateAndDisplayRoute() */
->>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
 
   /* Recursive function to find route of specified distance */
   createRoute(start, error, distance, depth, beginDirection, multi) {
@@ -624,7 +614,6 @@ class NewMap extends Component {
           multi++;
       }
     );
-<<<<<<< HEAD
   }
   
   async saveRoute() {
@@ -722,9 +711,6 @@ class NewMap extends Component {
 	if (selected[0]) { selected[0].classList.remove('selected'); }
 	e.target.parent.classList.add('selected');
   }
-=======
-  } /* createRoute() */
->>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
 
   /* Alerts user to error if Google Map does not load */
   gm_authFailure(){
