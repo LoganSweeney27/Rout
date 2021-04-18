@@ -19,17 +19,14 @@ const styles = {
     flexGrow: 1,
   },
 };
-<<<<<<< HEAD
+
 let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
 Modal.setAppElement("#root");
 
-=======
-
 /* This function adds markers to the given map */
->>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
 function addMarker(location, map) {
   const marker = new window.google.maps.Marker({
       position: location,
@@ -259,11 +256,8 @@ class NewMap extends Component {
       hasDistance: false,
       hasPace: false,
       hasTime: false,
-<<<<<<< HEAD
 	  showModal: false,
-=======
       elevationDiff: 0,
->>>>>>> fc56406e4d3f12156c6081b3c7b4e1ca474b6530
     }
 
 	this.openModal = this.openModal.bind(this);
