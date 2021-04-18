@@ -641,6 +641,36 @@ class Router {
         });
     }
 
+    getResponseByCode(app, db) {
+        app.post('/getResponseByCode', (req, res) => {
+            let uniqueCode = req.body.uniqueCode;
+        
+            var sql = "SELECT response FROM prevroutes WHERE code = \"" + uniqueCode + "\" LIMIT 1";
+            var query = db.query(sql,
+            function(err, data) {
+                if (err){
+                    console.log(err);
+                    console.log("Error in DB for getting response from unique code");
+                    res.json({
+                        success: false,
+                    })
+                } else {
+                    console.log("Success");
+                    if (data && data.length >= 1) {
+                        res.json({
+                            success: true,
+                            response = data[0].response
+                        })
+                        return true;
+                    } else {
+                        res.json({
+                            success: false,
+                        })
+                    }
+                }
+            });
+        });
+    }
 
     // STATISTICS PAGE QUERIES
     getCompare(app, db) {
