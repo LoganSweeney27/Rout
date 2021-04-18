@@ -225,6 +225,7 @@ class NewMap extends Component {
       routeDistance:"", //distance of the produced route
       routeDistance_m: '', //distance of real produced route in distance
       d_service:null,
+	  uniqueCode:null,
       d_renderer1:null,
       d_renderer2:null,
       d_renderer3:null,
@@ -706,10 +707,9 @@ class NewMap extends Component {
   }
   
   handleSelection(e) {
-	alert(e.target.parent);
-	let selected = e.target.parent.getElementsByClassName('selected');
-	if (selected[0]) { selected[0].classList.remove('selected'); }
-	e.target.parent.classList.add('selected');
+	let selected = e.target.parentNode.parentNode.getElementsByClassName('selected');
+	if (selected.item(0)) { selected.item(0).classList.remove('selected'); }
+	e.target.parentNode.classList.add('selected');
   }
 
   /* Alerts user to error if Google Map does not load */
