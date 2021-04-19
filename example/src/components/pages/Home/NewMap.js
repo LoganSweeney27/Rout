@@ -718,14 +718,14 @@ class NewMap extends Component {
   }
   
   handleSelection(e) {
-	let selected = e.target.parentNode.parentNode.getElementsByClassName('selected');
-	if (selected.item(0)) { selected.item(0).classList.remove('selected'); }
-	e.target.parentNode.classList.add('selected');
-	
-	let inputField = e.target.parentNode.parentNode.parentNode
-					 .getElementsByClassName('login-input').item(0)
-					 .value = e.target.parentNode.getElementsByTagName("td").item(5).innerHTML;
-	this.setState({ uniqueCode: e.target.parentNode.getElementsByTagName("td").item(5).innerHTML });
+    let selected = e.target.parentNode.parentNode.getElementsByClassName('selected');
+    if (selected.item(0)) { selected.item(0).classList.remove('selected'); }
+    e.target.parentNode.classList.add('selected');
+    
+    let inputField = e.target.parentNode.parentNode.parentNode
+            .getElementsByClassName('login-input').item(0)
+            .value = e.target.parentNode.getElementsByTagName("td").item(5).innerHTML;
+    this.setState({ uniqueCode: e.target.parentNode.getElementsByTagName("td").item(5).innerHTML });
   }
 
   /* Alerts user to error if Google Map does not load */

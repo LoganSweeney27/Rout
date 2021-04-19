@@ -1,5 +1,7 @@
 import React from 'react'
 import { Button } from '../../Button'
+import { Link } from 'react-router-dom'
+// import LinkButton from '../../LinkButton';
 import UserStore from '../Login/Stores/UserStore';
 
 import './Profile.css'
@@ -11,10 +13,6 @@ class Profile extends React.Component {
             newNickname: UserStore.nickname,
             profilePicture: UserStore.profilePicture,
         };
-    }
-
-    handleChangeNickname = (e) => {
-        this.changeNickname();
     }
 
     async changeNickname() {
@@ -41,10 +39,6 @@ class Profile extends React.Component {
         } catch (e) {
           console.log(e);
         }
-    }
-
-    handleChangeProfilePicture = (e) => {
-        this.changeProfilePicture()
     }
 
     async changeProfilePicture() {
@@ -74,8 +68,37 @@ class Profile extends React.Component {
         }
     }
 
+    async doLogout() {
+        try {
+          let res = await fetch('/logout', {
+            method: 'post',
+            headers: {
+              'Accept': 'application/json',
+              'Content-type': 'application/json'
+            }
+          });
+          let result = await res.json();
+          if (result && result.success) {
+            UserStore.isLoggedIn = false;
+            UserStore.username = '';
+          }
+        }
+    
+        catch(e) {
+          console.log(e)
+        }
+    }
+
+    handleChangeNickname = (e) => {
+        this.changeNickname()
+    }
+
+    handleChangeProfilePicture = (e) => {
+        this.changeProfilePicture()
+    }
+
     handleLogOut = (e) => {
-        //A working log out button here would really help testing
+        this.doLogout()
     }
     
     render() {
@@ -102,10 +125,8 @@ class Profile extends React.Component {
                     </Button>
                     {/* <img src={this.state.profilePicture}  alt='ProfilePic'/> */}
                 </div>
-                <div className='profile-content'>
-                    <Button buttonStyle='btn--logout' onClick={ (e) => this.handleLogOut(e) }>
-                        Logout
-                    </Button>
+                <div className='profile-content' style={{ margin: "15px 3px" }}>
+                    <Link className="profile-btn-logout" to="/" onClick={(e) => this.handleLogOut(e)}>Logout</Link>
                 </div>
             </div>
         )

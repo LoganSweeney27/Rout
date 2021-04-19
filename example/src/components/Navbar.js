@@ -21,17 +21,30 @@ class Navbar extends React.Component {
         window.addEventListener('resize', this.showButton)
     }
 
-    componentDidMount() {
+    componentWillMount() {
         this.isLoggedIn()
-        this.navbar.addEventListener('click', this.reRender);
     }
 
-    // componentWillUnmount() {
-    //     this.navbar.removeEventListener('click', this.reRender);
+    componentDidMount() {
+        this.interval = setInterval(() => {
+            // console.log('This will run every second!');
+            this.reRender()
+         }, 1000);
+        // this.navbar.addEventListener('click', this.reRender);
+    }
+
+    // componentDidUpdate() {
+    //     this.reRender();
     // }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
+        // this.navbar.removeEventListener('click', this.reRender);
+    }
 
     async isLoggedIn() {
         // alert("checking if logged in: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
+        console.log("isLoggedIn from NavBar")
         try {
             let res = await fetch('/isLoggedIn', {
               method: 'post',

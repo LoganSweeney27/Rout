@@ -1,5 +1,5 @@
 .profile-container {
-    height: 50vh;
+    height: 80vh;
     width: 100%;
 }
 
@@ -28,4 +28,22 @@
     border-color: var(--text-color);
     border-radius: 3px;
     transition: 0.3s all;
+}
+
+.profile-btn-logout {
+    padding: 8px 20px;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    white-space: nowrap;
+    background-color: transparent;
+    color: var(--text-color);
+    border: 1px solid var(--text-color);
+    transition: all 0.3s ease-out;
+}
+
+.profile-btn-logout:hover {
+    color: var(--background-color);
+    background-color: var(--text-color);
+    transition: all 0.2s ease-out;
 }
