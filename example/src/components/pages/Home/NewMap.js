@@ -317,16 +317,16 @@ class NewMap extends Component {
       if (this.state.wasCreated) {
         this.pushRoute()
         //alert(window.document.getElementById("pano"));
-        const panorama = new window.google.maps.StreetViewPanorama(
-          window.document.getElementById('pano'),
-          {
-            position: this.state.route.routes[0].overview_path[0],
-            pov: {
-              heading: 34,
-              pitch: 10,
-            },
-          }
-        );
+        // const panorama = new window.google.maps.StreetViewPanorama(
+        //   window.document.getElementById('pano'),
+        //   {
+        //     position: this.state.route.routes[0].overview_path[0],
+        //     pov: {
+        //       heading: 34,
+        //       pitch: 10,
+        //     },
+        //   }
+        // );
         //this.state.my_map.setStreetView(panorama);
       }
       
@@ -733,7 +733,10 @@ class NewMap extends Component {
           {/* <div id="pano"></div> */}
         </div>
         <div>
-        {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
+        {this.state.showDetails && 
+        <Details my_map={this.state.my_map} routeDistance={this.state.routeDistance} time={this.state.final_time}
+                 pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr}
+                 routeID={this.state.routeID} route={this.state.route}/>}
             <div className='details-btn'>
                 <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
                     Details ^
