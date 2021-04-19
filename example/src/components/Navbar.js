@@ -128,18 +128,14 @@ class Navbar extends React.Component {
                         <li className='nav-item'>
                             {UserStore.isLoggedIn && <Link to='/Statistics' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Statistics</Link>}
                         </li>
-                        {/* <li className='nav-item'>
-                            {this.state.loggedIn ? <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link> : <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
-                        </li> */}
                         <li className='nav-item'>
                             {UserStore.isLoggedIn && <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link>}
                         </li>
-                        {/* I think the UserStore.isDev is being rendered on the navbar as a 0, because the user is not a dev, i.e. (isdev=0) */}
 						<li className='nav-item'>
                             {this.isUserADev() && <a class="nav-links" href="https://rout.link/phpmyadmin">Database</a>}
 						</li>
                         <li className='nav-item'>
-                            <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>
+                            {!UserStore.isLoggedIn && <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
                         </li>
                         {/* example of using mobile buttons */}
                         {/* <li className='nav-btn'>
