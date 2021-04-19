@@ -22,6 +22,7 @@ class Router {
         this.getRouteID(app, db);
 		this.getRoutesUsername(app, db);
         this.getResponse(app, db);
+		this.getResponseByCode(app, db);
     }
 
 
@@ -655,11 +656,10 @@ class Router {
                         success: false,
                     })
                 } else {
-                    console.log("Success");
-                    if (data && data.length >= 1) {
+                    if (data && data.length == 1) {
                         res.json({
                             success: true,
-                            response = data[0].response
+                            response: data[0].response,
                         })
                         return true;
                     } else {

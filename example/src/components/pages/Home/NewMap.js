@@ -5,6 +5,7 @@ import { Button } from '../../Button';
 import Details from './Details';
 import UserStore from '../Login/Stores/UserStore';
 import Modal from "react-modal"
+import InputField from '../Login/InputField.js'
 
 import './Input.css'
 
@@ -219,13 +220,12 @@ class NewMap extends Component {
     var today = new Date(),
     mdy = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
 
-    this.state ={
+    this.state = {
       mapIsReady:false,
       chartIsReady:false,
       routeDistance:"", //distance of the produced route
       routeDistance_m: '', //distance of real produced route in distance
       d_service:null,
-      uniqueCode:null,
       d_renderer1:null,
       d_renderer2:null,
       d_renderer3:null,
@@ -254,10 +254,13 @@ class NewMap extends Component {
       hasTime: false,
 	  showModal: false,
       elevationDiff: 0,
+	  uniqueCode:null, //code for loading saved routes
     }
 
 	this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+	this.finishModal = this.finishModal.bind(this);
+	this.clearMap = this.clearMap.bind(this);
     this.initMap = this.initMap.bind(this)
     this.lastDirections = null;
   }
@@ -625,61 +628,44 @@ class NewMap extends Component {
 	}
   }
   
-  async loadRoute() {
-    /*if (this.state.uniqueCode != null) {
-      try {
+  loadRoute() { //Locally renders route fetched in fetchRoute()
+    if (this.state.uniqueCode == null) {
+      alert("No route was fetched!");
+	  return;
+    }
+	
+	//this.clearMap();
+	alert(this.state.loadRoute.routes[0]);
+	this.state.d_renderer1.setDirections(this.state.loadRoute);
+	this.state.d_renderer1.setMap(this.state.my_map);
+      
+  }
+    
+  async fetchRoute() { //Fetches route from DB, updates state
+    try {
       let res = await fetch('/getResponseByCode', {
         method: 'post',
         headers: {
             'Accept': 'application/json',
-            'Content-type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          uniqueCode: this.state.uniqueCode
-        })
+		body: JSON.stringify({
+			uniqueCode: this.state.uniqueCode,
+		})
       });
       let result = await res.json();
         if (result && result.success) {
             // If successful set response object
-            this.setState({ loadRoute: result.response })
+			let response = JSON.parse(result.response);
+            this.setState({ loadRoute: response });
+			this.loadRoute();
         } else {
             alert("Could not get route response object.");
         }
-      } catch(e) {
+    } catch(e) {
         console.log(e)
-      }
-    } else {
-      if (this.lastDirections == null) {
-        alert("lastDirections is null!");
-      }
-      else {
-        this.clearMap();
-        this.state.d_renderer.setMap(this.state.my_map);
-      }
-      try {
-        let res = await fetch('/getResponse', {
-          method: 'post',
-          headers: {
-              'Accept': 'application/json',
-              'Content-type': 'application/json'
-          }
-        });
-        let result = await res.json();
-          if (result && result.success) {
-              //If successful set response object
-              this.setState({ loadRoute: result.response })
-          } else {
-              alert("Could not get route response object.");
-          }
-      } catch(e) {
-          console.log(e)
-      }
-  }*/
-    
-	
-	
-	
-  }
+    }
+  }	
     
   async propagateTable() {
 	  
@@ -735,6 +721,11 @@ class NewMap extends Component {
 	let selected = e.target.parentNode.parentNode.getElementsByClassName('selected');
 	if (selected.item(0)) { selected.item(0).classList.remove('selected'); }
 	e.target.parentNode.classList.add('selected');
+	
+	let inputField = e.target.parentNode.parentNode.parentNode
+					 .getElementsByClassName('login-input').item(0)
+					 .value = e.target.parentNode.getElementsByTagName("td").item(5).innerHTML;
+	this.setState({ uniqueCode: e.target.parentNode.getElementsByTagName("td").item(5).innerHTML });
   }
 
   /* Alerts user to error if Google Map does not load */
@@ -840,43 +831,7 @@ class NewMap extends Component {
     }, 400)
 
   } /* runAlgorithmWithData */
-  
-  saveRoute() {
-	  this.savedDirections = this.lastDirections;
-  }
-  
-  async loadRoute() {
-    // if (this.lastDirections == null) {
-    //   alert("lastDirections is null!");
-    // }
-    // else {
-    //   this.clearMap();
-    //   this.state.d_renderer.setDirections(this.savedDirections);
-    //   this.state.d_renderer.setMap(this.state.my_map);
-    // }
-    try {
-      let res = await fetch('/getResponse', {
-        method: 'post',
-        headers: {
-            'Accept': 'application/json',
-            'Content-type': 'application/json'
-        }
-      });
-      let result = await res.json();
-        if (result && result.success) {
-            // If successful set response object
-            this.setState({ loadRoute: result.response })
-        } else {
-            alert("Could not get route response object.");
-        }
-    } catch(e) {
-        console.log(e)
-    }
-  }
-
-
-
-
+    
   estimate_time(distance_m) {
     // 0.00559234 is 9 min/mile as min/meter
     // multiplied by 60 to get in seconds
@@ -889,9 +844,6 @@ class NewMap extends Component {
     // 100 is the average calories burned per mile
     this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
   }
-
-
-
 
   //Call to push data to database
   async pushRoute() {
@@ -1001,9 +953,13 @@ class NewMap extends Component {
 	this.setState({ showModal: true });
   }
   
+  finishModal() {
+	this.setState({ showModal: false });
+	this.fetchRoute();
+  }
+  
   closeModal() {
 	this.setState({ showModal: false });
-	
   }
 
   render() {
@@ -1095,7 +1051,7 @@ class NewMap extends Component {
               />
       
 			<br />
-			<button id="modal-btn" onClick={this.closeModal}>Confirm</button>
+			<button id="modal-btn" onClick={this.finishModal}>Confirm</button>
 
 		</Modal>
 
