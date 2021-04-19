@@ -149,16 +149,7 @@ function geocodeAddr(geocoder, addr) {
   });
 }
 
-/* Function to convert a distance (km) and time (min) into a pace */
-function calcPace(distance, time) {
-  distance = distance * 0.000621371;
-  var pace = time / distance;
-  /*if (Number.isInteger(pace)) {
-    return pace;
-  } else {
-  }*/
-  return pace;
-}
+
 
 /* Function to quantify the hilliness of a route */
 function findHilliness(arr) {
@@ -235,6 +226,7 @@ class NewMap extends Component {
       hasTime: false,
       elevationDiff: 0,
       difficulty: 0,
+      compTime: null,
     }
 
     this.initMap = this.initMap.bind(this)
@@ -579,6 +571,7 @@ class NewMap extends Component {
                 this.estimate_time(totaldistance); //estimate for final time value
                 this.estimate_calories(totaldistance); //estimate for final calories burned
                 this.calcDifficulty(totaldistance); //calculates difficulty score
+                this.calcPace(totaldistance, this.state.final_time); //calculates pace
                 //this.setState({routeDistance: displayDistance});
                 this.setState({ routeDistance_m: totaldistance })
                 this.setState({ route: response })
@@ -741,7 +734,11 @@ class NewMap extends Component {
   estimate_time(distance_m) {
     // 0.00559234 is 9 min/mile as min/meter
     // multiplied by 60 to get in seconds
-    this.setState({final_time: (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
+    if (this.state.compTime != null) {
+      this.setState({final_time: this.state.compTime})
+    } else {
+      this.setState({final_time: (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
+    }
   }
 
 
@@ -769,6 +766,22 @@ class NewMap extends Component {
     tempHilliness = Math.round(tempHilliness);
     score = tempDistance + tempHilliness;
     this.setState({ difficulty: score })
+  }
+
+  /* Function to convert a distance (m) and time (min) into a pace */
+  calcPace(distance, time) {
+    distance = distance * 0.000621371;
+    if (time > 100) {
+      time = time / 60;
+    }
+    var tempPace = time / distance;
+    tempPace = Math.round(tempPace * 10) / 10;
+    alert("tempPace = " + tempPace);
+    /*if (Number.isInteger(pace)) {
+      return pace;
+    } else {
+    }*/
+    this.setState({ final_pace: tempPace })
   }
 
 
@@ -885,6 +898,7 @@ class NewMap extends Component {
           <div className='map-inputs'>
             <div>
                 <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' id='addy' placeholder='Address' />
+                <input className='input-field' name='compTime' value={this.state.compTime} onChange={(e) => this.setState({ compTime: e.target.value })} type='text' id='compTime' placeholder='Completion Time (min)' />
             </div>
             <div>
               {!this.state.inputTypes && <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => { this.setState({ distance: e.target.value }); this.setState({ hasDistance: true })}} type='text' placeholder={this.state.units} />} 
