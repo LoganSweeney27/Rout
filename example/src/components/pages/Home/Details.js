@@ -33,10 +33,10 @@ class Details extends React.Component {
                 }
             );
             this.setState({panorama:panorama});
-            this.setState({route_turns : this.props.route.routes[0].overview_path.length})
+            this.setState({max_route_turns : this.props.route.routes[0].legs[0].steps.length - 1})
             this.setState({currentStreetIndex : 0});
             //alert(this.props.route.routes[0].overview_path.length);
-            //this.props.my_map.setStreetView(panorama);
+            this.props.my_map.setStreetView(panorama);
         }
     }
     componentDidUpdate() {
@@ -49,13 +49,17 @@ class Details extends React.Component {
         if ((this.state.panorama != null) && (this.props.route != null) 
                     && (this.state.currentStreetIndex < this.state.max_route_turns)) {
             //alert("working1");
-            this.state.panorama.setPosition(this.props.route.routes[0].overview_path[++this.state.currentStreetIndex]);
+            this.state.panorama.setPosition(this.props.route.routes[0].legs[0].steps[++this.state.currentStreetIndex].start_location);
+            this.props.my_map.setStreetView(this.state.panorama);
+
         }
     }
     handlePrevStreetView() {
         if ((this.state.panorama != null) && (this.props.route != null) 
                 && (this.state.currentStreetIndex > 0)) {
-            this.state.panorama.setPosition(this.props.route.routes[0].overview_path[--this.state.currentStreetIndex]);
+                    this.state.panorama.setPosition(this.props.route.routes[0].legs[0].steps[--this.state.currentStreetIndex].start_location);
+                    this.props.my_map.setStreetView(this.state.panorama);
+
         }
     }
     render() {
@@ -95,10 +99,10 @@ class Details extends React.Component {
                     {/* <div className='details-streetview'> */}
                     <div id="pano"></div>
                     <div className='details-streetview-buttons'>
-                        <Button buttonStyle='btn--regular' onClick={this.handlePrevStreetView()}>
+                        <Button buttonStyle='btn--regular' onClick={() => this.handlePrevStreetView()}>
                             Prev
                         </Button> 
-                        <Button buttonStyle='btn--regular' onClick={this.handleNextStreetView()}>
+                        <Button buttonStyle='btn--regular' onClick={() => this.handleNextStreetView()}>
                             Next
                         </Button>
                     </div>
