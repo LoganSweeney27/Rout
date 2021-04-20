@@ -127,7 +127,7 @@
     transition: all 0.2s ease-out;
 }
 
-.btn--regular:hover, .btn--nospaces:hover {
+.btn--regular:hover, .btn--nospaces:hover, .btn--logout:hover {
     color: var(--background-color);
     background-color: var(--text-color);
     transition: all 0.2s ease-out;

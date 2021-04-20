@@ -17,6 +17,9 @@ class Router {
         this.sendCodeFA(app, db);
         this.changeNickname(app, db);
         this.changeProfilePicture(app, db);
+        this.changeEmail(app, db);
+        this.changePhone(app, db);
+        this.changeTFA(app, db);
         this.sendRoute(app, db);
         this.updateRating(app, db);
         this.getRouteID(app, db);
@@ -52,7 +55,6 @@ class Router {
         });
     }
 
-
     changeProfilePicture(app, db) {
         app.post('/changeProfilePicture', (req, res) => {
             let profilePicture = req.body.profilePicture;
@@ -76,6 +78,79 @@ class Router {
             
         });
     }
+
+    changeEmail(app, db) {
+        app.post('/changeEmail', (req, res) => {
+            let email = req.body.email;
+            let username = req.body.username;
+            var sql = "UPDATE user set email = \"" + email + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'Email Successfully Updated',
+                            email: email
+                        })
+                    }
+                });
+            
+        });
+    }
+
+    changePhone(app, db) {
+        app.post('/changePhone', (req, res) => {
+            let phone = req.body.phone;
+            let username = req.body.username;
+            var sql = "UPDATE user set phone = \"" + phone + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'Phone Successfully Updated',
+                            phone: phone
+                        })
+                    }
+                });
+            
+        });
+    }
+
+    changeTFA(app, db) {
+        app.post('/changeTFA', (req, res) => {
+            let fa = req.body.fa;
+            let username = req.body.username;
+            var sql = "UPDATE user set enableFA = \"" + fa + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'TFA Successfully Updated',
+                            fa: fa
+                        })
+                    }
+                });
+            
+        });
+    }
+
     submitCode(app, db) {
         app.post('/submitCode', (req, res) => {
             let email = req.body.email;
@@ -375,7 +450,9 @@ class Router {
                                         username: data[0].username,
                                         email : data[0].email,
                                         dev: data[0].dev,
-                                        profilePicture: data[0].profilePicture
+                                        profilePicture: data[0].profilePicture,
+                                        phone: data[0].phone,
+                                        fa: data[0].enableFA
                                     })
                                 } else {
                                     res.json({
@@ -390,7 +467,9 @@ class Router {
                                     username: data[0].username,
                                     email : data[0].email,
                                     dev: data[0].dev,
-                                    profilePicture: data[0].profilePicture
+                                    profilePicture: data[0].profilePicture,
+                                    phone: data[0].phone,
+                                    fa: data[0].enableFA
                                 })
                             }
                         } else {
@@ -443,7 +522,10 @@ class Router {
                             username: data[0].username,
                             profilePicture: data[0].profilePicture,
                             dev: data[0].dev,
-                            nickname: data[0].nickname
+                            nickname: data[0].nickname,
+                            email : data[0].email,
+                            phone: data[0].phone,
+                            fa: data[0].enableFA
                         })
                         return true;
                     } else {

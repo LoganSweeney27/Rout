@@ -10,7 +10,10 @@ class UserStore {
             nickname: '',
             register: false,
             isDev: false,
-            address: ''
+            address: '',
+            email: '',
+            phone: '',
+            fa: ''
         })
     }
 }

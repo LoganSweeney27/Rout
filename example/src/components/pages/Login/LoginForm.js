@@ -176,6 +176,9 @@ class LoginForm extends React.Component {
         UserStore.username = result.username;
         UserStore.profilePicture = result.profilePicture;
         UserStore.isDev = result.dev;
+        UserStore.email = result.email;
+        UserStore.phone = result.phone;
+        UserStore.fa = result.fa;
       } else if (result && result.success === false) {
         this.resetForm();
         alert(result.msg);

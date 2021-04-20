@@ -55,7 +55,7 @@ class Rating extends React.Component {
                 />
             </div>
             <div style={{ textAlign: "center", paddingTop: "15px" }}>
-                <Button buttonStyle='btn--nospaces' onClick={this.submitRating()}>Submit Rating</Button>
+                <Button buttonStyle='btn--nospaces' onClick={() => this.submitRating()}>Submit Rating</Button>
             </div>
         </div>
         )
