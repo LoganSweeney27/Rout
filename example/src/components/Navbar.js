@@ -44,7 +44,6 @@ class Navbar extends React.Component {
 
     async isLoggedIn() {
         // alert("checking if logged in: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
-        console.log("isLoggedIn from NavBar")
         try {
             let res = await fetch('/isLoggedIn', {
               method: 'post',
@@ -61,6 +60,9 @@ class Navbar extends React.Component {
               UserStore.profilePicture = result.profilePicture;
               UserStore.nickname = result.nickname;
 			  UserStore.isDev = result.dev;
+              UserStore.email = result.email;
+              UserStore.phone = result.phone;
+              UserStore.fa = result.fa;
             } else {
               UserStore.loading = false;
               UserStore.isLoggedIn = false;
@@ -154,7 +156,6 @@ class Navbar extends React.Component {
                                 </Link>
                             )}
                         </li> */}
-
                         <DarkMode />
                     </ul>
                 </div>

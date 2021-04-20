@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Rating from './Rating';
 
 import './Details.css'
@@ -28,6 +28,8 @@ class Details extends React.Component {
                         <h1 className='details-text'>
                             Difficulty Rating: {this.props.difficulty}
                         </h1>
+                    </div>
+                    <div className='details-row'>
                         <h1 className='details-text'>
                             Starting Location: {this.props.address}
                         </h1>

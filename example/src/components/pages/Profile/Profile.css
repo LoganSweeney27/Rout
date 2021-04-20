@@ -15,8 +15,14 @@
     color: var(--text-color);
 }
 
+.profile-content-container {
+    display: flex;
+    justify-content: start;
+    align-items: normal;
+}
+
 .profile-content {
-    padding-left: 10vh;
+    padding-left: 27vh;
 }
 
 .profile-input-field {
@@ -28,6 +34,20 @@
     border-color: var(--text-color);
     border-radius: 3px;
     transition: 0.3s all;
+}
+
+.profile-picture {
+    /* display: flex;
+    align-items: center;
+    justify-content: center; */
+    padding-left: 60vh;
+    height: 10vh;
+    width: 10vh;
+}
+
+.profile-picture-img {
+    max-width:100%;
+    max-height:100%;
 }
 
 .profile-btn-logout {
