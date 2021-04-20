@@ -261,7 +261,7 @@ class NewMap extends Component {
     this.closeModal = this.closeModal.bind(this);
 	this.finishModal = this.finishModal.bind(this);
 	this.clearMap = this.clearMap.bind(this);
-    this.initMap = this.initMap.bind(this)
+    this.initMap = this.initMap.bind(this);
     this.lastDirections = null;
   }
 
@@ -399,7 +399,7 @@ class NewMap extends Component {
     this.createRoute(start, error, distance, 0, Math.random() * 2 * Math.PI, 0);
     setTimeout(() => {
       if (this.state.wasCreated) {
-        this.pushRoute()
+        //this.pushRoute()
         const panorama = new window.google.maps.StreetViewPanorama(
           document.getElementById('pano'),
           {
@@ -621,23 +621,60 @@ class NewMap extends Component {
   }
   
   async saveRoute() {
-	if (this.state.wasCreated) {
-	  this.pushRoute();
-	} else {
-	  alert("Please create a route first!");
-	}
+	//if (this.state.wasCreated) {
+	
+	  let data = {start:null, end:null, waypoints:[]};
+	  let routeLeg = this.state.d_renderer1.getDirections().routes[0].legs[0];
+	  data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
+	  data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
+	  let wps = routeLeg.via_waypoints;
+	  let wps_latlng = [];
+	  for (var i = 0; i > wps.length; i++) {
+		wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
+	  }
+	  data.waypoints = wps;
+	  //alert(data.start);
+	  //alert(data.end);
+	  
+	  this.pushRoute(data);
+	  
+	//} else {
+	  //alert("Please create a route first!");
+	//}
   }
   
-  loadRoute() { //Locally renders route fetched in fetchRoute()
+  loadRoute(response) { //Locally renders route fetched in fetchRoute()
     if (this.state.uniqueCode == null) {
       alert("No route was fetched!");
 	  return;
     }
 	
-	//this.clearMap();
-	alert(this.state.loadRoute.routes[0]);
-	this.state.d_renderer1.setDirections(this.state.loadRoute);
-	this.state.d_renderer1.setMap(this.state.my_map);
+	this.clearMap();
+	
+	let waypoints = [];
+	let start = response.response_data.start;
+	let end = response.response_data.end;
+	let response_waypoints = response.response_data.waypoints;
+	for (var i = 0; i < response_waypoints.length; i++) {
+		waypoints[i] = {'location': new window.google.maps.LatLng(response_waypoints[i].lat, response_waypoints[i].lng)};
+	}
+	
+	this.state.d_service.route({
+		'origin': new window.google.maps.LatLng(start.lat, start.lng),
+		'destination': new window.google.maps.LatLng(end.lat, end.lng),
+		'waypoints': waypoints,
+		'travelMode': window.google.maps.TravelMode.WALKING
+	},
+	(response, status) => {
+		if (status == "OK") {
+			this.state.d_renderer1.setDirections(response);
+			this.state.d_renderer1.setMap(this.state.my_map);
+		}
+		else {
+			alert("Route re-loading failed");
+		}
+	});
+	
       
   }
     
@@ -657,8 +694,7 @@ class NewMap extends Component {
         if (result && result.success) {
             // If successful set response object
 			let response = JSON.parse(result.response);
-            this.setState({ loadRoute: response });
-			this.loadRoute();
+			this.loadRoute( response );
         } else {
             alert("Could not get route response object.");
         }
@@ -846,7 +882,7 @@ class NewMap extends Component {
   }
 
   //Call to push data to database
-  async pushRoute() {
+  async pushRoute(response_data) {
     try {
       let final_pace;
       if (this.state.pace === '') {
@@ -862,7 +898,7 @@ class NewMap extends Component {
             'Content-type': 'application/json'
         },
         body: JSON.stringify({
-            response: this.state.route,
+            response: JSON.stringify({ response_data }),
             username: UserStore.username,
             distance: this.state.routeDistance_m,
             pace: final_pace,

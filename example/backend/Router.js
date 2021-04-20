@@ -493,8 +493,8 @@ class Router {
     sendRoute(app, db) {
         app.post('/sendRoute', (req, res) => {
             let code = Math.random().toString(20).substr(2, 6);
-            let response = req.body.response;
-            let responseString = this.mysql_real_escape_string(JSON.stringify(response))
+            let response = this.mysql_real_escape_string(req.body.response);
+            let responseString = response;
             let username = req.body.username;
             let distance = req.body.distance;
             let pace = req.body.pace;
