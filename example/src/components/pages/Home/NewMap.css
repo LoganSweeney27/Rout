@@ -152,8 +152,12 @@ table {
   table-layout: fixed;
 }
 
+#saved-routes-table > tr:hover {
+  background-color: #18f;
+}
+
 .selected {
-  background-color: green;
+  background-color: #14f !important;
 }
 
 .modal-btn {
@@ -166,10 +170,6 @@ table {
   display: inline-block;
   font-size: 24px;
   float: right;
-}
-
-#saved-routes-table {
-  
 }
   
   /*For a11y reasons*/
