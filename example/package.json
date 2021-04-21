@@ -18,6 +18,7 @@
     "bcryptjs": "^2.4.3",
     "chart.js": "^2.9.4",
     "emailjs-com": "^2.6.4",
+    "fb": "^2.0.0",
     "materialize-css": "^1.0.0-rc.2",
     "mobx": "^6.1.7",
     "mobx-react": "^7.1.0",

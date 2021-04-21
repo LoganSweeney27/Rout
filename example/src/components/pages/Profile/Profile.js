@@ -15,7 +15,8 @@ class Profile extends React.Component {
             profilePicture: UserStore.profilePicture,
             email: UserStore.email,
             phone: UserStore.phone,
-            FAEnabled: UserStore.fa
+            FAEnabled: UserStore.fa,
+            code: ""
         };
         this.setFAEnabled();
     }
@@ -155,6 +156,35 @@ class Profile extends React.Component {
         }
     }
 
+    async doFB() {
+        let code = this.state.code;
+        console.log(code);
+        if (code != "") {
+            try {
+                let res = await fetch('/postFB', {
+                    method: 'post',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code
+                    })
+                });
+                let result = await res.json();
+                if (result && result.success) {
+                  alert("Route successfully shared");
+                } else if (result && result.success === false) {
+                    alert(result.msg);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        } else {
+            console.log("empty");
+        }
+    }
+
     async doLogout() {
         try {
           let res = await fetch('/logout', {
@@ -198,7 +228,8 @@ class Profile extends React.Component {
     }
 
     handleFacebook = (e) => {
-
+        console.log("reached FB");
+        this.doFB();
     }
 
     handleInstagram = (e) => {
@@ -257,6 +288,7 @@ class Profile extends React.Component {
                             <b style={{ marginLeft: "3px" }}>
                                 Share your routes:
                             </b>
+                            <input className='profile-input-field' name='code' value={this.state.code} onChange={(e) => this.setState({ code: e.target.value })} type='text' placeholder={"Enter Route ID Here"} />
                             <Button buttonStyle='btn--regular' onClick={ (e) => this.handleFacebook(e) }>
                                 <FaFacebook />
                             </Button>

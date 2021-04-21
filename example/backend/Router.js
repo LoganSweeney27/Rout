@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
 const { parseIsolatedEntityName } = require('typescript');
+var fb = require('fb');
+const { FB } = require('fb/lib/fb');
 
 
 class Router {
@@ -26,8 +28,24 @@ class Router {
 		this.getRoutesUsername(app, db);
         this.getResponse(app, db);
 		this.getResponseByCode(app, db);
+        this.postFB(app, db);
     }
 
+    postFB(app, db) {
+        app.post('/postFB', (req, res) => {
+            let code = req.body.code;
+            console.log(code);
+            FB.setAccessToken('EAAFN5WZAsKekBAGoB9ZChNjkycRPawXZCxFCy6Rob1tZA5bbko22b40ZBcXfsRH4VyT6i1F2x33RYF044jflMZBFQKMVj3pmmg3pLQvnfRWbbla5dbGAZAO4zalcTWg5H7xcBqATt9lklILciiZA9pXojfkpluMTrRKq9BSK0dZCo3tNNZATxZCUrOi');
+            FB.api(
+                '/RoutRunning/feed',
+                'POST',
+                { "message": "Here is your Rout- " + code + "."},
+                function (response) {
+                    console.log(response);
+                }
+            )
+        })
+    }
 
     changeNickname(app, db) {
         app.post('/changeNickname', (req, res) => {
