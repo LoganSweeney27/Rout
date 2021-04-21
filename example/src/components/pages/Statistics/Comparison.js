@@ -70,7 +70,6 @@ class Comparison extends React.Component {
             if (minutes === 0) {
                 return seconds;
             }
-            alert(seconds[0])
             if (seconds[0] == 0) {
                 return minutes + ":0" + seconds;
             } else {
