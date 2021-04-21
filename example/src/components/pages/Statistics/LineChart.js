@@ -81,7 +81,7 @@ class LineChart extends React.Component {
             ticks: {
               fontColor: 'rgba(80, 130, 250, 1)',
               suggestedMin: 0,
-              suggestedMax: 2000
+              suggestedMax: 500
             },
             gridLines: {
               display: false,

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import './NewMap.css'
 import { Button } from '../../Button';
 import Details from './Details';
 import UserStore from '../Login/Stores/UserStore';
@@ -8,6 +7,7 @@ import Modal from "react-modal"
 import InputField from '../Login/InputField.js'
 
 import './Input.css'
+import './NewMap.css'
 
 let startPoint = null;
 let wayptOn = false;
