@@ -1087,7 +1087,8 @@ class NewMap extends Component {
               />
       
 			<br />
-			<button id="modal-btn" onClick={this.finishModal}>Confirm</button>
+			<button buttonStyle='btn--input' id="modal-btn" onClick={this.finishModal}>Import Using Saved File</button>
+			<button buttonStyle='btn--input' id="modal-btn" onClick={this.finishModal}>Confirm</button>
 
 		</Modal>
 
