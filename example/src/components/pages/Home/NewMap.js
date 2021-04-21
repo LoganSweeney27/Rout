@@ -135,19 +135,7 @@ function listenforStart(map) {
 
 
 
-/* Takes in an address string and uses a geocoder to convert into a latLng object */
-function geocodeAddr(geocoder, addr) {
-  //const addr = document.getElementById("addr");
-  geocoder.geocode({address: addr}, (results, status) => {
-    if (status == "OK") {
-      startPoint = results[0].geometry.location;
-    } else {
-      /*alert(
-        "Address geocoding was not successful for the following reason: " + status
-      );*/
-    }
-  });
-}
+
 
 
 
@@ -197,6 +185,7 @@ class NewMap extends Component {
       chartIsReady:false,
       routeDistance:"", //distance of the produced route
       routeDistance_m: '', //distance of real produced route in distance
+      d_autocomplete: null,
       d_service:null,
       d_renderer1:null,
       d_renderer2:null,
@@ -335,8 +324,11 @@ class NewMap extends Component {
         const geocoder = new window.google.maps.Geocoder();
         this.setState({d_geocoder : geocoder});
       }
-      const addy = document.getElementById("addy");
-      const autocomplete = new window.google.maps.places.Autocomplete(addy);
+      if (this.state.d_autocomplete == null) {
+        const autocomplete = new window.google.maps.places.Autocomplete(document.getElementById("addy"));
+        this.setState({d_autocomplete: autocomplete})
+      }
+      
 
       listenforStart(map);
     }//end of if statement
@@ -671,17 +663,25 @@ class NewMap extends Component {
   /* Run algorithm with user inputted data */
   runAlgorithmWithData = () => {
 
-    const address = document.getElementById("addy");
-    if (address) {
-      geocodeAddr(this.state.d_geocoder, this.state.addr);
+      /*const addy = document.getElementById("addy");
+      alert("addy: " + addy);
+      const autocomplete = new window.google.maps.places.Autocomplete(addy);
+      alert("newaddy: " + addy);*/
+
+    var fullAddr = null;
+    if (this.state.d_autocomplete.getPlace()) {
+      fullAddr = this.state.d_autocomplete.getPlace().formatted_address;
     }
+    if (fullAddr) {
+      this.geocodeAddr(this.state.d_geocoder, fullAddr);
+    } else if (startPoint == null) {
+      this.geocodeAddr(this.state.d_geocoder, this.state.addr);
+    }
+
     this.convertToMeters();
-    
-    //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
     setTimeout(() => {
       if (startPoint) {
         if (this.state.distance_m) {
-
           //this.setState({routeDistance: data.distance});
           this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m);
 
@@ -728,7 +728,20 @@ class NewMap extends Component {
     }
   }
 
-
+  /* Takes in an address string and uses a geocoder to convert into a latLng object */
+  geocodeAddr(geocoder, addr) {
+    //const addr = document.getElementById("addr");
+    geocoder.geocode({address: addr}, (results, status) => {
+      if (status == "OK") {
+        startPoint = results[0].geometry.location;
+        this.setState({addr: addr});
+      } else {
+        /*alert(
+          "Address geocoding was not successful for the following reason: " + status
+        );*/
+      }
+    });
+  }
 
 
   estimate_time(distance_m) {
