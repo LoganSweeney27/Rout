@@ -1,7 +1,6 @@
 import React from 'react'
 import { Button } from '../../Button'
 import { Link } from 'react-router-dom'
-// import LinkButton from '../../LinkButton';
 import UserStore from '../Login/Stores/UserStore';
 import { FaFacebook, FaInstagram, FaTwitter } from 'react-icons/fa';
 

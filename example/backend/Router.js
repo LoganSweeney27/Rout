@@ -810,7 +810,7 @@ class Router {
         app.post('/getLine', (req, res) => {
             let username = req.body.username;
         
-            var sql = "SELECT sum(calories) as calories, date FROM prevroutes WHERE username = \"" + username + "\" GROUP BY date";
+            var sql = "SELECT sum(calories) as sumCalories, max(calories) as maxCalories, date FROM prevroutes WHERE username = \"" + username + "\" GROUP BY routeID";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
@@ -825,13 +825,14 @@ class Router {
                         let dataArray = [];
                         let labelsArray = [];
                         for (let i = 0; i < data.length; i++) {
-                            dataArray[i] = data[i].calories;
+                            dataArray[i] = data[i].sumCalories;
                             labelsArray[i] = data[i].date;
                         }
                         res.json({
                             success: true,
                             data: dataArray,
-                            labels: labelsArray
+                            labels: labelsArray,
+                            maxCalories: data[0].maxCalories
                         })
                         return true;
                     } else {
