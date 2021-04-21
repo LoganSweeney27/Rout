@@ -571,7 +571,7 @@ class NewMap extends Component {
                 this.estimate_time(totaldistance); //estimate for final time value
                 this.estimate_calories(totaldistance); //estimate for final calories burned
                 this.calcDifficulty(totaldistance); //calculates difficulty score
-                this.calcPace(totaldistance, this.state.final_time); //calculates pace
+                //this.calcPace(totaldistance, this.state.final_time); //calculates pace
                 //this.setState({routeDistance: displayDistance});
                 this.setState({ routeDistance_m: totaldistance })
                 this.setState({ route: response })
@@ -769,14 +769,21 @@ class NewMap extends Component {
   }
 
   /* Function to convert a distance (m) and time (min) into a pace */
-  calcPace(distance, time) {
+  calcPace() {
+    var distance = this.state.routeDistance_m;
+    var time = 0;
+    if (this.state.compTime != null) {
+      time = this.state.compTime;
+    } else {
+      time = this.state.final_time;
+    }
     distance = distance * 0.000621371;
     if (time > 100) {
       time = time / 60;
     }
     var tempPace = time / distance;
     tempPace = Math.round(tempPace * 10) / 10;
-    alert("tempPace = " + tempPace);
+    //alert("tempPace = " + tempPace);
     /*if (Number.isInteger(pace)) {
       return pace;
     } else {
@@ -890,6 +897,10 @@ class NewMap extends Component {
 	  this.loadRoute();
   }
 
+  handlePace = () => {
+    this.calcPace();
+  }
+
 
   render() {
     return (
@@ -898,7 +909,6 @@ class NewMap extends Component {
           <div className='map-inputs'>
             <div>
                 <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => this.setState({ addr: e.target.value })} type='text' id='addy' placeholder='Address' />
-                <input className='input-field' name='compTime' value={this.state.compTime} onChange={(e) => this.setState({ compTime: e.target.value })} type='text' id='compTime' placeholder='Completion Time (min)' />
             </div>
             <div>
               {!this.state.inputTypes && <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => { this.setState({ distance: e.target.value }); this.setState({ hasDistance: true })}} type='text' placeholder={this.state.units} />} 
@@ -927,6 +937,12 @@ class NewMap extends Component {
               <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
                   Waypoints
               </Button>
+            </div>
+            <div>
+                {this.state.wasCreated && <input className='input-field' name='compTime' value={this.state.compTime} onChange={(e) => this.setState({ compTime: e.target.value })} type='text' id='compTime' placeholder='Completion Time (min)' />}
+                {this.state.wasCreated && <Button buttonStyle='btn--input' onClick={this.handlePace}>
+                  Enter Time
+                </Button>}
             </div>
             {/* <div>
             <input className='input-field' name='final_time' value={this.state.final_time} onChange={(e) => this.setState({ final_time: e.target.value })} type='text' placeholder={'Final Run Time'} />
