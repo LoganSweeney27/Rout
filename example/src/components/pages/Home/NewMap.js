@@ -252,15 +252,16 @@ class NewMap extends Component {
       hasDistance: false,
       hasPace: false,
       hasTime: false,
-	  showModal: false,
+	    showModal: false,
       elevationDiff: 0,
-	  uniqueCode:null, //code for loading saved routes
+	    uniqueCode:null, //code for loading saved routes
+      routeChoosen: 1,
     }
 
-	this.openModal = this.openModal.bind(this);
+	  this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
-	this.finishModal = this.finishModal.bind(this);
-	this.clearMap = this.clearMap.bind(this);
+	  this.finishModal = this.finishModal.bind(this);
+	  this.clearMap = this.clearMap.bind(this);
     this.initMap = this.initMap.bind(this);
     this.lastDirections = null;
   }
@@ -1016,18 +1017,18 @@ class NewMap extends Component {
               <Button buttonStyle='btn--input' onClick={(e) => this.handleChangeUnit(e)}>
                   Change Units
               </Button>
-			  {UserStore.isLoggedIn == true && <Button buttonStyle='btn--input' onClick={this.handleSave}>Save</Button>}
-			  {UserStore.isLoggedIn == true && <Button buttonStyle='btn--input' onClick={this.handleLoad}>Load</Button>}
+			        {UserStore.isLoggedIn === true && <Button buttonStyle='btn--input' onClick={this.handleSave}>Save</Button>}
+			        {UserStore.isLoggedIn === true && <Button buttonStyle='btn--input' onClick={this.handleLoad}>Load</Button>}
             </div>
             <div style={{ paddingTop: "10px" }}>
               <Button buttonStyle='btn--input' onClick={(e) => this.handleEnter(e)}>
-                  Enter
+                Enter
               </Button>
               <Button buttonStyle='btn--input' onClick={this.handleClear}>
                 Clear
               </Button>
               <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
-                  Waypoints
+                Waypoints
               </Button>
             </div>
             {/* <div>
@@ -1036,9 +1037,7 @@ class NewMap extends Component {
             <Button buttonStyle='btn--input' onClick={this.handleFinalTimeSave}>
                 Final Run Time Enter
             </Button> */}
-			
-        </div>
-          <h1>{this.state.routeDistance}</h1>
+          </div>
         </div>
         <div>
           <main id="map" role="application"></main>
