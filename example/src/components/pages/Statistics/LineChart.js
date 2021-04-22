@@ -95,6 +95,8 @@ class LineChart extends React.Component {
     };
     if (this.state.loading) {
         return <div className='loading'>Data is loading... </div>;
+    } else if (this.state.data.length < 2) {
+        return <div className='loading'>Not enough routes to display line graph. </div>;
     } else {
       return (
         <div className='lineChart'>
