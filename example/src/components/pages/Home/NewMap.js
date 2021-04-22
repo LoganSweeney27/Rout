@@ -1134,11 +1134,11 @@ class NewMap extends Component {
               </Button>
             </div>
             <div class="dropdown">
-              <button class="dropbtn">Choose Route</button>
+              {this.state.wasCreated && <button class="dropbtn">Choose Route</button>}
               <div class="dropdown-content">
-                <a onClick={this.handleRoute1}>Route 1 (Blue)</a>
-                <a onClick={this.handleRoute2}>Route 2 (Green)</a>
-                <a onClick={this.handleRoute3}>Route 3 (Red)</a>
+                <Button onClick={this.handleRoute1}>Route 1 (Blue)</Button>
+                <Button onClick={this.handleRoute2}>Route 2 (Green)</Button>
+                <Button onClick={this.handleRoute3}>Route 3 (Red)</Button>
               </div>
             </div>
             {/* <div>
