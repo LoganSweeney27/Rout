@@ -232,7 +232,7 @@ class NewMap extends Component {
       d_geocoder:null,
       my_map:null, //Map object
       wayptListener:null,
-      addr: 'West Lafayette, IN, US',
+      addr: '',
       distance: '', //inputted distance, could be in miles or kilometers
       distance_m:'', //distance in meters
       pace: '',
