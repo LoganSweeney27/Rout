@@ -225,20 +225,6 @@ class Profile extends React.Component {
         this.changeTFA()
         this.setState({ FAEnabled: !this.state.FAEnabled })
     }
-
-    handleFacebook = (e) => {
-        console.log("reached FB");
-        this.doFB();
-    }
-
-    handleInstagram = (e) => {
-
-    }
-
-    handleTwitter = (e) => {
-
-    }
-
     handleLogOut = (e) => {
         this.doLogout()
     }
@@ -294,16 +280,19 @@ class Profile extends React.Component {
                                 Share your routes:
                             </b>
                             <input className='profile-input-field' name='code' value={this.state.code} onChange={(e) => this.setState({ code: e.target.value })} type='text' placeholder={"Enter Route ID Here"} />
-                            <Button buttonStyle='btn--regular' onClick={ (e) => this.handleFacebook(e) }>
-                                <FaFacebook />
+                            <Button buttonStyle='btn--regular'>
+                                <a title="send to Facebook" 
+                                    href="http://www.facebook.com/sharer.php?s=100&p[title]=MyRout&p[quote]=hello&p[url]=https://rout.link/"
+                                    target="_blank">
+                                <FaFacebook /></a>
                             </Button>
-                            <Button buttonStyle='btn--regular' onClick={ (e) => this.handleInstagram(e) }>
-                                <FaInstagram />
+                            <Button buttonStyle='btn--regular'>
+                                <a title="send to Instagram" 
+                                    href="https://www.instagram.com/"
+                                    target="_blank">
+                                <FaInstagram /></a>
                             </Button>
-                            {/* <Button buttonStyle='btn--regular' onClick={ (e) => this.handleTwitter(e) }>
-                                <FaTwitter />
-                            </Button> */}
-                            <Button buttonStyle='btn--regular' onClick={ (e) => this.handleTwitter(e) }>
+                            <Button buttonStyle='btn--regular'>
                                 <a class="twitter-share-button"
                                 href={this.createHref()}
                                 target="_blank"
