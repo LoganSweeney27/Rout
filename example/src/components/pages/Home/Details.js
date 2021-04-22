@@ -35,8 +35,9 @@ function plotElevation(elevations, status) {
 
     if (status !== "OK") {
     // Show the error code inside the chartDiv.
-        chartDiv.innerHTML =
-                "Cannot show elevation: request failed because " + status;
+        alert("Cannot show elevation: request failed because " + status);
+        // chartDiv.innerHTML =
+        //         "Cannot show elevation: request failed because " + status;
         return;
     }
     // Create a new chart in the elevation_chart DIV.
@@ -91,7 +92,11 @@ class Details extends React.Component {
 
     componentDidUpdate() {
         //check if route has updated
-        if ((this.props.route.routes[0].legs[0].steps.length - 1) != (this.state.max_route_turns)) {
+        if ((this.props.route != null) &&
+                    (this.props.route.routes[0].legs[0].steps.length - 1) != (this.state.max_route_turns)) {
+            this.setState({max_route_turns : this.props.route.routes[0].legs[0].steps.length - 1})
+            this.setState({currentStreetIndex : 0});
+
             this.updateStreetView();
             this.updateAltitude();
         }
@@ -118,7 +123,7 @@ class Details extends React.Component {
             this.props.my_map.setStreetView(panorama);
         } else {
 
-            this.state.panorama.setPosition(this.props.route.routes[0].legs[0].steps[++this.state.currentStreetIndex].start_location);
+            this.state.panorama.setPosition(this.props.route.routes[0].legs[0].steps[0].start_location);
             this.props.my_map.setStreetView(this.state.panorama);
         }
     }

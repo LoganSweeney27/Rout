@@ -78,9 +78,6 @@ function listenforStart(map) {
 
 
 
-
-
-
 /* Function to quantify the hilliness of a route */
 function findHilliness(arr) {
   var prevElevation = arr[0].elevation;
@@ -123,8 +120,6 @@ class NewMap extends Component {
       mdy = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
 
     this.state = {
-      mapIsReady: false,
-      chartIsReady: false,
       routeDistance: "", //distance of the produced route
       routeDistance_m: '', //distance of real produced route in distance
       d_autocomplete: null,
@@ -193,17 +188,16 @@ class NewMap extends Component {
     scriptChart.src = 'https://www.gstatic.com/charts/loader.js'
     scriptChart.onerror = function () { window.alert("The Google Charts API failed to load data!") }
 
-    //this is a callback to wait until the code has loaded
+   // this is a callback to wait until the code has loaded
     scriptMap.addEventListener('load', () => {
-      this.setState({ mapIsReady: true })
-      scriptChart.addEventListener('load', () => {
-        if (this.state.mapIsReady) {
-          window.google.charts.load('current', { packages: ['corechart'] });
-          this.setState({ chartIsReady: true });
-          this.initMap()
-        }
-      });
-
+      
+      this.initMap();
+    });
+      
+    scriptChart.addEventListener('load', () => {
+        //alert("loaded")
+        window.google.charts.load('current', { packages: ['corechart'] });
+      
     });
 
     window.document.body.appendChild(scriptMap)
@@ -225,7 +219,6 @@ class NewMap extends Component {
   /* this function initializes the map and prepares*/
   initMap() {
     //if map is ready to load
-    if (this.state.mapIsReady && this.state.chartIsReady) {
       const map = new window.google.maps.Map(document.getElementById('map'), {
         center: { lat: 40.4259, lng: -86.9081 },//{lat: 40, lng: -105},//{
         zoom: 13,
@@ -316,7 +309,7 @@ class NewMap extends Component {
       
 
       listenforStart(map);
-    }//end of if statement
+    //end of if statement
 
   } /* initMap() */
 
