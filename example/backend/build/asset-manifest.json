@@ -1,30 +1,21 @@
 {
   "files": {
-    "main.css": "./static/css/main.ddaed268.chunk.css",
-<<<<<<< HEAD
-    "main.js": "./static/js/main.b07729fd.chunk.js",
-    "main.js.map": "./static/js/main.b07729fd.chunk.js.map",
-=======
-    "main.js": "./static/js/main.00f39f56.chunk.js",
-    "main.js.map": "./static/js/main.00f39f56.chunk.js.map",
->>>>>>> 5a9e6ed53ec1812530d9d52dc44403cbcc86616e
+    "main.css": "./static/css/main.f5a45a05.chunk.css",
+    "main.js": "./static/js/main.abc06ed8.chunk.js",
+    "main.js.map": "./static/js/main.abc06ed8.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.b437da2e.js",
     "runtime-main.js.map": "./static/js/runtime-main.b437da2e.js.map",
     "static/js/2.913e5c22.chunk.js": "./static/js/2.913e5c22.chunk.js",
     "static/js/2.913e5c22.chunk.js.map": "./static/js/2.913e5c22.chunk.js.map",
     "index.html": "./index.html",
-    "static/css/main.ddaed268.chunk.css.map": "./static/css/main.ddaed268.chunk.css.map",
+    "static/css/main.f5a45a05.chunk.css.map": "./static/css/main.f5a45a05.chunk.css.map",
     "static/js/2.913e5c22.chunk.js.LICENSE.txt": "./static/js/2.913e5c22.chunk.js.LICENSE.txt",
     "static/media/google street view.png": "./static/media/google street view.25d6a62b.png"
   },
   "entrypoints": [
     "static/js/runtime-main.b437da2e.js",
     "static/js/2.913e5c22.chunk.js",
-    "static/css/main.ddaed268.chunk.css",
-<<<<<<< HEAD
-    "static/js/main.b07729fd.chunk.js"
-=======
-    "static/js/main.00f39f56.chunk.js"
->>>>>>> 5a9e6ed53ec1812530d9d52dc44403cbcc86616e
+    "static/css/main.f5a45a05.chunk.css",
+    "static/js/main.abc06ed8.chunk.js"
   ]
 }
