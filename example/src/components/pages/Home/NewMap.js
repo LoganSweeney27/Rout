@@ -63,61 +63,6 @@ function newCoordinatesLocation(lat, lng, distance, direction) {
 
 
 
-// /* Displays the elevation along the given path */
-// function displayPathElevation(
-//   path,
-//   elevator,
-//   ) {
-
-//   // Create a PathElevationRequest object using this array.
-//   // Ask for 256 samples along that path.
-//   // Initiate the path request.
-//   elevator.getElevationAlongPath(
-//       {
-//         path: path,
-//         samples: 256,
-//       },
-//       plotElevation
-//   );
-// } /* displayPathElevation() */
-
-
-
-// /* Takes an array of ElevationResult objects, draws the path on the map
-//  and plots the elevation profile on a Visualization API ColumnChart. */
-// function plotElevation(elevations, status) {
-//   const chartDiv = window.document.getElementById("elevation_chart");
-
-//   if (status !== "OK") {
-//   // Show the error code inside the chartDiv.
-//   chartDiv.innerHTML =
-//         "Cannot show elevation: request failed because " + status;
-//   return;
-//   }
-//   // Create a new chart in the elevation_chart DIV.
-//   const chart = new window.google.visualization.ColumnChart(chartDiv);
-
-//   // Extract the data from which to populate the chart.
-//   // Because the samples are equidistant, the 'Sample'
-//   // column here does double duty as distance along the
-//   // X axis.
-//   const data = new window.google.visualization.DataTable();
-//   data.addColumn("string", "Sample");
-//   data.addColumn("number", "Elevation");
-
-//   for (let i = 0; i < elevations.length; i++) {
-//   data.addRow(["", elevations[i].elevation]);
-//   }
-
-// Draw the chart using the data within its DIV.
-// chart.draw(data, {
-// height: 150,
-// legend: "none",
-// // @ts-ignore TODO(jpoehnelt) update to newest visualization library
-// titleY: "Elevation (m)",
-// });
-// } /* plotElevation() */
-
 
 /* Listens for starting marker to be placed */
 function listenforStart(map) {
@@ -231,7 +176,6 @@ class NewMap extends Component {
           window.google.charts.load('current', { packages: ['corechart'] });
           this.setState({ chartIsReady: true });
           this.initMap()
-
         }
       });
 
