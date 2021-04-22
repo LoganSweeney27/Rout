@@ -223,8 +223,8 @@ class NewMap extends Component {
     this.state = {
       mapIsReady:false,
       chartIsReady:false,
-      routeDistance:"", //distance of the produced route
-      routeDistance_m: '', //distance of real produced route in distance
+      routeDistance: [], //distance of the produced route
+      routeDistance_m: [], //distance of real produced route in meters
       d_service:null,
       d_renderer1:null,
       d_renderer2:null,
@@ -232,17 +232,17 @@ class NewMap extends Component {
       d_geocoder:null,
       my_map:null, //Map object
       wayptListener:null,
-      addr: '',
+      addr: 'West Lafayette, IN, US',
       distance: '', //inputted distance, could be in miles or kilometers
       distance_m:'', //distance in meters
       pace: '',
       time: '',
-      final_time:'',
+      final_time: [],
       final_pace: '',
       units: 'Distance (Kilometers)',
       unitType: 'kilometers',
       showDetails: false,
-      calories: 0,
+      calories: [],
       route: null,
       loadRoute: "Didn't work :(", // state for loading routes
       wasCreated: false,
@@ -255,7 +255,7 @@ class NewMap extends Component {
 	    showModal: false,
       elevationDiff: 0,
 	    uniqueCode:null, //code for loading saved routes
-      routeChoosen: 1,
+      routeChoosen: 0, // state for deciding which multi route to choose
     }
 
     this.openModal = this.openModal.bind(this);
@@ -604,8 +604,12 @@ class NewMap extends Component {
                 this.convertToDisplayDistance(totaldistance);
                 this.estimate_time(totaldistance); //estimate for final time value
                 this.estimate_calories(totaldistance); //estimate for final calories burned
-                //this.setState({routeDistance: displayDistance});
-                this.setState({ routeDistance_m: totaldistance })
+                //    ****** This is not real I dont think ******  this.setState({routeDistance: displayDistance});
+                this.setState(prevState => ({
+                  routeDistance_m: [...prevState.routeDistance_m, totaldistance]
+                }))
+                // Working one route set distance, above is for multi routes
+                // this.setState({ routeDistance_m: totaldistance })
                 this.setState({ route: response })
                 this.setState({ wasCreated: true });
                 this.createRoute(start,error,distance, 0, 0, ++multi);
@@ -641,8 +645,8 @@ class NewMap extends Component {
     element.download = "rout.txt";
     document.body.appendChild(element);
     element.click();
-
   }
+
   async saveRoute() {
 	
 	let data = {start:null, end:null, waypoints:[]};
@@ -652,7 +656,7 @@ class NewMap extends Component {
 	let wps = routeLeg.via_waypoints;
 	let wps_latlng = [];
 	for (var i = 0; i > wps.length; i++) {
-	wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
+		wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
 	}
 	data.waypoints = wps;
 
@@ -850,10 +854,18 @@ class NewMap extends Component {
   /* Converts given Distance to displayable distance */
   convertToDisplayDistance(distance) {
     if (this.state.unitType === 'kilometers') {
-      this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
+      this.setState(prevState => ({
+        routeDistance: [...prevState.routeDistance, ((parseInt(distance) / 1000) + " km")]
+      }))
+      // Working one route set distance, above is for multi routes
+      // this.setState({routeDistance : ((parseInt(distance) / 1000) + " km") });
     } else {
       //convert meters to miles
-      this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
+      this.setState(prevState => ({
+        routeDistance: [...prevState.routeDistance, ((parseInt(distance) * 0.000621371) + " miles")]
+      }))
+      // Working one route set distance, above is for multi routes
+      // this.setState({routeDistance : ((parseInt(distance) * 0.000621371) + " miles")});
     }
   } /* convertToDisplayDistance() */
 
@@ -923,14 +935,22 @@ class NewMap extends Component {
   estimate_time(distance_m) {
     // 0.00559234 is 9 min/mile as min/meter
     // multiplied by 60 to get in seconds
-    this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
+    this.setState(prevState => ({
+      final_time: [...prevState.final_time, (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)]
+    }))
+    // Working one route set distance, above is for multi routes
+    // this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
   }
 
 
   estimate_calories(distance) {
     // 0.00062 is the conversion rate from meters to miles
     // 100 is the average calories burned per mile
-    this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
+    this.setState(prevState => ({
+      calories: [...prevState.calories, (100 * (distance * 0.00062)).toFixed(0)]
+    }))
+    // Working one route set distance, above is for multi routes
+    // this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
   }
 
   //Call to push data to database
@@ -952,10 +972,10 @@ class NewMap extends Component {
         body: JSON.stringify({
             response: JSON.stringify({ response_data }),
             username: UserStore.username,
-            distance: this.state.routeDistance_m,
+            distance: this.state.routeDistance_m[this.state.routeChoosen],
             pace: final_pace,
-            time: this.state.final_time,
-            calories: this.state.calories,
+            time: this.state.final_time[this.state.routeChoosen],
+            calories: this.state.calories[this.state.routeChoosen],
             difficulty: -1,
             rating: -1,
             location: this.state.addr,
@@ -1022,6 +1042,7 @@ class NewMap extends Component {
   /* Clears map when clear button is pressed */
   handleClear = () => {
     this.clearMap()
+    this.setState({ routeDistance: [], routeDistance_m: [], final_time: [], calories: [] });
   } /* handleClear */
 
   /* When Waypoints button is pressed, wait for waypoints */
@@ -1103,7 +1124,7 @@ class NewMap extends Component {
           <div id="pano"></div>
         </div>
         <div>
-        {this.state.showDetails && <Details routeDistance={this.state.routeDistance} time={this.state.final_time} pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
+        {this.state.showDetails && <Details routeDistance={this.state.routeDistance[this.state.routeChoosen]} time={this.state.final_time[this.state.routeChoosen]} pace={this.state.final_pace} calories={this.state.calories[this.state.routeChoosen]} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
             <div className='details-btn'>
                 <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
                     Details ^

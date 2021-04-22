@@ -10,7 +10,7 @@ class UserStore {
             nickname: '',
             register: false,
             isDev: false,
-            address: '',
+            address: 'West Lafayette, IN, US',
             email: '',
             phone: '',
             fa: ''
