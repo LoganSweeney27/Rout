@@ -997,6 +997,7 @@ class NewMap extends Component {
       let result = await res.json();
         if (result && result.success) {
             // If successful call new sql query to obtain last routeID
+			alert("Route saved! Your sharing code is: " + result.uniqueID);
             this.setRouteID();
         } else {
             alert("Could not insert information into database or user is not logged in!");
