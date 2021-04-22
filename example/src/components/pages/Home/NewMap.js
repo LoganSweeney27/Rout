@@ -953,6 +953,18 @@ class NewMap extends Component {
     // this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
   }
 
+  changeTo1() {
+    this.setState({routeChoosen: 0});
+  }
+
+  changeTo2() {
+    this.setState({routeChoosen: 1});
+  }
+
+  changeTo3() {
+    this.setState({routeChoosen: 2});
+  }
+
   //Call to push data to database
   async pushRoute(response_data) {
     try {
@@ -1057,6 +1069,18 @@ class NewMap extends Component {
   handleLoad = () => {
 	this.openModal();
   }
+
+  handleRoute1 = () => {
+    this.changeTo1();
+  }
+  
+  handleRoute2 = () => {
+    this.changeTo2();
+  }
+
+  handleRoute3 = () => {
+    this.changeTo3();
+  }
   
   openModal() {
 	this.setState({ showModal: true });
@@ -1108,6 +1132,14 @@ class NewMap extends Component {
               <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
                 Waypoints
               </Button>
+            </div>
+            <div class="dropdown">
+              <button class="dropbtn">Choose Route</button>
+              <div class="dropdown-content">
+                <a onClick={this.handleRoute1}>Route 1 (Blue)</a>
+                <a onClick={this.handleRoute2}>Route 2 (Green)</a>
+                <a onClick={this.handleRoute3}>Route 3 (Red)</a>
+              </div>
             </div>
             {/* <div>
             <input className='input-field' name='final_time' value={this.state.final_time} onChange={(e) => this.setState({ final_time: e.target.value })} type='text' placeholder={'Final Run Time'} />
