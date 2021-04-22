@@ -1,7 +1,7 @@
 import React from 'react'
 import './Button.css'
 
-const STYLES = ['btn--primary', 'btn--outline', 'btn--input', 'btn--lightbulb', 'btn--details', 'btn--weather', 'btn--regular', 'btn--logout']
+const STYLES = ['btn--primary', 'btn--outline', 'btn--input', 'btn--lightbulb', 'btn--details', 'btn--weather', 'btn--regular', 'btn--logout', 'btn--nospaces']
 const SIZES = ['btn--medium', 'btn--medium_dark', 'btn--large', 'btn--mobile', 'btn--wide']
 const COLOR = ['primary', 'darkmode']
 

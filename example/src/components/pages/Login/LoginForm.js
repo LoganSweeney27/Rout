@@ -12,7 +12,7 @@ class LoginForm extends React.Component {
       username: '',
       password: '',
       nickname: '',
-      profilePicture: '',
+      profilePicture: 'https://t4.ftcdn.net/jpg/04/10/43/77/360_F_410437733_hdq4Q3QOH9uwh0mcqAhRFzOKfrCR24Ta.jpg',
       forgotCode: '',
       buttonDisabled: false,
       formDisabled: false,
@@ -176,6 +176,9 @@ class LoginForm extends React.Component {
         UserStore.username = result.username;
         UserStore.profilePicture = result.profilePicture;
         UserStore.isDev = result.dev;
+        UserStore.email = result.email;
+        UserStore.phone = result.phone;
+        UserStore.fa = result.fa;
       } else if (result && result.success === false) {
         this.resetForm();
         alert(result.msg);

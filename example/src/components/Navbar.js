@@ -21,17 +21,22 @@ class Navbar extends React.Component {
         window.addEventListener('resize', this.showButton)
     }
 
-    componentDidMount() {
+    componentWillMount() {
         this.isLoggedIn()
-        this.navbar.addEventListener('click', this.reRender);
+    }
+
+    componentDidMount() {
+        this.interval = setInterval(() => {
+            // console.log('This will run every second!');
+            this.reRender()
+         }, 1000);
     }
 
     componentWillUnmount() {
-        this.navbar.removeEventListener('click', this.reRender);
+        clearInterval(this.interval);
     }
 
     async isLoggedIn() {
-        // alert("checking if logged in: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
         try {
             let res = await fetch('/isLoggedIn', {
               method: 'post',
@@ -48,6 +53,9 @@ class Navbar extends React.Component {
               UserStore.profilePicture = result.profilePicture;
               UserStore.nickname = result.nickname;
 			  UserStore.isDev = result.dev;
+              UserStore.email = result.email;
+              UserStore.phone = result.phone;
+              UserStore.fa = result.fa;
             } else {
               UserStore.loading = false;
               UserStore.isLoggedIn = false;
@@ -60,12 +68,14 @@ class Navbar extends React.Component {
             UserStore.isLoggedIn = false;
 			UserStore.isDev = false;
           }
-        // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn + " and .isDev=" + UserStore.isDev);
         this.setState({})
     }
 
+    isUserADev = (e) => {
+        return (UserStore.isDev === 1)
+    }
+
     reRender = (e) => {
-        // this.isLoggedIn()
         this.forceUpdate()
     }
 
@@ -111,18 +121,14 @@ class Navbar extends React.Component {
                         <li className='nav-item'>
                             {UserStore.isLoggedIn && <Link to='/Statistics' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Statistics</Link>}
                         </li>
-                        {/* <li className='nav-item'>
-                            {this.state.loggedIn ? <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link> : <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
-                        </li> */}
                         <li className='nav-item'>
                             {UserStore.isLoggedIn && <Link to='/Profile' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Profile</Link>}
                         </li>
-                        {/* I think the UserStore.isDev is being rendered on the navbar as a 0, because the user is not a dev, i.e. (isdev=0) */}
 						<li className='nav-item'>
-                            {UserStore.isDev && <a class="nav-links" href="https://rout.link/phpmyadmin">Database</a>}
+                            {this.isUserADev() && <a class="nav-links" href="https://rout.link/phpmyadmin">Database</a>}
 						</li>
                         <li className='nav-item'>
-                            <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>
+                            {!UserStore.isLoggedIn && <Link to='/Login' className='nav-links' onClick={ (e) => this.closeMobileMenu(e) }>Login</Link>}
                         </li>
                         {/* example of using mobile buttons */}
                         {/* <li className='nav-btn'>
@@ -141,7 +147,6 @@ class Navbar extends React.Component {
                                 </Link>
                             )}
                         </li> */}
-
                         <DarkMode />
                     </ul>
                 </div>

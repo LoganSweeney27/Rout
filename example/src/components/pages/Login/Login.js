@@ -31,7 +31,9 @@ class Login extends React.Component {
         UserStore.profilePicture = result.profilePicture;
         UserStore.nickname = result.nickname;
         UserStore.isDev = result.dev;
-
+        UserStore.email = result.email;
+        UserStore.phone = result.phone;
+        UserStore.fa = result.fa;
       } else {
         UserStore.loading = false;
         UserStore.isLoggedIn = false;

@@ -36,8 +36,9 @@ class PreviousRoutes extends React.Component {
                 // If successful we should set distance, time, calories, and dates to all rows found
                 this.setState({ distances: result.distances, times: result.times, calories: result.calories, dates: result.dates })
             } else {
-                alert("Could not find prevoius routes to display.");
-                this.setState({ distances: ['N/A'], times:['N/A'], calories: ['N/A'], dates: ['N/A'] })
+                // alert("Could not find prevoius routes to display.");
+                // this.setState({ distances: ['N/A'], times:['N/A'], calories: ['N/A'], dates: ['N/A'] })
+                // I chose to display text saying that there are no routes, instead of a table with N/A values
             }
         } catch(e) {
             console.log(e)
@@ -69,7 +70,9 @@ class PreviousRoutes extends React.Component {
     }
     render(){
         if (this.state.loading) {
-            return <div className='loading'>Data is loading... </div>;
+            return <div className='loading'>Data is loading...</div>;
+        } else if (this.state.distances.length < 1) {
+            return <div className='loading'>No previous routes. Try creating a new route!.</div>;
         } else {
             return(
             <div className='table'>

@@ -1,3 +1,4 @@
+import { RepeatOutlined } from '@material-ui/icons';
 import React from 'react'
 import { Line } from 'react-chartjs-2';
 import UserStore from '../Login/Stores/UserStore';
@@ -10,6 +11,7 @@ class LineChart extends React.Component {
     this.state = {
         data: [],
         labels: [],
+        maxCalories: '500',
         loading: true,
         username: UserStore.username,
     };
@@ -31,9 +33,9 @@ class LineChart extends React.Component {
       let result = await res.json();
         if (result && result.success) {
             // If successful we should set user calories and dates to all rows found
-            this.setState({ data: result.data, labels: result.labels })
+            this.setState({ data: result.data, labels: result.labels, maxCalories: result.maxCalories })
         } else {
-            alert("Could not find previous routes with calories burned.");
+            // alert("Could not find previous routes with calories burned.");
             this.setState({ data: [], labels: [] })
         }
     } catch(e) {
@@ -43,6 +45,7 @@ class LineChart extends React.Component {
   }
 
   render() {
+    let maxCals = this.state.maxCalories;
     const data = {
       labels: this.state.labels,
       datasets: [
@@ -63,7 +66,7 @@ class LineChart extends React.Component {
       },
       title: {
         display: true,
-        text: "Calories Burned",
+        text: "Calories Burned Over Time",
         fontSize: 20,
         fontColor: 'rgba(100, 150, 250, 1)',
       },
@@ -81,7 +84,7 @@ class LineChart extends React.Component {
             ticks: {
               fontColor: 'rgba(80, 130, 250, 1)',
               suggestedMin: 0,
-              suggestedMax: 2000
+              suggestedMax: maxCals,
             },
             gridLines: {
               display: false,
@@ -91,7 +94,9 @@ class LineChart extends React.Component {
       }
     };
     if (this.state.loading) {
-        return <div className='loading'>Data is loading... </div>;
+        return <div className='loading'>Data is loading...</div>;
+    } else if (this.state.data.length < 2) {
+        return <div className='loading'>Not enough routes to display line graph.</div>;
     } else {
       return (
         <div className='lineChart'>

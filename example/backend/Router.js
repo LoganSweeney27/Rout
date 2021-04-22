@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs');
 const nodemailer = require("nodemailer");
+const { parseIsolatedEntityName } = require('typescript');
+var fb = require('fb');
+const { FB } = require('fb/lib/fb');
 
 
 class Router {
@@ -16,8 +19,16 @@ class Router {
         this.sendCodeFA(app, db);
         this.changeNickname(app, db);
         this.changeProfilePicture(app, db);
+        this.changeEmail(app, db);
+        this.changePhone(app, db);
+        this.changeTFA(app, db);
+        this.sendRoute(app, db);
+        this.updateRating(app, db);
+        this.getRouteID(app, db);
+		this.getRoutesUsername(app, db);
+        this.getResponse(app, db);
+		this.getResponseByCode(app, db);
     }
-
 
     changeNickname(app, db) {
         app.post('/changeNickname', (req, res) => {
@@ -45,7 +56,6 @@ class Router {
         });
     }
 
-
     changeProfilePicture(app, db) {
         app.post('/changeProfilePicture', (req, res) => {
             let profilePicture = req.body.profilePicture;
@@ -69,6 +79,79 @@ class Router {
             
         });
     }
+
+    changeEmail(app, db) {
+        app.post('/changeEmail', (req, res) => {
+            let email = req.body.email;
+            let username = req.body.username;
+            var sql = "UPDATE user set email = \"" + email + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'Email Successfully Updated',
+                            email: email
+                        })
+                    }
+                });
+            
+        });
+    }
+
+    changePhone(app, db) {
+        app.post('/changePhone', (req, res) => {
+            let phone = req.body.phone;
+            let username = req.body.username;
+            var sql = "UPDATE user set phone = \"" + phone + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'Phone Successfully Updated',
+                            phone: phone
+                        })
+                    }
+                });
+            
+        });
+    }
+
+    changeTFA(app, db) {
+        app.post('/changeTFA', (req, res) => {
+            let fa = req.body.fa;
+            let username = req.body.username;
+            var sql = "UPDATE user set enableFA = \"" + fa + "\" WHERE username = \"" + username + "\""; 
+            var query = db.query(sql,
+                function(err, rows) {
+                    if (err){
+                        res.json({
+                            success: false,
+                            msg: 'User does not exist.'
+                        })
+                    } else {
+                        res.json({
+                            success: true,
+                            msg: 'TFA Successfully Updated',
+                            fa: fa
+                        })
+                    }
+                });
+            
+        });
+    }
+
     submitCode(app, db) {
         app.post('/submitCode', (req, res) => {
             let email = req.body.email;
@@ -368,7 +451,9 @@ class Router {
                                         username: data[0].username,
                                         email : data[0].email,
                                         dev: data[0].dev,
-                                        profilePicture: data[0].profilePicture
+                                        profilePicture: data[0].profilePicture,
+                                        phone: data[0].phone,
+                                        fa: data[0].enableFA
                                     })
                                 } else {
                                     res.json({
@@ -383,7 +468,9 @@ class Router {
                                     username: data[0].username,
                                     email : data[0].email,
                                     dev: data[0].dev,
-                                    profilePicture: data[0].profilePicture
+                                    profilePicture: data[0].profilePicture,
+                                    phone: data[0].phone,
+                                    fa: data[0].enableFA
                                 })
                             }
                         } else {
@@ -436,7 +523,10 @@ class Router {
                             username: data[0].username,
                             profilePicture: data[0].profilePicture,
                             dev: data[0].dev,
-                            nickname: data[0].nickname
+                            nickname: data[0].nickname,
+                            email : data[0].email,
+                            phone: data[0].phone,
+                            fa: data[0].enableFA
                         })
                         return true;
                     } else {
@@ -453,9 +543,217 @@ class Router {
         });
     }
 
+    // Function for making string SQL nice!
+    mysql_real_escape_string (str) {
+        return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+            switch (char) {
+                case "\0":
+                    return "\\0";
+                case "\x08":
+                    return "\\b";
+                case "\x09":
+                    return "\\t";
+                case "\x1a":
+                    return "\\z";
+                case "\n":
+                    return "\\n";
+                case "\r":
+                    return "\\r";
+                case "\"":
+                case "'":
+                case "\\":
+                case "%":
+                    return "\\"+char; // prepends a backslash to backslash, percent,
+                                      // and double/single quotes
+                default:
+                    return char;
+            }
+        });
+    }
 
 
+    // ROUTE SENDING QUERIES
+    sendRoute(app, db) {
+        app.post('/sendRoute', (req, res) => {
+            let code = Math.random().toString(20).substr(2, 6);
+            let response = this.mysql_real_escape_string(req.body.response);
+            let responseString = response;
+            let username = req.body.username;
+            let distance = req.body.distance;
+            let pace = req.body.pace;
+            let time = req.body.time;
+            let calories = req.body.calories;
+            let difficulty = req.body.difficulty;
+            let rating = req.body.rating;
+            let location = req.body.location;
+            let date = req.body.date;
+        
+            var sql = "INSERT INTO prevroutes (`code`, `routeID`, `response`, `username`, `distance`, `pace`, `time`, `calories`, `difficulty`, `rating`, `location`, `date`) VALUES (\"" + code + "\", NULL, \"" + responseString + "\", \"" + username + "\", \"" + parseFloat(distance) + "\", \"" + parseFloat(pace) + "\", \"" + parseFloat(time) + "\", \"" + parseInt(calories) + "\", \"" + parseInt(difficulty) + "\", \"" + parseInt(rating) + "\", \"" + location + "\", \"" + date + "\")";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err) {
+                    console.log(err);
+                    res.json({
+                        success: false,
+                        msg: 'Insert could not be completed.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        msg: 'Successfully inserted route.',
+                    })
+                }
+            });
+        });
+    }
 
+    getRouteID(app, db) {
+        app.post('/getRouteID', (req, res) => {
+    
+            var sql = "SELECT routeID FROM prevroutes WHERE routeID = @@Identity;";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for selecting last id.");
+                    res.json({
+                        success: false,
+                        msg: 'Last id could not be selected.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        routeID: rows[0].routeID,
+                        msg: 'Successfully selected last id.',
+                    })
+                }
+            });
+        });
+    }
+	
+	getRoutesUsername(app, db) {
+		app.post('/getRoutesUsername', (req, res) => {
+			let username = req.body.username;
+			
+			var sql = "SELECT `date`, `distance`, `difficulty`, `calories`, `location`, `code` FROM prevroutes WHERE username = \"" + username + "\";";
+			var query = db.query(sql, function(err, rows) {
+				
+				if (err) {
+					console.log("Error in DB fetching route by username:\r\n");
+					console.log(err);
+					res.json({
+						success: false,
+						msg: 'Could not fetch records for username ' + username
+					});
+				} else {
+					let dateResponses = [];
+					let distanceResponses = [];
+					let difficultyResponses = [];
+					let caloriesResponses = [];
+					let locationResponses = [];
+					let codeResponses = [];
+					rows.forEach(function(row) {
+						dateResponses.push(row.date);
+						distanceResponses.push(row.distance);
+						difficultyResponses.push(row.difficulty);
+						caloriesResponses.push(row.calories);
+						locationResponses.push(row.location);
+						codeResponses.push(row.code);
+					});
+					res.json({
+						success: true,
+						dates: dateResponses,
+						distances: distanceResponses,
+						difficulties: difficultyResponses,
+						calories: caloriesResponses,
+						locations: locationResponses,
+						codes: codeResponses,
+						responseCount: rows.length,
+						msg: 'Successfully selected ' + rows.length + ' responses'
+					});
+				}
+				
+			})
+			
+		})
+		
+	}
+
+    updateRating(app, db) {
+        app.post('/updateRating', (req, res) => {
+            let username = req.body.username;
+            let routeID = req.body.routeID;
+            let rating = req.body.rating;
+        
+            var sql = "UPDATE prevroutes SET rating = '" + parseInt(rating) + "' WHERE username = \"" + username + "\" AND prevroutes.routeID = " + parseInt(routeID);
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for updating");
+                    res.json({
+                        success: false,
+                        msg: 'Update could not be completed.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        msg: 'Successfully updated rating.',
+                    })
+                }
+            });
+        });
+    }
+
+    getResponse(app, db) {
+        app.post('/getResponse', (req, res) => {
+            var sql = "SELECT response FROM prevroutes WHERE routeID = @@Identity;";
+            var query = db.query(sql,
+            function(err, rows) {
+                if (err){
+                    console.log("Error in DB for selecting response form last route.");
+                    res.json({
+                        success: false,
+                        msg: 'Last response could not be selected.'
+                    })
+                } else {
+                    res.json({
+                        success: true,
+                        response: rows[0].response,
+                        msg: 'Successfully selected last response.',
+                    })
+                }
+            });
+        });
+    }
+
+    getResponseByCode(app, db) {
+        app.post('/getResponseByCode', (req, res) => {
+            let uniqueCode = req.body.uniqueCode;
+        
+            var sql = "SELECT response FROM prevroutes WHERE code = \"" + uniqueCode + "\" LIMIT 1";
+            var query = db.query(sql,
+            function(err, data) {
+                if (err){
+                    console.log(err);
+                    console.log("Error in DB for getting response from unique code");
+                    res.json({
+                        success: false,
+                    })
+                } else {
+                    if (data && data.length == 1) {
+                        res.json({
+                            success: true,
+                            response: data[0].response,
+                        })
+                        return true;
+                    } else {
+                        res.json({
+                            success: false,
+                        })
+                    }
+                }
+            });
+        });
+    }
 
     // STATISTICS PAGE QUERIES
     getCompare(app, db) {
@@ -463,7 +761,7 @@ class Router {
             let dist = req.body.dist;
             let username = req.body.username;
         
-            var sql = "SELECT distance, time FROM prevroutes WHERE username = \"" + username + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time";
+            var sql = "SELECT distance, time FROM prevroutes WHERE username = \"" + username + "\" AND distance BETWEEN \"" + (parseFloat(dist) - parseFloat(dist * 0.1)) + "\" AND \"" + (parseFloat(dist) + parseFloat(dist * 0.1)) + "\" ORDER BY time LIMIT 1";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
@@ -495,7 +793,7 @@ class Router {
         app.post('/getLine', (req, res) => {
             let username = req.body.username;
         
-            var sql = "SELECT calories, date FROM prevroutes WHERE username = \"" + username + "\" ORDER BY date";
+            var sql = "SELECT sum(calories) as sumCalories, max(calories) as maxCalories, date FROM prevroutes WHERE username = \"" + username + "\" GROUP BY routeID";
             var query = db.query(sql,
             function(err, data) {
                 if (err){
@@ -510,13 +808,14 @@ class Router {
                         let dataArray = [];
                         let labelsArray = [];
                         for (let i = 0; i < data.length; i++) {
-                            dataArray[i] = data[i].calories;
+                            dataArray[i] = data[i].sumCalories;
                             labelsArray[i] = data[i].date;
                         }
                         res.json({
                             success: true,
                             data: dataArray,
-                            labels: labelsArray
+                            labels: labelsArray,
+                            maxCalories: data[0].maxCalories
                         })
                         return true;
                     } else {
