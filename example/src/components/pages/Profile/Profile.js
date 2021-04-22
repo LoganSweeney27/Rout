@@ -283,13 +283,15 @@ class Profile extends React.Component {
                             <Button buttonStyle='btn--regular'>
                                 <a title="send to Facebook" 
                                     href="http://www.facebook.com/sharer.php?s=100&p[title]=MyRout&p[quote]=hello&p[url]=https://rout.link/"
-                                    target="_blank">
+                                    target="_blank"
+                                    rel="noreferrer">
                                 <FaFacebook /></a>
                             </Button>
                             <Button buttonStyle='btn--regular'>
                                 <a title="send to Instagram" 
                                     href="https://www.instagram.com/"
-                                    target="_blank">
+                                    target="_blank"
+                                    rel="noreferrer">
                                 <FaInstagram /></a>
                             </Button>
                             <Button buttonStyle='btn--regular'>

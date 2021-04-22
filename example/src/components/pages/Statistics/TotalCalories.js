@@ -33,7 +33,7 @@ class TotalCalories extends React.Component {
                 let totalCalories = result.calories.reduce((caloriesCount, value) => caloriesCount + value);
                 this.setState({ calories: totalCalories })
             } else {
-                alert("Could not find prevoius routes to display.");
+                // alert("Could not find prevoius routes to display.");
                 this.setState({ calories: 'N/A' })
             }
         } catch(e) {
