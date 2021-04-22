@@ -11,7 +11,6 @@ let startPoint = null;
 let wayptOn = false;
 let markers = [];
 let waypts = [];
-let elevationDiff = 0;
 
 const styles = {
   root: {
@@ -454,6 +453,7 @@ class NewMap extends Component {
                     
                     this.setState({ routeDistance_m: totaldistance })
                     this.setState({ route : response })
+                    this.calcDifficulty(totaldistance);
                   }
                 });
     
@@ -466,6 +466,7 @@ class NewMap extends Component {
     
                     this.setState({ routeDistance_m: totaldistance })
                     this.setState({ route : response })
+                    this.calcDifficulty(totaldistance);
                   }
                 });
 
@@ -478,6 +479,7 @@ class NewMap extends Component {
                 this.setState({ routeDistance_m: totaldistance })
                 this.setState({ route : response })
                 this.setState({ wasCreated: true });
+                this.calcDifficulty(totaldistance);
                 this.createRoute(start,error,distance, 0, Math.random() * 2 * Math.PI, ++multi);
                 return;
               }
@@ -765,16 +767,18 @@ class NewMap extends Component {
     var score = 0;
     var tempDistance = 0
     var tempHilliness = 0;
-    tempDistance = distance / 3.5;
+    tempDistance = distance / 1.5;
     if (tempDistance > 5) {
       tempDistance = 5;
     }
-    tempHilliness = elevationDiff / 2;
+    tempHilliness = this.state.elevationDiff;
+    //tempHilliness = this.state.changeInAlt;
     if (tempHilliness > 5) {
       tempHilliness = 5;
     }
     tempDistance = Math.round(tempDistance);
     tempHilliness = Math.round(tempHilliness);
+    //alert("temp dist = " + tempDistance + " temp hills = " + tempHilliness);
     score = tempDistance + tempHilliness;
     this.setState({ difficulty: score })
   }
@@ -981,7 +985,7 @@ class NewMap extends Component {
         <div>
           {this.state.showDetails &&
             <Details my_map={this.state.my_map} routeDistance={this.state.routeDistance} time={this.state.final_time}
-              pace={this.state.final_pace} calories={this.state.calories} difficulty='3' address={this.state.addr}
+              pace={this.state.final_pace} calories={this.state.calories} difficulty={this.state.difficulty} address={this.state.addr}
               routeID={this.state.routeID} route={this.state.route} />}
           <div className='details-btn'>
             <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
