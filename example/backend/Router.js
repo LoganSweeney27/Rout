@@ -601,6 +601,7 @@ class Router {
                     res.json({
                         success: true,
                         msg: 'Successfully inserted route.',
+						uniqueID: code,
                     })
                 }
             });
