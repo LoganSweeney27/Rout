@@ -261,7 +261,8 @@ class NewMap extends Component {
     this.openModal = this.openModal.bind(this);
     this.downloadFile = this.downloadFile.bind(this);
     this.closeModal = this.closeModal.bind(this);
-    this.finishModal = this.finishModal.bind(this);
+    this.modalConfirm = this.modalConfirm.bind(this);
+	this.modalImport = this.modalImport.bind(this);
     this.clearMap = this.clearMap.bind(this);
     this.initMap = this.initMap.bind(this);
     this.lastDirections = null;
@@ -623,10 +624,19 @@ class NewMap extends Component {
   }
   
   downloadFile() {
-    console.log("Downloading");
-    console.log(JSON.stringify(this.state.route));
+    let data = {start:null, end:null, waypoints:[]};
+	let routeLeg = this.state.route.routes[0].legs[0];
+	data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
+	data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
+	let wps = routeLeg.via_waypoints;
+	let wps_latlng = [];
+	for (var i = 0; i > wps.length; i++) {
+	  wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
+	}
+	data.waypoints = wps;
+	
     const element = document.createElement("a");
-    const file = new Blob([JSON.stringify(this.state.route)], {type: 'text/plain;charset=utf-8'});
+    const file = new Blob([JSON.stringify(data)], {type: 'text/plain;charset=utf-8'});
     element.href = URL.createObjectURL(file);
     element.download = "rout.txt";
     document.body.appendChild(element);
@@ -634,26 +644,20 @@ class NewMap extends Component {
 
   }
   async saveRoute() {
-	//if (this.state.wasCreated) {
 	
-	  let data = {start:null, end:null, waypoints:[]};
-	  let routeLeg = this.state.d_renderer1.getDirections().routes[0].legs[0];
-	  data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
-	  data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
-	  let wps = routeLeg.via_waypoints;
-	  let wps_latlng = [];
-	  for (var i = 0; i > wps.length; i++) {
-		wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
-	  }
-	  data.waypoints = wps;
-	  //alert(data.start);
-	  //alert(data.end);
-	  
-	  this.pushRoute(data);
-	  
-	//} else {
-	  //alert("Please create a route first!");
-	//}
+	let data = {start:null, end:null, waypoints:[]};
+	let routeLeg = this.state.route.routes[0].legs[0];
+	data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
+	data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
+	let wps = routeLeg.via_waypoints;
+	let wps_latlng = [];
+	for (var i = 0; i > wps.length; i++) {
+	wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
+	}
+	data.waypoints = wps;
+
+	this.pushRoute(data);
+  
   }
   
   loadRoute(response) { //Locally renders route fetched in fetchRoute()
@@ -668,6 +672,7 @@ class NewMap extends Component {
 	let start = response.response_data.start;
 	let end = response.response_data.end;
 	let response_waypoints = response.response_data.waypoints;
+	let distance = 0;
 	for (var i = 0; i < response_waypoints.length; i++) {
 		waypoints[i] = {'location': new window.google.maps.LatLng(response_waypoints[i].lat, response_waypoints[i].lng)};
 	}
@@ -682,6 +687,7 @@ class NewMap extends Component {
 		if (status == "OK") {
 			this.state.d_renderer1.setDirections(response);
 			this.state.d_renderer1.setMap(this.state.my_map);
+			this.setState({ route: response });
 		}
 		else {
 			alert("Route re-loading failed");
@@ -775,6 +781,39 @@ class NewMap extends Component {
             .getElementsByClassName('login-input').item(0)
             .value = e.target.parentNode.getElementsByTagName("td").item(5).innerHTML;
     this.setState({ uniqueCode: e.target.parentNode.getElementsByTagName("td").item(5).innerHTML });
+  }
+  
+  importRoute() {
+	
+	this.clearMap();
+	
+	let importCode = JSON.parse(this.state.uniqueCode);
+	let waypoints = [];
+	let start = importCode.start;
+	let end = importCode.end;
+	let response_waypoints = importCode.waypoints;
+	let distance = 0;
+	for (var i = 0; i < response_waypoints.length; i++) {
+		waypoints[i] = {'location': new window.google.maps.LatLng(response_waypoints[i].lat, response_waypoints[i].lng)};
+	}
+	
+	this.state.d_service.route({
+		'origin': new window.google.maps.LatLng(start.lat, start.lng),
+		'destination': new window.google.maps.LatLng(end.lat, end.lng),
+		'waypoints': waypoints,
+		'travelMode': window.google.maps.TravelMode.WALKING
+	},
+	(response, status) => {
+		if (status == "OK") {
+			this.state.d_renderer1.setDirections(response);
+			this.state.d_renderer1.setMap(this.state.my_map);
+			this.setState({ route: response });
+		}
+		else {
+			alert("Route re-loading failed");
+		}
+	});
+	
   }
 
   /* Alerts user to error if Google Map does not load */
@@ -1002,9 +1041,14 @@ class NewMap extends Component {
 	this.setState({ showModal: true });
   }
   
-  finishModal() {
+  modalConfirm() {
 	this.setState({ showModal: false });
 	this.fetchRoute();
+  }
+  
+  modalImport() {
+	this.setState({ showModal: false });
+	this.importRoute();
   }
   
   closeModal() {
@@ -1052,6 +1096,7 @@ class NewMap extends Component {
             </Button> */}
           </div>
         </div>
+		<br />
         <div>
           <main id="map" role="application"></main>
           <div id="elevation_chart"></div>
@@ -1091,7 +1136,7 @@ class NewMap extends Component {
 			<br />
       <InputField
               type='text'
-              placeholder='Unique Route Code'
+              placeholder='Sharing Code or Saved File Contents'
               value={this.state.uniqueCode ? this.state.uniqueCode : ''}
               onChange={ (val) => this.setState({
                 uniqueCode: val
@@ -1099,14 +1144,12 @@ class NewMap extends Component {
               />
       
 			<br />
-			<button buttonStyle='btn--input' id="modal-btn" onClick={this.finishModal}>Import Using Saved File</button>
-			<button buttonStyle='btn--input' id="modal-btn" onClick={this.finishModal}>Confirm</button>
-
+			<button id="confirm-btn" class="modal-btn" onClick={this.modalConfirm}>Confirm</button>
+			<button id="import-btn" class="modal-btn" onClick={this.modalImport}>Import Using Saved File</button>
+			
 		</Modal>
 
-
       </div>
-    
 
     )
   }

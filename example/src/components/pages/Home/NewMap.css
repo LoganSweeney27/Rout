@@ -171,6 +171,10 @@ table {
   font-size: 24px;
   float: right;
 }
+
+#confirm-btn {
+  margin-left: 25px;
+}
   
   /*For a11y reasons*/
   a:focus{
