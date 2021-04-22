@@ -243,7 +243,7 @@ class NewMap extends Component {
       unitType: 'kilometers',
       showDetails: false,
       calories: [],
-      route: null,
+      route: [],
       loadRoute: "Didn't work :(", // state for loading routes
       wasCreated: false,
       date: mdy,
@@ -255,7 +255,7 @@ class NewMap extends Component {
 	    showModal: false,
       elevationDiff: 0,
 	    uniqueCode:null, //code for loading saved routes
-      routeChoosen: 0, // state for deciding which multi route to choose
+      routeChosen: 0, // state for deciding which multi route to choose
     }
 
     this.openModal = this.openModal.bind(this);
@@ -406,7 +406,7 @@ class NewMap extends Component {
         const panorama = new window.google.maps.StreetViewPanorama(
           document.getElementById('pano'),
           {
-            position: this.state.route.routes[0].overview_path[0],
+            position: this.state.route[this.state.routeChosen].routes[0].overview_path[0],
             pov: {
               heading: 34,
               pitch: 10,
@@ -610,7 +610,11 @@ class NewMap extends Component {
                 }))
                 // Working one route set distance, above is for multi routes
                 // this.setState({ routeDistance_m: totaldistance })
-                this.setState({ route: response })
+                this.setState(prevState => ({
+                  route: [...prevState.route, response]
+                }))
+                // Working one route set distance, above is for multi routes
+                // this.setState({ route: response })
                 this.setState({ wasCreated: true });
                 this.createRoute(start,error,distance, 0, 0, ++multi);
                 return;
@@ -629,7 +633,7 @@ class NewMap extends Component {
   
   downloadFile() {
     let data = {start:null, end:null, waypoints:[]};
-	let routeLeg = this.state.route.routes[0].legs[0];
+	let routeLeg = this.state.route[this.state.routeChosen].routes[0].legs[0];
 	data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
 	data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
 	let wps = routeLeg.via_waypoints;
@@ -650,7 +654,7 @@ class NewMap extends Component {
   async saveRoute() {
 	
 	let data = {start:null, end:null, waypoints:[]};
-	let routeLeg = this.state.route.routes[0].legs[0];
+	let routeLeg = this.state.route[this.state.routeChosen].routes[0].legs[0];
 	data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
 	data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
 	let wps = routeLeg.via_waypoints;
@@ -691,7 +695,11 @@ class NewMap extends Component {
 		if (status == "OK") {
 			this.state.d_renderer1.setDirections(response);
 			this.state.d_renderer1.setMap(this.state.my_map);
-			this.setState({ route: response });
+      this.setState(prevState => ({
+        route: [...prevState.route, response]
+      }))
+      // Working one route set distance, above is for multi routes
+      // this.setState({ route: response })
 		}
 		else {
 			alert("Route re-loading failed");
@@ -811,7 +819,11 @@ class NewMap extends Component {
 		if (status == "OK") {
 			this.state.d_renderer1.setDirections(response);
 			this.state.d_renderer1.setMap(this.state.my_map);
-			this.setState({ route: response });
+      this.setState(prevState => ({
+        route: [...prevState.route, response]
+      }))
+      // Working one route set distance, above is for multi routes
+      // this.setState({ route: response })
 		}
 		else {
 			alert("Route re-loading failed");
@@ -954,15 +966,15 @@ class NewMap extends Component {
   }
 
   changeTo1() {
-    this.setState({routeChoosen: 0});
+    this.setState({routeChosen: 0});
   }
 
   changeTo2() {
-    this.setState({routeChoosen: 1});
+    this.setState({routeChosen: 1});
   }
 
   changeTo3() {
-    this.setState({routeChoosen: 2});
+    this.setState({routeChosen: 2});
   }
 
   //Call to push data to database
@@ -984,10 +996,10 @@ class NewMap extends Component {
         body: JSON.stringify({
             response: JSON.stringify({ response_data }),
             username: UserStore.username,
-            distance: this.state.routeDistance_m[this.state.routeChoosen],
+            distance: this.state.routeDistance_m[this.state.routeChosen],
             pace: final_pace,
-            time: this.state.final_time[this.state.routeChoosen],
-            calories: this.state.calories[this.state.routeChoosen],
+            time: this.state.final_time[this.state.routeChosen],
+            calories: this.state.calories[this.state.routeChosen],
             difficulty: -1,
             rating: -1,
             location: this.state.addr,
@@ -1055,7 +1067,7 @@ class NewMap extends Component {
   /* Clears map when clear button is pressed */
   handleClear = () => {
     this.clearMap()
-    this.setState({ routeDistance: [], routeDistance_m: [], final_time: [], calories: [] });
+    this.setState({ routeDistance: [], routeDistance_m: [], final_time: [], calories: [], route: [] });
   } /* handleClear */
 
   /* When Waypoints button is pressed, wait for waypoints */
@@ -1157,7 +1169,7 @@ class NewMap extends Component {
           <div id="pano"></div>
         </div>
         <div>
-        {this.state.showDetails && <Details routeDistance={this.state.routeDistance[this.state.routeChoosen]} time={this.state.final_time[this.state.routeChoosen]} pace={this.state.final_pace} calories={this.state.calories[this.state.routeChoosen]} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
+        {this.state.showDetails && <Details routeDistance={this.state.routeDistance[this.state.routeChosen]} time={this.state.final_time[this.state.routeChosen]} pace={this.state.final_pace} calories={this.state.calories[this.state.routeChosen]} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
             <div className='details-btn'>
                 <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
                     Details ^
