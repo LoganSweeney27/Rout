@@ -30,20 +30,13 @@ class Navbar extends React.Component {
             // console.log('This will run every second!');
             this.reRender()
          }, 1000);
-        // this.navbar.addEventListener('click', this.reRender);
     }
-
-    // componentDidUpdate() {
-    //     this.reRender();
-    // }
 
     componentWillUnmount() {
         clearInterval(this.interval);
-        // this.navbar.removeEventListener('click', this.reRender);
     }
 
     async isLoggedIn() {
-        // alert("checking if logged in: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn)
         try {
             let res = await fetch('/isLoggedIn', {
               method: 'post',
@@ -75,7 +68,6 @@ class Navbar extends React.Component {
             UserStore.isLoggedIn = false;
 			UserStore.isDev = false;
           }
-        // alert("After Check: UserStore.username=" + UserStore.username + " and UserStore.isLoggedIn=" + UserStore.isLoggedIn + " and .isDev=" + UserStore.isDev);
         this.setState({})
     }
 
@@ -84,7 +76,6 @@ class Navbar extends React.Component {
     }
 
     reRender = (e) => {
-        // this.isLoggedIn()
         this.forceUpdate()
     }
 

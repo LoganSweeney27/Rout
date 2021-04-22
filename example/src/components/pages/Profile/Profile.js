@@ -242,6 +242,12 @@ class Profile extends React.Component {
     handleLogOut = (e) => {
         this.doLogout()
     }
+
+    createHref = () => {
+        let part1 = "https://twitter.com/intent/tweet?hashtags=routlink&original_referer=https%3A%2F%2Fdeveloper.twitter.com%2F&ref_src=twsrc%5Etfw&related=twitterapi%2Ctwitter&text=I%20just%20ran%20an%20awesome%20route!%20Here's%20the%20code: ";
+        let part2 = "!&tw_p=tweetbutton&url=https%3A%2F%2Frout.link";
+        return part1 + this.state.code + part2;
+    }
     
     render() {
         return (
@@ -294,8 +300,16 @@ class Profile extends React.Component {
                             <Button buttonStyle='btn--regular' onClick={ (e) => this.handleInstagram(e) }>
                                 <FaInstagram />
                             </Button>
-                            <Button buttonStyle='btn--regular' onClick={ (e) => this.handleTwitter(e) }>
+                            {/* <Button buttonStyle='btn--regular' onClick={ (e) => this.handleTwitter(e) }>
                                 <FaTwitter />
+                            </Button> */}
+                            <Button buttonStyle='btn--regular' onClick={ (e) => this.handleTwitter(e) }>
+                                <a class="twitter-share-button"
+                                href={this.createHref()}
+                                target="_blank"
+                                rel="noreferrer"
+                                data-size="large">
+                                <FaTwitter />Tweet</a>
                             </Button>
                         </div>
                         <div className='profile-content' style={{ margin: "15px 3px" }}>
