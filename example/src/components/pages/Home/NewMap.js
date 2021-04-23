@@ -514,7 +514,7 @@ class NewMap extends Component {
           //   console.log("Directions request failed due to " + status);
           // } else {
           window.alert("Directions request failed due to " + status);
-          this.setState({ wasCreated: false });
+          //this.setState({ wasCreated: false });
           //}
         }
         multi++;
