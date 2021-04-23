@@ -25,8 +25,8 @@ const styles = {
 /* This function adds markers to the given map */
 function addMarker(location, map) {
   const marker = new window.google.maps.Marker({
-      position: location,
-      map: map,
+    position: location,
+    map: map,
   });
   markers.push(marker);
 } /* addMarker() */
@@ -36,7 +36,7 @@ function addMarker(location, map) {
   and clears them if map is null */
 function setMapOnAll(map) {
   for (let i = 0; i < markers.length; i++) {
-      markers[i].setMap(map);
+    markers[i].setMap(map);
   }
 } /* setMapOnAll() */
 
@@ -60,69 +60,12 @@ function newCoordinatesLocation(lat, lng, distance, direction) {
   lat = lat + (distance * Math.cos(direction) / 111111);
   lng = lng + (distance * Math.sin(direction) / Math.cos(lat) / 111111);
   let latlng = new window.google.maps.LatLng(lat, lng);
-  
+
 
   return latlng;
 } /* newCoordinatesLocation() */
 
 
-
-/* Displays the elevation along the given path */
-function displayPathElevation(
-  path,
-  elevator,
-  ) {
-
-  // Create a PathElevationRequest object using this array.
-  // Ask for 256 samples along that path.
-  // Initiate the path request.
-  elevator.getElevationAlongPath(
-      {
-        path: path,
-        samples: 256,
-      },
-      plotElevation
-  );
-} /* displayPathElevation() */
-
-
-
-/* Takes an array of ElevationResult objects, draws the path on the map
- and plots the elevation profile on a Visualization API ColumnChart. */
-function plotElevation(elevations, status) {
-  const chartDiv = document.getElementById("elevation_chart");
-
-  if (status !== "OK") {
-  // Show the error code inside the chartDiv.
-  chartDiv.innerHTML =
-        "Cannot show elevation: request failed because " + status;
-  return;
-  }
-  // Create a new chart in the elevation_chart DIV.
-  const chart = new window.google.visualization.ColumnChart(chartDiv);
-
-  // Extract the data from which to populate the chart.
-  // Because the samples are equidistant, the 'Sample'
-  // column here does double duty as distance along the
-  // X axis.
-  const data = new window.google.visualization.DataTable();
-  data.addColumn("string", "Sample");
-  data.addColumn("number", "Elevation");
-
-  for (let i = 0; i < elevations.length; i++) {
-  data.addRow(["", elevations[i].elevation]);
-  }
-
-  elevationDiff = findHilliness(elevations);
-
-  // Draw the chart using the data within its DIV.
-  chart.draw(data, {
-  height: 150,
-  legend: "none",
-  // @ts-ignore TODO(jpoehnelt) update to newest visualization library
-  titleY: "Elevation (m)",
-  });
-} /* plotElevation() */
 
 
 /* Listens for starting marker to be placed */
@@ -138,30 +81,6 @@ function listenforStart(map) {
 
 
 
-/* Takes in an address string and uses a geocoder to convert into a latLng object */
-function geocodeAddr(geocoder, addr) {
-  //const addr = document.getElementById("addr");
-  geocoder.geocode({address: addr}, (results, status) => {
-    if (status == "OK") {
-      startPoint = results[0].geometry.location;
-    } else {
-      /*alert(
-        "Address geocoding was not successful for the following reason: " + status
-      );*/
-    }
-  });
-}
-
-/* Function to convert a distance (km) and time (min) into a pace */
-function calcPace(distance, time) {
-  distance = distance * 0.000621371;
-  var pace = time / distance;
-  /*if (Number.isInteger(pace)) {
-    return pace;
-  } else {
-  }*/
-  return pace;
-}
 
 /* Function to quantify the hilliness of a route */
 function findHilliness(arr) {
@@ -193,38 +112,21 @@ function findHilliness(arr) {
   return diff;
 };
 
-/* Function to calculate the difficulty of a route, based on distance and hilliness */
-function calcDifficulty(distance, hilliness) {
-  distance = distance / 1000;
-  var score = 0;
-  var tempDistance = 0
-  var tempHilliness = 0;
-  tempDistance = distance / 3.5;
-  if (tempDistance > 5) {
-    tempDistance = 5;
-  }
-  tempHilliness = hilliness / 15;
-  if (tempHilliness > 5) {
-    tempHilliness = 5;
-  }
-  score = tempDistance + tempHilliness;
-  return score;
-}
+
 
 /* NewMap class defines map and all functions that go with it
   It also displays the map and the directions */
 class NewMap extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
 
     var today = new Date(),
-    mdy = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
+      mdy = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
 
     this.state = {
-      mapIsReady:false,
-      chartIsReady:false,
       routeDistance: [], //distance of the produced route
       routeDistance_m: [], //distance of real produced route in meters
+      d_autocomplete: null,
       d_service:null,
       d_renderer1:null,
       d_renderer2:null,
@@ -234,7 +136,7 @@ class NewMap extends Component {
       wayptListener:null,
       addr: '',
       distance: '', //inputted distance, could be in miles or kilometers
-      distance_m:'', //distance in meters
+      distance_m: '', //distance in meters
       pace: '',
       time: '',
       final_time: [],
@@ -249,6 +151,7 @@ class NewMap extends Component {
       date: mdy,
       routeID: '', // routeID used for updating rating of route
       inputTypes: false, // input type boolean used to show either distance or pace/time input fields
+      hillsType: 0, //want any route, hilly route, or less hilly rout (0, 1, 2) respectively
       hasDistance: false,
       hasPace: false,
       hasTime: false,
@@ -256,6 +159,9 @@ class NewMap extends Component {
       elevationDiff: 0,
 	    uniqueCode:null, //code for loading saved routes
       routeChosen: 0, // state for deciding which multi route to choose
+      difficulty: [],
+      compTime: null,
+      changeInAlt:0,
     }
 
     this.openModal = this.openModal.bind(this);
@@ -269,73 +175,71 @@ class NewMap extends Component {
   }
 
   /* Runs after component is mounted, initalizes Map and algorithm */
-  componentDidMount(){
+  componentDidMount() {
     this.loadGoogleMapScript();
     window.gm_authFailure = this.gm_authFailure;
 
     //we load the google map script when its ready
     //we get the venues when they are ready
     //this.getVenues()
-    
+
   } /* componentDidMount() */
 
   /* Loads information for Google Maps API */
-  loadGoogleMapScript(){
+  loadGoogleMapScript() {
     const ApiKey = 'AIzaSyDekWG_GZBqJ3j0Kt9t-B0ayBcU9wLHlsk'
 
     const scriptMap = window.document.createElement('script')
     scriptMap.src = `https://maps.googleapis.com/maps/api/js?key=${ApiKey}&libraries=places`
     scriptMap.async = true;
-    scriptMap.defer= true;
-    scriptMap.onerror = function(){window.alert("The Google Maps API failed to load data!")}
+    scriptMap.defer = true;
+    scriptMap.onerror = function () { window.alert("The Google Maps API failed to load data!") }
 
     const scriptChart = window.document.createElement('script')
 
     scriptChart.src = 'https://www.gstatic.com/charts/loader.js'
-    scriptChart.onerror = function(){window.alert("The Google Charts API failed to load data!")}
+    scriptChart.onerror = function () { window.alert("The Google Charts API failed to load data!") }
 
-    //this is a callback to wait until the code has loaded
-    scriptMap.addEventListener('load', () =>{
-      this.setState({mapIsReady:true})
-      scriptChart.addEventListener('load', () => {
-        if (this.state.mapIsReady) {
-          window.google.charts.load('current', {packages: ['corechart']});
-          this.setState({chartIsReady:true});
-  
-        }
-      });
-
+   // this is a callback to wait until the code has loaded
+    scriptMap.addEventListener('load', () => {
+      
+      this.initMap();
     });
-    
+      
+    scriptChart.addEventListener('load', () => {
+        //alert("loaded")
+        window.google.charts.load('current', { packages: ['corechart'] });
+      
+    });
+
     window.document.body.appendChild(scriptMap)
     window.document.body.appendChild(scriptChart);
   } /* loadGoogleMapScript() */
 
 
-  /* when component is updated, upload map */
-  componentDidUpdate(){
-   //once the script is uploaded to the window load up the map 
+  // /* when component is updated, upload map */
+  // componentDidUpdate() {
+  //   //once the script is uploaded to the window load up the map 
 
-    if (this.state.my_map == null) {
-      this.initMap()
-    }
-  } /* componentDidUpdate() */
+  //   if (this.state.my_map == null) {
+  //     this.initMap()
+  //   }
+  // } /* componentDidUpdate() */
 
 
 
   /* this function initializes the map and prepares*/
-  initMap(){
+  initMap() {
     //if map is ready to load
-    if(this.state.mapIsReady && this.state.chartIsReady){
       const map = new window.google.maps.Map(document.getElementById('map'), {
-        center: {lat: 40.4259, lng: -86.9081},
+        center: { lat: 40.4259, lng: -86.9081 },//{lat: 40, lng: -105},//{
         zoom: 13,
       });
 
 
       if (this.state.my_map == null) {
-        this.setState({my_map: map});
-        
+        this.setState({ my_map: map });
+
       }
       // Create A Map use window so the browser can access it
       //const map = this.state.my_map;
@@ -345,35 +249,79 @@ class NewMap extends Component {
           draggable: true,
           map,
         }); 
+        directionsRenderer1.setOptions({
+          polylineOptions: {
+            strokeWeight: 4,
+            strokeOpacity: 0.8,
+            strokeColor: "blue"
+          },
+          markerOptions:{
+            icon:{
+                scale: 3,
+                strokeColor: "blue"
+            }
+          }
+        });
         this.setState({d_renderer1 : directionsRenderer1});
       }
+
       if (this.state.d_renderer2 == null) {
         const directionsRenderer2 = new window.google.maps.DirectionsRenderer({
           draggable: true,
           map,
         }); 
+        directionsRenderer2.setOptions({
+          polylineOptions: {
+            strokeWeight: 4,
+            strokeOpacity: 0.8,
+            strokeColor: "green"
+          },
+          markerOptions:{
+            icon:{
+                scale: 3,
+                strokeColor: "green"
+            }
+          }
+        });
         this.setState({d_renderer2 : directionsRenderer2});
       }
+
       if (this.state.d_renderer3 == null) {
         const directionsRenderer3 = new window.google.maps.DirectionsRenderer({
           draggable: true,
           map,
         }); 
+        directionsRenderer3.setOptions({
+          polylineOptions: {
+            strokeWeight: 4,
+            strokeOpacity: 0.8,
+            strokeColor: "red"
+          },
+          markerOptions:{
+            icon:{
+                scale: 3,
+                strokeColor: "red"
+            }
+          }
+        });
         this.setState({d_renderer3 : directionsRenderer3});
       }
       if (this.state.d_service == null) {
         const directionsService = new window.google.maps.DirectionsService();
-        this.setState({d_service : directionsService});
+        this.setState({ d_service: directionsService });
       }
       if (this.state.d_geocoder == null) {
         const geocoder = new window.google.maps.Geocoder();
-        this.setState({d_geocoder : geocoder});
+        this.setState({ d_geocoder: geocoder });
       }
-      const addy = document.getElementById("addy");
-      const autocomplete = new window.google.maps.places.Autocomplete(addy);
+      if (this.state.d_autocomplete == null) {
+        const autocomplete = new window.google.maps.places.Autocomplete(document.getElementById("addy"));
+        this.setState({d_autocomplete: autocomplete})
+      }
+      
 
       listenforStart(map);
-    }//end of if statement
+    //end of if statement
 
   } /* initMap() */
 
@@ -381,11 +329,12 @@ class NewMap extends Component {
     for directions result */
   myCalculateAndDisplayRoute(
     start,
-    distance
+    distance,
+    error,
   ) {
     console.log("added marker");
     //add that location as a waypoint
-    
+
     var totaldistance = 0;
     //var counter = 0;
     console.log("distance : " + distance); //3000
@@ -393,115 +342,67 @@ class NewMap extends Component {
     //totaldistance = 3500;
 
     //while distance is not with +-error of request distance
-    var error = 400;
+    if (this.state.hillsType == 1) {
+      this.setState({changeInAlt : 0});
+    } else if (this.state.hillsType == 2) {
+      this.setState({changeInAlt : 10000}); // max altitude change
 
+    }
 
-    
-    
     // this.setState({ wasCreated: this.createRoute(start, error, distance, 0) });
     this.createRoute(start, error, distance, 0, Math.random() * 2 * Math.PI, 0);
     setTimeout(() => {
+      //alert("test")
       if (this.state.wasCreated) {
-        //this.pushRoute()
-        const panorama = new window.google.maps.StreetViewPanorama(
-          document.getElementById('pano'),
-          {
-            position: this.state.route[this.state.routeChosen].routes[0].overview_path[0],
-            pov: {
-              heading: 34,
-              pitch: 10,
-            },
-          }
-        );
-        this.state.my_map.setStreetView(panorama);
-      }
-      
-    }, 2000);
-
         
+
+        //alert(this.state.route)
+        if ((this.state.hillsType == 1 )|| (this.state.hillsType == 2)) {
+          // this.clearMap();
+          
+          this.state.d_renderer1.setDirections(this.state.route[this.state.routeChosen]);
+          this.lastDirections = this.state.route[this.state.routeChosen];
+          this.state.d_renderer1.setMap(this.state.my_map);
+        }
+      }
+
+    }, 3000);
+
+
   } /* myCalculateAndDisplayRoute() */
 
   /* Recursive function to find route of specified distance */
   createRoute(start, error, distance, depth, beginDirection, multi) {
-    console.log("test1");
     if (multi > 2) {
       return;
     }
 
     if (depth > 8) {
-      alert("Could not find route at this starting point.");
-      this.setState({ wasCreated: false });
-      return;
+      if ((this.state.hillsType == 1) || (this.state.hillsType == 2)) { //if working with hills
+        this.setState({ wasCreated: true });
+        return;
+      } else {
+        alert("Could not find route at this starting point.");
+        this.setState({ wasCreated: false });
+        return;
+      }
     }
 
     var directionsService = this.state.d_service;
-    var directionsRenderer1 = this.state.d_renderer1;
-    var directionsRenderer2 = this.state.d_renderer2;
-    var directionsRenderer3 = this.state.d_renderer3;
-    var map = this.state.my_map;
-
-    directionsRenderer1.setOptions({
-      polylineOptions: {
-        strokeWeight: 4,
-        strokeOpacity: 0.8,
-        strokeColor: "blue"
-      },
-      markerOptions:{
-        icon:{
-            scale: 3,
-            strokeColor: "blue"
-        }
-      }
-    });
-    directionsRenderer2.setOptions({
-      polylineOptions: {
-        strokeWeight: 4,
-        strokeOpacity: 0.8,
-        strokeColor: "green"
-      },
-      markerOptions:{
-        icon:{
-            scale: 3,
-            strokeColor: "green"
-        }
-      }
-    });
-    directionsRenderer3.setOptions({
-      polylineOptions: {
-        strokeWeight: 4,
-        strokeOpacity: 0.8,
-        strokeColor: "red"
-      },
-      markerOptions:{
-        icon:{
-            scale: 3,
-            strokeColor: "red"
-        }
-      }
-    });
+    var directionsRenderer;
+    if (multi == 0) {
+      directionsRenderer = this.state.d_renderer1;
+    } else if (multi == 1) {
+      directionsRenderer = this.state.d_renderer2;
+    } else {
+      directionsRenderer = this.state.d_renderer3;
+    }
 
     if (!wayptOn) {
       waypts = [];
-      let loc = 0; //newCoordinatesLocation(start.lat(), start.lng(), distance / 2, 0);
-      if (multi == 0) {
-        //alert("multi is 0");
-        loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
+      let loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
                                      beginDirection + (depth * (Math.PI / 4)));
-      }
-      else if (multi == 1) {
-        //alert("multi is 1");
-        /*alert("begin direction at multi 1 = " + beginDirection);
-        alert("depth at multi 1 = " + depth);*/
-        loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
-                                     beginDirection + (depth * (Math.PI / 4)));
-      }
-      else if (multi == 2) {
-        //alert("multi is 2");
-        /*alert("begin direction at multi 2 = " + beginDirection);
-        alert("depth at multi 2 = " + depth);*/
-        loc = newCoordinatesLocation(start.lat(), start.lng(), distance / 2,
-                                     beginDirection + (depth * (Math.PI / 4)));
-      }
+      
 
       //clears waypoints array so that multiple routes can be created
       waypts.length = 0;
@@ -520,113 +421,103 @@ class NewMap extends Component {
 
     directionsService.route(
       {
-          origin: start,
-          destination: start,
-          waypoints: waypts,
-          optimizeWaypoints: false,
-          avoidHighways: true,
-          travelMode: window.google.maps.TravelMode.WALKING,
+        origin: start,
+        destination: start,
+        waypoints: waypts,
+        optimizeWaypoints: false,
+        avoidHighways: true,
+        travelMode: window.google.maps.TravelMode.WALKING,
       },
-      (response, status) => {
-          if (status === "OK" && response) {
-              const route = response.routes[0];
-              let totaldistance = 0;
-  
-              for (let i = 0; i < route.legs.length; i++) {
-                  totaldistance += route.legs[i].distance.value;
-              }
-              console.log("totaldistance : " + totaldistance);
-              console.log("error : " + error);
-              console.log("distance : " + distance);
+      
+       async (response, status) => {
+        if (status === "OK" && response) {
+          const route = response.routes[0];
+          let totaldistance = 0;
 
+          for (let i = 0; i < route.legs.length; i++) {
+            totaldistance += route.legs[i].distance.value;
+          }
+          console.log("totaldistance : " + totaldistance);
+          console.log("error : " + error);
+          console.log("distance : " + distance);
+          console.log(parseFloat(distance) + parseFloat(error));
+          console.log(totaldistance);
+          console.log("DEPTH: " + depth);
 
-              // directionsRenderer.setDirections(response);
-              // directionsRenderer.setMap(map);
-              console.log(parseFloat(distance) + parseFloat(error));
-              console.log(totaldistance);
-              if (((parseFloat(distance) + parseFloat(error)) > totaldistance)
-                  && ((parseFloat(distance) - parseFloat(error)) < totaldistance)) {
-                console.log("test");
-                if (multi == 0) {
-                  //alert("depth at multi 0 = " + depth);
-                  if (!wayptOn) {
-                      directionsRenderer1.setDirections(response);
-                      this.lastDirections = response;
-                      directionsRenderer1.setMap(map);
-
-                  } else if (wayptOn && (totaldistance <= distance)) {
-                      directionsRenderer1.setDirections(response);
-                      this.lastDirections = response;
-                      directionsRenderer1.setMap(map);
-
-                  } else {
-                      window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
-                      this.setState({ wasCreated: false });
+          
+          if ((((parseFloat(distance) + parseFloat(error)) > totaldistance)
+            && ((parseFloat(distance) - parseFloat(error)) < totaldistance))
+            || wayptOn) {
+              if ((this.state.hillsType == 1) && !wayptOn) {
+                this.calculateTotalAltitudeChange(route.overview_path, (totalAltChange) => {
+                  if (totalAltChange > this.state.changeInAlt) {
+                    this.setState({changeInAlt : totalAltChange});
+                    console.log("changing");
+                    this.setState({ routeDistance_m : [totaldistance] })
+                    this.setState({ route : [response] })
+                    this.calcDifficulty(totaldistance);
+                    this.convertToDisplayDistance(totaldistance);
+                    this.estimate_time(totaldistance); //estimate for final time value
+                    this.estimate_calories(totaldistance); //estimate for final calories burned
                   }
-                }
-                else if (multi == 1) {
-                  //alert("depth at multi 1 = " + depth);
-                  if (!wayptOn) {
-                      directionsRenderer2.setDirections(response);
-                      this.lastDirections = response;
-                      directionsRenderer2.setMap(map);
-
-                  } else if (wayptOn && (totaldistance <= distance)) {
-                      directionsRenderer2.setDirections(response);
-                      this.lastDirections = response;
-                      directionsRenderer2.setMap(map);
-
-                  } else {
-                      window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
-                      this.setState({ wasCreated: false });
+                });
+    
+              } else if ((this.state.hillsType == 2) && !wayptOn) {
+    
+                this.calculateTotalAltitudeChange(route.overview_path, (totalAltChange) => {
+                  if (totalAltChange < this.state.changeInAlt) {
+                    console.log("changing");
+                    this.setState({changeInAlt : totalAltChange});
+    
+                    this.setState({ routeDistance_m : [totaldistance] })
+                    this.setState({ route : [response] })
+                    this.calcDifficulty(totaldistance);
+                    this.convertToDisplayDistance(totaldistance);
+                    this.estimate_time(totaldistance); //estimate for final time value
+                    this.estimate_calories(totaldistance); //estimate for final calories burned
                   }
-                }
-                else if (multi == 2) {
-                  //alert("depth at multi 2 = " + depth);
-                  if (!wayptOn) {
-                      directionsRenderer3.setDirections(response);
-                      this.lastDirections = response;
-                      directionsRenderer3.setMap(map);
+                });
 
-                  } else if (wayptOn && (totaldistance <= distance)) {
-                      directionsRenderer3.setDirections(response);
-                      this.lastDirections = response;
-                      directionsRenderer3.setMap(map);
+              } else {
 
-                  } else {
-                      window.alert("WAYPOINTS TOO FAR AWAY, CLEAR AND TRY AGAIN")
-                      this.setState({ wasCreated: false });
-                  }
-                }
-                const elevator = new window.google.maps.ElevationService();
-                // Draw the path, using the Visualization API and the Elevation service.
-                displayPathElevation(route.overview_path, elevator);
-                this.convertToDisplayDistance(totaldistance);
-                this.estimate_time(totaldistance); //estimate for final time value
-                this.estimate_calories(totaldistance); //estimate for final calories burned
-                //    ****** This is not real I dont think ******  this.setState({routeDistance: displayDistance});
+                  
+                directionsRenderer.setDirections(response);
+                directionsRenderer.setMap(this.state.my_map);
+
                 this.setState(prevState => ({
                   routeDistance_m: [...prevState.routeDistance_m, totaldistance]
-                }))
-                // Working one route set distance, above is for multi routes
-                // this.setState({ routeDistance_m: totaldistance })
+                }))         
+             
                 this.setState(prevState => ({
                   route: [...prevState.route, response]
                 }))
-                // Working one route set distance, above is for multi routes
-                // this.setState({ route: response })
+
+                this.convertToDisplayDistance(totaldistance);
+                this.estimate_time(totaldistance); //estimate for final time value
+                this.estimate_calories(totaldistance); //estimate for final calories burned
+
                 this.setState({ wasCreated: true });
-                this.createRoute(start,error,distance, 0, 0, ++multi);
+                this.calcDifficulty(totaldistance);
+                this.createRoute(start,error,distance, 0, Math.random() * 2 * Math.PI, ++multi);
                 return;
-              } else {
-                this.createRoute(start,error,distance, ++depth, 0, multi);
               }
-  
-          } else {
-              window.alert("Directions request failed due to " + status);
-              this.setState({ wasCreated: false });
-          }
-          multi++;
+
+            }
+          //alert(depth);
+
+          //if neither a hilly route nor a non fitting regular, call again
+
+          this.createRoute(start, error, distance, ++depth, beginDirection, multi);
+
+        } else {
+          // if (status === "OVER_QUERY_LIMIT") {
+          //   console.log("Directions request failed due to " + status);
+          // } else {
+          window.alert("Directions request failed due to " + status);
+          this.setState({ wasCreated: false });
+          //}
+        }
+        multi++;
       }
     );
   }
@@ -653,18 +544,18 @@ class NewMap extends Component {
 
   async saveRoute() {
 	
-	let data = {start:null, end:null, waypoints:[]};
-	let routeLeg = this.state.route[this.state.routeChosen].routes[0].legs[0];
-	data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
-	data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
-	let wps = routeLeg.via_waypoints;
-	let wps_latlng = [];
-	for (var i = 0; i > wps.length; i++) {
-		wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
-	}
-	data.waypoints = wps;
+    let data = {start:null, end:null, waypoints:[]};
+    let routeLeg = this.state.route[this.state.routeChosen].routes[0].legs[0];
+    data.start = {'lat': routeLeg.start_location.lat(), 'lng':routeLeg.start_location.lng()};
+    data.end = {'lat': routeLeg.end_location.lat(), 'lng':routeLeg.end_location.lng()};
+    let wps = routeLeg.via_waypoints;
+    let wps_latlng = [];
+    for (var i = 0; i > wps.length; i++) {
+      wps_latlng[i] = [wps[i].lat(), wps[i].lng()];
+    }
+    data.waypoints = wps;
 
-	this.pushRoute(data);
+    this.pushRoute(data);
   
   }
   
@@ -832,16 +723,89 @@ class NewMap extends Component {
 	
   }
 
+
+  async calculateTotalAltitudeChange(path, callback) {
+    const elevator = new window.google.maps.ElevationService();
+    var totalElevationGain = 0;
+    await elevator.getElevationAlongPath(
+      {
+        path: path,
+        samples: 50,
+      },
+      // this.sumElevations
+      (elevations, status) => {
+        if (status !== "OK") {
+          alert("Cannot show elevation: request failed because " + status);
+          return;
+        }
+    
+        let bottom = elevations[0].elevation; //max elevation
+        let previousElevation = elevations[0].elevation;
+        let goingUp = (elevations[1].elevation > elevations[0].elevation);
+    
+        for (let i = 1; i < elevations.length; i++) {
+          //at bottom of slope
+          if (elevations[i].elevation > previousElevation) {
+            if (!goingUp) {
+              goingUp = true;
+              bottom = previousElevation;
+            }
+            // at top of slope
+          } else if (elevations[i].elevation < previousElevation) {
+            if (goingUp) {
+              goingUp = false;
+              totalElevationGain += (elevations[i].elevation - bottom);
+            }
+          }
+          previousElevation = elevations[i].elevation;
+        }
+        callback(totalElevationGain);
+      }
+    );
+  }
+
+  sumElevations(elevations, status) {
+    if (status !== "OK") {
+      alert("Cannot show elevation: request failed because " + status);
+      return;
+    }
+
+    let bottom = elevations[0].elevation; //max elevation
+    let totalElevationGain = 0;
+    let previousElevation = elevations[0].elevation;
+    let goingUp = (elevations[1].elevation > elevations[0].elevation);
+
+    for (let i = 1; i < elevations.length; i++) {
+      //at bottom of slope
+      if (elevations[i].elevation > previousElevation) {
+        if (!goingUp) {
+          goingUp = true;
+          bottom = previousElevation;
+        }
+        // at top of slope
+      } else if (elevations[i].elevation < previousElevation) {
+        if (goingUp) {
+          goingUp = false;
+          totalElevationGain += (elevations[i].elevation - bottom);
+        }
+      }
+      previousElevation = elevations[i].elevation;
+    }
+
+
+    //alert(totalElevationGain)
+    return totalElevationGain;
+  }
   /* Alerts user to error if Google Map does not load */
-  gm_authFailure(){
-      window.alert("Google Maps error!")
+  gm_authFailure() {
+    window.alert("Google Maps error!")
   } /* gm_authFailure() */
 
 
   /* Handles errors */
   handleErrors(response) {
     if (!response.ok) {
-        throw Error(response.statusText);
+      throw Error(response.statusText);
     }
     return response;
   } /* handleErrors() */
@@ -851,14 +815,14 @@ class NewMap extends Component {
   convertToMeters() {
     if (this.state.distance) {
       if (this.state.unitType === 'kilometers') {
-        this.state.distance_m = parseInt(this.state.distance) * 1000;
+        this.setState({distance_m : (parseInt(this.state.distance) * 1000)})
       } else {
         //conversion from miles to meters
-        this.state.distance_m = parseInt(this.state.distance) * 1609.34;
+        this.setState({ distance_m : (parseInt(this.state.distance) * 1609.34)})
       }
     } else {
       if ((this.state.pace != null) && (this.state.time != null)) {
-        this.state.distance_m = (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34;
+        this.setState({ distance_m : (parseInt(this.state.time) / parseInt(this.state.pace)) * 1609.34});
       }
     }
   } /* convertToMeters() */
@@ -897,7 +861,7 @@ class NewMap extends Component {
     wayptOn = false;
     if (this.state.wayptListener != null) {
       window.google.maps.event.removeListener(this.state.wayptListener);
-      this.setState({wayptListener:null});
+      this.setState({ wayptListener: null });
     }
     listenforStart(this.state.my_map);
   } /* clearMap */
@@ -913,27 +877,41 @@ class NewMap extends Component {
           stopover: false,
         });
       })
-      this.setState({wayptListener: myWayptListener});
+      this.setState({ wayptListener: myWayptListener });
     }
   } /* addWaypoints */
 
   /* Run algorithm with user inputted data */
   runAlgorithmWithData = () => {
 
-    const address = document.getElementById("addy");
-    if (address) {
-      geocodeAddr(this.state.d_geocoder, this.state.addr);
+      /*const addy = document.getElementById("addy");
+      alert("addy: " + addy);
+      const autocomplete = new window.google.maps.places.Autocomplete(addy);
+      alert("newaddy: " + addy);*/
+
+    var fullAddr = null;
+    if (this.state.d_autocomplete.getPlace()) {
+      fullAddr = this.state.d_autocomplete.getPlace().formatted_address;
     }
+    if (fullAddr) {
+      this.geocodeAddr(this.state.d_geocoder, fullAddr);
+    } else if (startPoint == null) {
+      this.geocodeAddr(this.state.d_geocoder, this.state.addr);
+    }
+
     this.convertToMeters();
-    
+
     //const autocomplete = new window.google.maps.places.Autocomplete(this.state.addr);
     setTimeout(() => {
       if (startPoint) {
-        if (this.state.distance_m) {
+        if (this.state.distance_m || wayptOn) {
 
           //this.setState({routeDistance: data.distance});
-          this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m);
-
+          if ((this.state.hillsType == 1) || (this.state.hillsType == 2)) {
+            this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m, 1000);
+          } else {
+            this.myCalculateAndDisplayRoute(startPoint, this.state.distance_m, 400);
+          }
         } else {
           alert("No Distance or Time and Pace entered");
         }
@@ -953,6 +931,24 @@ class NewMap extends Component {
     // Working one route set distance, above is for multi routes
     // this.setState({final_time : (0.00559234 * parseFloat(distance_m) * 60).toFixed(2)});
   }
+  
+
+  /* Takes in an address string and uses a geocoder to convert into a latLng object */
+  geocodeAddr(geocoder, addr) {
+    //const addr = document.getElementById("addr");
+    geocoder.geocode({address: addr}, (results, status) => {
+      if (status == "OK") {
+        startPoint = results[0].geometry.location;
+        this.setState({addr: addr});
+      } else {
+        /*alert(
+          "Address geocoding was not successful for the following reason: " + status
+        );*/
+      }
+    });
+  }
+
+
 
 
   estimate_calories(distance) {
@@ -965,10 +961,61 @@ class NewMap extends Component {
     // this.setState({ calories: (100 * (distance * 0.00062)).toFixed(0) })
   }
 
+
+  /* Function to calculate the difficulty of a route, based on distance and hilliness */
+  calcDifficulty(distance) {
+    distance = distance / 1000;
+    var score = 0;
+    var tempDistance = 0
+    var tempHilliness = 0;
+    tempDistance = distance / 1.5;
+    if (tempDistance > 5) {
+      tempDistance = 5;
+    }
+    tempHilliness = this.state.elevationDiff;
+    //tempHilliness = this.state.changeInAlt;
+    if (tempHilliness > 5) {
+      tempHilliness = 5;
+    }
+    tempDistance = Math.round(tempDistance);
+    tempHilliness = Math.round(tempHilliness);
+    //alert("temp dist = " + tempDistance + " temp hills = " + tempHilliness);
+    score = tempDistance + tempHilliness;
+    this.setState(prevState => ({
+      difficulty: [...prevState.difficulty, score]
+    }))
+  }
+
+  /* Function to convert a distance (m) and time (min) into a pace */
+  calcPace() {
+    var distance = this.state.routeDistance_m[this.state.routeChosen];
+    var time = 0;
+    if (this.state.compTime != null) {
+      time = this.state.compTime; //time in minutes
+      //convert to time in seconds
+      this.state.final_time[this.state.routeChosen] = time * 60;
+      //this.setState({ })
+    } else {
+      time = this.state.final_time[this.state.routeChosen];
+    }
+    distance = distance * 0.000621371;
+    if (time > 100) {
+      time = time / 60;
+    }
+    var tempPace = time / distance;
+    tempPace = Math.round(tempPace * 10) / 10;
+    //alert("tempPace = " + tempPace);
+    /*if (Number.isInteger(pace)) {
+      return pace;
+    } else {
+    }*/
+
+    this.setState({ final_pace: tempPace })
+  }
   changeTo1() {
     this.setState({routeChosen: 0});
   }
-
+  
   changeTo2() {
     this.setState({routeChosen: 1});
   }
@@ -980,27 +1027,21 @@ class NewMap extends Component {
   //Call to push data to database
   async pushRoute(response_data) {
     try {
-      let final_pace;
-      if (this.state.pace === '') {
-        final_pace = 9;
-      } else {
-        final_pace = this.state.pace;
-      }
-      this.setState({ final_pace: final_pace });
+      
       let res = await fetch('/sendRoute', {
         method: 'post',
         headers: {
-            'Accept': 'application/json',
-            'Content-type': 'application/json'
+          'Accept': 'application/json',
+          'Content-type': 'application/json'
         },
         body: JSON.stringify({
             response: JSON.stringify({ response_data }),
             username: UserStore.username,
             distance: this.state.routeDistance_m[this.state.routeChosen],
-            pace: final_pace,
+            pace: this.state.final_pace,
             time: this.state.final_time[this.state.routeChosen],
             calories: this.state.calories[this.state.routeChosen],
-            difficulty: -1,
+            difficulty: this.state.difficulty[this.state.routeChosen],
             rating: -1,
             location: this.state.addr,
             date: this.state.date,
@@ -1024,19 +1065,19 @@ class NewMap extends Component {
       let res = await fetch('/getRouteID', {
         method: 'post',
         headers: {
-            'Accept': 'application/json',
-            'Content-type': 'application/json'
+          'Accept': 'application/json',
+          'Content-type': 'application/json'
         }
       });
       let result = await res.json();
-        if (result && result.success) {
-            // If successful update routeID created for rating update later
-            this.setState({ routeID: result.routeID })
-        } else {
-            alert("Could not get last routes routeID!");
-        }
-    } catch(e) {
-        console.log(e)
+      if (result && result.success) {
+        // If successful update routeID created for rating update later
+        this.setState({ routeID: result.routeID })
+      } else {
+        alert("Could not get last routes routeID!");
+      }
+    } catch (e) {
+      console.log(e)
     }
   }
 
@@ -1044,10 +1085,20 @@ class NewMap extends Component {
   /* Handles when Enter is pressed */
   handleEnter = (e) => {
     e.preventDefault();
-    if (!(this.state.hasDistance || (this.state.hasPace && this.state.hasTime))) {
-        alert('Please add either a distance or pace and time!')
-        return
+    if (!(this.state.hasDistance || (this.state.hasPace && this.state.hasTime)) && (!wayptOn)) {
+      alert('Please add either a distance or pace and time!')
+      return
     }
+    this.setState({ routeDistance: [], routeDistance_m: [], final_time: [], calories: [], route: [], difficulty: []});
+    
+    let final_pace;
+    if (this.state.pace === '') {
+      final_pace = 9;
+    } else {
+      final_pace = this.state.pace;
+    }
+    this.setState({ final_pace: final_pace });
+
 
     this.runAlgorithmWithData()
   } /* handleEnter */
@@ -1056,8 +1107,8 @@ class NewMap extends Component {
   handleChangeUnit = (e) => {
     // e.preventDefault();
     if (this.state.units === 'Distance (Kilometers)') {
-        this.setState({ units: 'Distance (Miles)' })
-        this.setState({ unitType: 'miles' })
+      this.setState({ units: 'Distance (Miles)' })
+      this.setState({ unitType: 'miles' })
     } else {
       this.setState({ units: 'Distance (Kilometers)' })
       this.setState({ unitType: 'kilometers' })
@@ -1067,7 +1118,7 @@ class NewMap extends Component {
   /* Clears map when clear button is pressed */
   handleClear = () => {
     this.clearMap()
-    this.setState({ routeDistance: [], routeDistance_m: [], final_time: [], calories: [], route: [] });
+    this.setState({ routeDistance: [], routeDistance_m: [], final_time: [], calories: [], route: [], difficulty: []});
   } /* handleClear */
 
   /* When Waypoints button is pressed, wait for waypoints */
@@ -1076,11 +1127,15 @@ class NewMap extends Component {
   } /* handleWaypoints */
 
   handleSave = () => {
-	  this.saveRoute();
+    this.saveRoute();
   }
 
   handleLoad = () => {
 	this.openModal();
+  }
+
+  handlePace = () => {
+    this.calcPace();
   }
 
   handleRoute1 = () => {
@@ -1122,14 +1177,17 @@ class NewMap extends Component {
                 <input className='input-field' name='addr' value={this.state.addr} onChange={(e) => {this.setState({ addr: e.target.value }); UserStore.address = e.target.value}} type='text' id='addy' placeholder='Address' />
             </div>
             <div>
-              {!this.state.inputTypes && <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => { this.setState({ distance: e.target.value }); this.setState({ hasDistance: true })}} type='text' placeholder={this.state.units} />} 
-              {this.state.inputTypes && <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => {this.setState({ pace: e.target.value }); this.setState({ hasPace: true })}} type='text' placeholder='Pace (minutes/mile)' />}
-              {this.state.inputTypes && <input className='input-field' name='time' value={this.state.time} onChange={(e) => {this.setState({ time: e.target.value }); this.setState({ hasTime: true })}} type='text' placeholder='Time (minutes)' />}
+              {!this.state.inputTypes && <input className='input-field' name='distance' value={this.state.distance} onChange={(e) => { this.setState({ distance: e.target.value }); this.setState({ hasDistance: true }) }} type='text' placeholder={this.state.units} />}
+              {this.state.inputTypes && <input className='input-field' name='pace' value={this.state.pace} onChange={(e) => { this.setState({ pace: e.target.value }); this.setState({ hasPace: true }) }} type='text' placeholder='Pace (minutes/mile)' />}
+              {this.state.inputTypes && <input className='input-field' name='time' value={this.state.time} onChange={(e) => { this.setState({ time: e.target.value }); this.setState({ hasTime: true }) }} type='text' placeholder='Time (minutes)' />}
             </div>
             <div>
               {this.state.inputTypes ? <Button buttonStyle='btn--input' onClick={() => this.setState({ inputTypes: (!this.state.inputTypes) })}>Distance</Button> : <Button buttonStyle='btn--input' onClick={() => this.setState({ inputTypes: (!this.state.inputTypes) })}>Pace/Time</Button>}
+
+
+
               <Button buttonStyle='btn--input' onClick={(e) => this.handleChangeUnit(e)}>
-                  Change Units
+                Change Units
               </Button>
           <Button buttonStyle='btn--input' onClick={this.downloadFile}>Download Rout File</Button>
           {UserStore.isLoggedIn == true && <Button buttonStyle='btn--input' onClick={this.handleSave}>Save</Button>}
@@ -1145,6 +1203,18 @@ class NewMap extends Component {
               <Button buttonStyle='btn--input' onClick={this.handleWaypoints}>
                 Waypoints
               </Button>
+              {(this.state.hillsType == 0) ?
+                <Button buttonStyle='btn--input' onClick={() => this.setState({ hillsType: 1 })}>Any</Button> :
+                ((this.state.hillsType == 1) ?
+                  <Button buttonStyle='btn--input' onClick={() => this.setState({ hillsType: 2 })}>Hills</Button> :
+                  <Button buttonStyle='btn--input' onClick={() => this.setState({ hillsType: 0 })}>No Hills</Button>)}
+
+            </div>
+            <div>
+                {this.state.wasCreated && <input className='input-field' name='compTime' value={this.state.compTime} onChange={(e) => this.setState({ compTime: e.target.value })} type='text' id='compTime' placeholder='Completion Time (min)' />}
+                {this.state.wasCreated && <Button buttonStyle='btn--input' onClick={this.handlePace}>
+                  Enter Time
+                </Button>}
             </div>
             <div class="dropdown">
               {this.state.wasCreated && <button class="dropbtn">Choose Route</button>}
@@ -1165,16 +1235,18 @@ class NewMap extends Component {
 		<br />
         <div>
           <main id="map" role="application"></main>
-          <div id="elevation_chart"></div>
-          <div id="pano"></div>
+          {/* <div id="pano"></div> */}
         </div>
         <div>
-        {this.state.showDetails && <Details routeDistance={this.state.routeDistance[this.state.routeChosen]} time={this.state.final_time[this.state.routeChosen]} pace={this.state.final_pace} calories={this.state.calories[this.state.routeChosen]} difficulty='3' address={this.state.addr} routeID={this.state.routeID}/>}
-            <div className='details-btn'>
-                <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
-                    Details ^
+          {this.state.showDetails &&
+            <Details my_map={this.state.my_map} routeDistance={this.state.routeDistance[this.state.routeChosen]} time={this.state.final_time[this.state.routeChosen]}
+              pace={this.state.final_pace} calories={this.state.calories[this.state.routeChosen]} difficulty={this.state.difficulty[this.state.routeChosen]} address={this.state.addr}
+              routeID={this.state.routeID} route={this.state.route[this.state.routeChosen]} />}
+          <div className='details-btn'>
+            <Button buttonStyle='btn--details' onClick={() => this.setState({ showDetails: (!this.state.showDetails) })}>
+              Details ^
                 </Button>
-            </div>
+          </div>
         </div>
 		<Modal 
 		  isOpen={this.state.showModal}

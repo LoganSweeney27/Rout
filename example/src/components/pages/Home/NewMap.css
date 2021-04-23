@@ -35,10 +35,10 @@
     height: 60vh;
     overflow:visible;
   }
-  #pano {
+  /* #pano {
     /* float:left; */
-    height: 40vh;
-  }
+    /* height: 40vh;
+  } */ 
   /* Optional: Makes the sample page fill the window. */
   html, body {
     height: 100%;
